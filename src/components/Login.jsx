@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import { ProductContext } from "../contexts/ProductContext";
 import { UserContext } from "../contexts/UserContext";
@@ -7,8 +7,9 @@ import OTPPanel from "./OTPPanel";
 import NewUserPage from "./NewUserPage";
 import toast from "react-hot-toast";
 import SpanLoader from "./SpanLoader";
-import { postAPI } from "../caller/axiosUrls";
 import { useNavigate } from "react-router-dom";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { SIMULATE_OTP } from "../config/env";
 
 const Login = () => {
   const [isOTPSent, setIsOTPSent] = useState(false);
@@ -19,7 +20,9 @@ const Login = () => {
 
   const { setShowLoginPage } = useContext(LoginPageContext);
   const { selectedProduct } = useContext(ProductContext);
-  const { setToken, setUserData } = useContext(UserContext);
+  const { userData, isAuthenticated } = useContext(UserContext);
+  const { signIn } = useAuthActions();
+  const [awaitingProfile, setAwaitingProfile] = useState(false);
 
   const navigate = useNavigate();
 
@@ -33,11 +36,7 @@ const Login = () => {
     else setSender(true);
 
     try {
-      await postAPI("/v1/sms/send-otp", {
-        countryCode: selectedCountryCode.replace("+", ""),
-        phoneNumber,
-        isContactVerification: false,
-      });
+      await signIn("phone", { phone: `${selectedCountryCode}${phoneNumber}` });
       toast.success("OTP sent successfully!");
       setIsOTPSent(true);
     } catch (error) {
@@ -47,40 +46,23 @@ const Login = () => {
     }
   };
 
-  const onVerifiedOTP = async (token, userData) => {
+  const onVerifiedOTP = async () => {
     setIsOTPSent(false);
-    console.log(userData);
+    setAwaitingProfile(true);
+  };
 
-    // Set credentials first
-    setCredentials(token, userData);
-
-    // Check if user needs to complete profile
+  useEffect(() => {
+    if (!awaitingProfile || !isAuthenticated || !userData) return;
+    setAwaitingProfile(false);
     if (userData.currentState === "basic-profile-pending") {
       setShowNewUserPage(true);
-    } else {
-      // Existing user - close login and navigate to booking if product selected
-      setShowLoginPage(false);
-      if (selectedProduct) {
-        navigate("/booking");
-      }
+      return;
     }
-  };
+    setShowLoginPage(false);
+    if (selectedProduct) navigate("/booking");
+  }, [awaitingProfile, isAuthenticated, navigate, selectedProduct, setShowLoginPage, userData]);
 
-  const setCredentials = (token, userData) => {
-    // Store in both localStorage and sessionStorage for better persistence
-    localStorage.setItem("token", token);
-    localStorage.setItem("userData", JSON.stringify(userData));
-    sessionStorage.setItem("token", token);
-    sessionStorage.setItem("userData", JSON.stringify(userData));
-    setToken(token);
-    setUserData(userData);
-  };
-
-  const updateUserData = (userData) => {
-    // Store in both localStorage and sessionStorage for better persistence
-    localStorage.setItem("userData", JSON.stringify(userData));
-    sessionStorage.setItem("userData", JSON.stringify(userData));
-    setUserData(userData);
+  const updateUserData = () => {
     setShowNewUserPage(false);
     setShowLoginPage(false);
 
@@ -107,6 +89,7 @@ const Login = () => {
           setIsOTPSent={setIsOTPSent}
           phoneNumber={phoneNumber}
           title={"Verify Phone Number"}
+          simulationCode={SIMULATE_OTP ? "123456" : null}
         />
       ) : (
         <div className="flex w-[1000px] max-h-[90%] rounded-[16px] overflow-hidden login-shadow bg-white">

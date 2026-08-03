@@ -371,6 +371,7 @@ const Booking = () => {
               landmark.trim() ? `, ${landmark.trim()}` : ""
             }`
           : null,
+        specialRequests: specialRequests.trim() || null,
         gstPaid:
           selectedProduct?.calculationData?.payment_breakdown?.gst_amount || 0,
       };
@@ -694,6 +695,7 @@ const Booking = () => {
         planId: selectedProduct?.planId,
         ratePlan: ratePlan.toLowerCase(),
         isHomeDelivery,
+        hubId: selectedHubId ? selectedHubId.toString() : undefined,
       };
 
       // Include promo code if applied
@@ -794,6 +796,7 @@ const Booking = () => {
         planId: selectedProduct.planId,
         ratePlan: ratePlan,
         isHomeDelivery: isHomeDelivery,
+        hubId: selectedHubId ? selectedHubId.toString() : undefined,
       };
 
       // Add coupon ID if a coupon is applied

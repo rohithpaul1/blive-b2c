@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import SpanLoader from "./SpanLoader";
-import { postAPI } from "../caller/axiosUrls";
 import toast from "react-hot-toast";
 import { UserContext } from "../contexts/UserContext";
 import TermsAndConditionsModal from "./TermsAndConditionsModal";
@@ -11,7 +10,7 @@ const NewUserPage = ({ setShowNewUserPage, setShowLoginPage, onSuccess }) => {
     const [sender, setSender] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
 
-    const { userData } = useContext(UserContext);
+    const { completeDriverProfile } = useContext(UserContext);
 
     const updateName = async () => {
         if (!firstName || !lastName) {
@@ -23,13 +22,12 @@ const NewUserPage = ({ setShowNewUserPage, setShowLoginPage, onSuccess }) => {
         else setSender(true);
         
         try {
-            const response = await postAPI('/user-onboarding/update-user', {
-                id: userData?.id,
+            const profile = await completeDriverProfile({
                 firstName,
                 lastName
-            })
+            });
             toast.success("Name added/updated successfully!");
-            onSuccess(response.data);
+            onSuccess(profile);
         } catch (error) {
             toast.error(error.message || "Something went wrong. Please try again.");
         } finally {

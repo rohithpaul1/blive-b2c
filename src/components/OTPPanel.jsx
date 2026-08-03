@@ -2,16 +2,17 @@ import { useContext, useEffect, useState } from "react";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import OTPInput from "./OTPInput";
 import toast from "react-hot-toast";
-import { postAPI } from "../caller/axiosUrls";
 import SpanLoader from "./SpanLoader";
+import { useAuthActions } from "@convex-dev/auth/react";
 
-const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent, phoneNumber, title, onSuccess }) => {
+const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent, phoneNumber, title, onSuccess, simulationCode = null }) => {
   const [timeLeft, setTimeLeft] = useState(90); 
   const [hasError, setHasError] = useState(false); 
   const [otp, setOtp] = useState('');
   const [sender, setSender] = useState(false);
 
   const { setShowLoginPage } = useContext(LoginPageContext);
+  const { signIn } = useAuthActions();
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -44,15 +45,15 @@ const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent
     
     try {
       setHasError(false);
-      const response = await postAPI('/v1/sms/verify-otp', {
-        countryCode: selectedCountryCode.replace('+', ''),
-        phoneNumber,
-        otp
-      });
+      if (isLogin) {
+        const result = await signIn("phone", {
+          phone: `${selectedCountryCode}${phoneNumber}`,
+          code: otp,
+        });
+        if (!result.signingIn) throw new Error("The verification code could not be confirmed");
+      }
       toast.success("OTP verified successfully!");
-      const { token, ...restData } = response.data;
-      if (isLogin) onSuccess(token.accessToken, restData);
-      else onSuccess();
+      onSuccess();
     } catch (error) {
       setHasError(true);
       toast.error(error.message || "Something went wrong. Please try again.");
@@ -100,6 +101,11 @@ const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent
 
       {/* Body */}
       <div className="flex flex-col flex-1 px-[32px]">
+        {simulationCode && (
+          <div className="mt-[20px] rounded-[10px] border border-[#E6E0FF] bg-[#F8F6FF] px-[14px] py-[10px] text-[13px] text-[#4B3D70]">
+            Test environment code: <span className="font-bold tracking-[2px]">{simulationCode}</span>
+          </div>
+        )}
         {/* OTP Inputs */}
         <div className="mt-[32px]">
           <p className="text-[12px] text-[#717171]">Verification Code</p>

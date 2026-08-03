@@ -26,7 +26,10 @@ export const API_BASE_URL = (
  * route to Convex via src/caller/convexClient.js; unmapped ones fall back to the
  * mock layer or REST. e.g. https://clever-wildcat-573.convex.cloud
  */
-export const CONVEX_URL = (import.meta.env.VITE_CONVEX_URL || '').trim().replace(/\/+$/, '');
+export const CONVEX_URL = (
+  import.meta.env.VITE_CONVEX_URL ||
+  (import.meta.env.DEV ? 'https://clever-wildcat-573.convex.cloud' : '')
+).trim().replace(/\/+$/, '');
 
 /**
  * Razorpay publishable key id (key_id, NOT key_secret).
@@ -53,6 +56,9 @@ const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
  * and provide a real VITE_RAZORPAY_KEY_ID.
  */
 export const SIMULATE_PAYMENT = import.meta.env.VITE_SIMULATE_PAYMENT !== 'false';
+
+/** Shows the test OTP helper only when the matching Convex environment is in simulation mode. */
+export const SIMULATE_OTP = import.meta.env.VITE_SIMULATE_OTP === 'true';
 
 if (IS_PRODUCTION && !RAZORPAY_KEY_ID && !USE_MOCKS && !SIMULATE_PAYMENT) {
   // console.error survives the production build on purpose (see vite.config.js).
