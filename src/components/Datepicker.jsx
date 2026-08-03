@@ -189,13 +189,13 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
       {isSubscription && (
         <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#e6e2ee] bg-[#faf9fc] px-[16px] py-[12px]">
           <div>
-            <p className="text-[12px] font-bold text-[#29252f]">Planned duration</p>
+            <p className="text-[12px] font-bold text-[#29252f]">Expected duration</p>
             <p className="mt-[2px] text-[11px] text-[#717171]">
-              Plan for {startingPeriodLabel(currentPlanType, subscriptionDuration)} from the selected date. You can extend later.
+              Planning for {startingPeriodLabel(currentPlanType, subscriptionDuration)} from this date. You can extend later.
             </p>
           </div>
           <p className="text-[12px] font-medium text-[#5b476f]">
-            Renews automatically
+            No return date required
           </p>
         </div>
       )}

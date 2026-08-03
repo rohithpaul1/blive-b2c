@@ -63,22 +63,9 @@ const SearchPage = () => {
     adjustDropoffDateForPlan,
     updateCurrentPlanType,
     rentalMode,
-    setRentalMode,
   } = useContext(SearchBarContext);
   const isSubscription = rentalMode === RENTAL_MODES.subscription;
   const { setSelectedProduct } = useContext(ProductContext);
-
-  const handleRentalModeChange = (mode) => {
-    const enteringSubscription =
-      mode === RENTAL_MODES.subscription &&
-      rentalMode !== RENTAL_MODES.subscription;
-
-    setRentalMode(mode);
-    if (enteringSubscription) {
-      setSelectedPlanType("monthly");
-      setSelectedTabIndex(2);
-    }
-  };
 
   // Plan type options (same as Catalogs)
   const planTypes = useMemo(
@@ -446,7 +433,7 @@ const SearchPage = () => {
         expanded={true}
         onSearchTrigger={handleSearchTrigger}
       />
-      <main className="px-[16px] pb-[72px] pt-[158px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[196px]">
+      <main className="px-[16px] pb-[72px] pt-[158px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[244px]">
         {isLoading ? (
           <Loader />
         ) : (
@@ -467,45 +454,7 @@ const SearchPage = () => {
               </div>
             </div>
 
-            <div className="mt-[20px] flex flex-col gap-[10px] rounded-[16px] border border-[#eceaef] bg-[#faf9fb] p-[8px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-[12px]">
-              <div className="grid grid-cols-2 rounded-[12px] bg-[#efedf1] p-[3px]">
-                {[
-                  [RENTAL_MODES.fixed, "Fixed rental"],
-                  [RENTAL_MODES.subscription, "Subscription"],
-                ].map(([mode, label]) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => handleRentalModeChange(mode)}
-                    className={`min-h-[44px] rounded-[10px] px-[14px] py-[9px] text-[12px] font-bold transition ${
-                      rentalMode === mode
-                        ? "bg-white text-[#26212c] shadow-sm"
-                        : "text-[#746e79]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-3 gap-[4px] rounded-[12px] border border-[#e4e1e7] bg-white p-[3px]">
-                {planTypes.map((plan, index) => (
-                  <button
-                    key={plan.planType}
-                    type="button"
-                    onClick={() => handleSearchTrigger(plan.planType, index)}
-                    className={`min-h-[44px] rounded-[9px] px-[10px] py-[8px] text-[12px] font-medium transition sm:px-[14px] ${
-                      selectedPlanType === plan.planType
-                        ? "bg-[#2b2630] text-white"
-                        : "text-[#5f5964] hover:bg-[#f5f3f6]"
-                    }`}
-                  >
-                    {plan.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-[24px] flex flex-wrap items-center justify-between gap-[16px] border-b border-[#ededed] pb-[18px]">
+            <div className="mt-[20px] flex flex-wrap items-center justify-between gap-[16px] border-b border-[#ededed] pb-[18px]">
               <div className="relative flex flex-wrap items-center gap-[8px]">
                 <button
                   id="sort-btn"

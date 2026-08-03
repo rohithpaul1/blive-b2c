@@ -65,6 +65,17 @@ const SearchBarProvider = ({ children }) => {
       }));
       sessionStorage.setItem("selectedDropoffDate", committedUntil.toISOString());
       sessionStorage.setItem("selectedDropoffTime", selectedPickup.time);
+    } else if (rentalModeState === RENTAL_MODES.subscription) {
+      const returnDate = addPlanDuration(selectedPickup.date, "daily", 1);
+      setCurrentPlanType("daily");
+      sessionStorage.setItem("currentPlanType", "daily");
+      setSelectedDropoff((previous) => ({
+        ...previous,
+        date: returnDate,
+        time: selectedPickup.time,
+      }));
+      sessionStorage.setItem("selectedDropoffDate", returnDate.toISOString());
+      sessionStorage.setItem("selectedDropoffTime", selectedPickup.time);
     }
   };
 

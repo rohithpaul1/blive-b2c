@@ -39,7 +39,7 @@ const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation, 
     if (!showLocation) return null;
 
     return (
-        <div ref={locationRef} className="absolute left-[212px] mt-[16px] max-h-[392px] w-[min(432px,calc(100vw-48px))] overflow-y-auto rounded-[20px] bg-white py-[12px] calender-shadow">
+        <div ref={locationRef} className="absolute left-0 mt-[16px] max-h-[392px] w-[min(432px,calc(100vw-48px))] overflow-y-auto rounded-[20px] bg-white py-[12px] calender-shadow">
             {/* Get Current Location Option */}
             {!locationPermissionGranted && (
                 <button 
