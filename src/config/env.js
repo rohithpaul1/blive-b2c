@@ -21,6 +21,9 @@ export const API_BASE_URL = (
   import.meta.env.VITE_BACKEND_URL || 'http://localhost:4015/b2c/api'
 ).replace(/\/+$/, '');
 
+/** Test/demo deployments route any endpoints not yet migrated to local mocks. */
+export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
+
 /**
  * Convex deployment URL (shared with the admin). When set, mapped B2C endpoints
  * route to Convex via src/caller/convexClient.js; unmapped ones fall back to the
@@ -28,7 +31,9 @@ export const API_BASE_URL = (
  */
 export const CONVEX_URL = (
   import.meta.env.VITE_CONVEX_URL ||
-  (import.meta.env.DEV ? 'https://clever-wildcat-573.convex.cloud' : '')
+  ((import.meta.env.DEV || USE_MOCKS)
+    ? 'https://clever-wildcat-573.convex.cloud'
+    : '')
 ).trim().replace(/\/+$/, '');
 
 /**
@@ -40,8 +45,6 @@ export const RAZORPAY_KEY_ID = (import.meta.env.VITE_RAZORPAY_KEY_ID || '').trim
 
 /** True when this bundle was produced by `vite build`. */
 export const IS_PRODUCTION = import.meta.env.PROD;
-
-const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
 /**
  * Payment simulation.
