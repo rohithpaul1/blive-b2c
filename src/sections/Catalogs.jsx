@@ -20,7 +20,9 @@ const Catalogs = () => {
 
   // Filtering state
   const [selectedBrand] = useState("all");
-  const [priceRange] = useState({ min: 0, max: 1000 });
+  // The home catalog has no visible price filter, so it must not silently
+  // exclude weekly or monthly plans whose cycle price is above ₹1,000.
+  const [priceRange] = useState({ min: 0, max: Number.POSITIVE_INFINITY });
   const [availabilityFilter] = useState("all");
   const [sortBy] = useState("price");
   const [sortOrder] = useState("asc");
