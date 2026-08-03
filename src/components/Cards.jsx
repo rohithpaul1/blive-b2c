@@ -290,7 +290,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
           return (
             <article
               key={"card-menu-" + i}
-              className="group flex min-h-[500px] flex-col overflow-hidden rounded-[24px] border border-[#ebebeb] bg-white shadow-[0_8px_20px_rgba(16,24,40,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(16,24,40,0.12)]"
+              className="group flex min-h-[540px] flex-col overflow-hidden rounded-[24px] border border-[#ebebeb] bg-white shadow-[0_8px_20px_rgba(16,24,40,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(16,24,40,0.12)]"
             >
               <div className="relative h-[220px] w-full overflow-hidden bg-[linear-gradient(145deg,#f5f4f8_0%,#ebe9ef_100%)] sm:h-[240px] xl:h-[250px]">
                 {!card.isAvailable ? (
@@ -323,7 +323,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[44px] bg-gradient-to-t from-white to-transparent" />
               </div>
 
-              <div className="flex flex-1 flex-col px-[20px] pb-[20px]">
+              <div className="flex flex-1 flex-col px-[20px] pb-[22px] pt-[4px] sm:pt-[6px]">
                 <div className="flex items-center gap-[8px]">
                   <span className="flex size-[24px] items-center justify-center overflow-hidden rounded-full border border-[#e6e6e6] bg-white p-[3px]">
                     <img
@@ -337,7 +337,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   </h2>
                 </div>
 
-                <div className="mt-[8px] flex items-end gap-[8px]">
+                <div className="mt-[10px] flex flex-wrap items-end gap-x-[8px] gap-y-[4px]">
                   <p className="text-[24px] font-black leading-none text-[#351a75]">
                     ₹{formatCurrency(isSubscription ? pricing.cycleRate : pricing.dailyRate)}
                     <span className="ml-[2px] text-[13px] font-bold">/{pricing.unit}</span>
@@ -350,7 +350,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                 </div>
 
                 {isSubscription && (
-                  <div className="mt-[12px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[10px] text-[11px]">
+                  <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[11px] text-[11px]">
                     <span className="font-medium text-[#4e4753]">
                       Planned until {formatShortDate(selectedDropoff?.date)}
                     </span>
@@ -360,7 +360,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   </div>
                 )}
 
-                <div className="mt-[16px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[10px] text-[#373737]">
+                <div className="mt-[18px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[12px] text-[#373737]">
                   <div className="flex flex-col items-center gap-[5px] border-r border-[#e5e5e5]">
                     <img className="size-[18px]" src="/images/speedometer-01.png" alt="" />
                     <span className="text-[11px] font-medium">{card.range} km</span>
@@ -379,8 +379,8 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   </div>
                 </div>
 
-                <div className="mt-[14px] flex items-center justify-between gap-[12px] text-[12px] text-[#626262]">
-                  <span className="flex items-center gap-[5px]">
+                <div className="mt-[16px] grid min-h-[36px] grid-cols-2 items-start gap-[16px] text-[12px] leading-[1.35] text-[#626262]">
+                  <span className="flex items-start gap-[5px]">
                     <span className="text-[#351a75]">✓</span>
                     {dailyIncludedKm > 0
                       ? isSubscription
@@ -388,7 +388,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                         : `${includedKm} km included`
                       : "Usage allowance shown at checkout"}
                   </span>
-                  <span className="flex items-center gap-[5px]">
+                  <span className="flex items-start justify-end gap-[5px] text-right">
                     <span className="text-[#351a75]">✓</span>
                     No fuel costs
                   </span>
@@ -400,7 +400,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                     card.isAvailable
                       ? "cursor-pointer border-[#351a75] text-[#351a75] hover:bg-[#351a75] hover:text-white"
                       : "cursor-not-allowed border-[#dedede] bg-[#f4f4f4] text-[#999]"
-                  } mt-auto flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
+                  } mt-[16px] flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
                   disabled={!card.isAvailable}
                 >
                   {card.isAvailable
