@@ -20,6 +20,35 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
   const { token } = useContext(UserContext);
   const { selectedPickup, selectedDropoff } = useContext(SearchBarContext);
 
+  const rentalDays = Math.max(
+    1,
+    Math.ceil(
+      (new Date(selectedDropoff?.date || Date.now()).getTime() -
+        new Date(selectedPickup?.date || Date.now()).getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
+  );
+
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 0,
+    }).format(Math.max(0, Math.round(Number(value) || 0)));
+
+  const getPricing = (card) => {
+    const unitDays =
+      selectedPlanType === "monthly"
+        ? 30
+        : selectedPlanType === "weekly"
+        ? 7
+        : 1;
+    const dailyRate = (Number(card.price) || 0) / unitDays;
+
+    return {
+      dailyRate,
+      total: dailyRate * rentalDays,
+    };
+  };
+
   // Helper function to format date and time for API
   const formatDateTimeForAPI = (date, time) => {
     if (!date) return null;
@@ -225,109 +254,117 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
   return (
     <>
       {cards &&
-        cards.map((card, i) => (
-          <div
-            key={"card-menu-" + i}
-            className="bg-white rounded-[24px] overflow-hidden flex flex-col items-center justify-center border border-[#0000001A]"
-          >
-            <div className="relative flex-1 w-full h-[200px] bg-[#F5F5F5]">
-              {" "}
-              {/* Fixed height + neutral bg so mixed photos frame consistently */}
-              {!card.isAvailable && (
-                <div className="absolute z-20 top-[16px] left-[16px] flex items-center rounded-[6px] py-[6px] px-[8px] gap-x-[6px] bg-white not-available-info">
-                  <img
-                    className="w-[20px] aspect-square"
-                    src="/images/solar_scooter-outline.png"
-                    alt="Scooter Outline Icon"
-                  />
-                  <p className="font-bold text-[12px]">
-                    Next available on {card.nextAvailableDate}
-                  </p>
-                </div>
-              )}
-              <img
-                className={
-                  (!card.isAvailable ? "opacity-[50%] " : "") +
-                  `w-full h-full object-contain object-center p-[10px]`
-                }
-                src={card.imgUrl}
-                alt="Scooter Image"
-                onError={(e) => {
-                  // Fall back in fixed steps and then STOP, so a missing image
-                  // can never loop (setting src to another 404 re-fires onError).
-                  const img = e.target;
-                  const step = img.dataset.fbStep || "0";
-                  if (step === "0") {
-                    img.dataset.fbStep = "1";
-                    img.src = `/images/${card.brandName}.png`;
-                  } else if (step === "1") {
-                    img.dataset.fbStep = "2";
-                    img.src = "/images/placeholder.jpeg";
-                  }
-                  // step "2": give up — no further swaps, loop cannot continue.
-                }}
-              />
-              <div className="absolute inset-0 z-10 image-gradient" />
-            </div>
-            <div className="flex-1 w-full pt-[12px] pb-[20px] px-[24px]">
-              <p className="opacity-[80%] font-medium text-[20px]">
-                {card.vehicleName}
-              </p>
-              <p className="mt-[8px] opacity-[80%] font-[900] text-[32px]">
-                ₹{card.price}
-                {card.actualPrice && (
-                  <span className="text-[22px] font-normal text-[#808080]">
-                    {" "}
-                    <span className="line-through">₹{399}</span>
-                  </span>
-                )}
-                <span className="font-medium text-[16px] text-[#00000080]">
-                  /day
-                </span>
-              </p>
-              <div className="mt-[16px] flex items-center justify-between rounded-[16px] py-[8px] px-[24px] gap-[8px] bg-[#F6F6F6] opacity-[70%]">
-                <div className="flex flex-col items-center gap-y-[6px]">
-                  <img
-                    className="w-[20px] aspect-square"
-                    src="/images/speedometer-01.png"
-                    alt="Speedometer Icon"
-                  />
-                  <p className="font-medium text-[14px]">{card.range} km</p>
-                </div>
-                <div className="flex flex-col items-center gap-y-[6px]">
-                  <img
-                    className="w-[20px] aspect-square"
-                    src="/images/bi_stopwatch.png"
-                    alt="Stopwatch Icon"
-                  />
-                  <p className="font-medium text-[14px]">
-                    {card.topSpeed} km/Hr
-                  </p>
-                </div>
-                <div className="flex flex-col items-center gap-y-[6px]">
-                  <img
-                    className="w-[20px] aspect-square"
-                    src="/images/mdi_battery-charging-outline.png"
-                    alt="Battery Icon"
-                  />
-                  <p className="font-medium text-[14px]">
-                    {card.chargeTime} Hr
-                  </p>
-                </div>
+        cards.map((card, i) => {
+          const pricing = getPricing(card);
+          const includedKm =
+            (Number(card.perDayKmLimit) || Number(card.range) || 0) *
+            rentalDays;
+
+          return (
+            <article
+              key={"card-menu-" + i}
+              className="group flex min-h-[530px] flex-col overflow-hidden rounded-[24px] border border-[#ebebeb] bg-white shadow-[0_8px_20px_rgba(16,24,40,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(16,24,40,0.12)]"
+            >
+              <div className="relative h-[260px] w-full overflow-hidden bg-[linear-gradient(145deg,#f5f4f8_0%,#ebe9ef_100%)]">
+                {!card.isAvailable ? (
+                  <div className="absolute z-20 top-[14px] left-[14px] rounded-full border border-[#e8e8e8] bg-white/95 px-[10px] py-[6px] text-[11px] font-bold text-[#5d5d5d] shadow-sm">
+                    Next available {card.nextAvailableDate}
+                  </div>
+                ) : card.availableCount <= 2 ? (
+                  <div className="absolute z-20 top-[14px] right-[14px] rounded-full bg-[#fff1f1] px-[10px] py-[6px] text-[11px] font-bold text-[#c43333]">
+                    Only {card.availableCount} left
+                  </div>
+                ) : null}
+                <img
+                  className={`${
+                    !card.isAvailable ? "opacity-50 grayscale" : ""
+                  } h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.025]`}
+                  src={card.imgUrl}
+                  alt={`${card.vehicleName} available for fixed rental`}
+                  onError={(e) => {
+                    const img = e.target;
+                    const step = img.dataset.fbStep || "0";
+                    if (step === "0") {
+                      img.dataset.fbStep = "1";
+                      img.src = "/images/Scooter.png";
+                    } else if (step === "1") {
+                      img.dataset.fbStep = "2";
+                      img.src = "/images/placeholder.jpeg";
+                    }
+                  }}
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[44px] bg-gradient-to-t from-white to-transparent" />
               </div>
-              <button
-                onClick={() => handleRentNow(card)}
-                className={
-                  (!card.isAvailable ? "opacity-[20%] " : "cursor-pointer ") +
-                  "flex w-full font-medium items-center justify-center mt-[24px] rounded-[32px] border border-black py-[12px] px-[24px]"
-                }
-                disabled={!card.isAvailable}
-              >
-                {!card.isAvailable ? "Unavailable" : "Rent Now"}
-              </button>
-            </div>
-          </div>
-        ))}
+
+              <div className="flex flex-1 flex-col px-[20px] pb-[20px]">
+                <div className="flex items-center gap-[8px]">
+                  <span className="flex size-[24px] items-center justify-center overflow-hidden rounded-full border border-[#e6e6e6] bg-white p-[3px]">
+                    <img
+                      className="h-full w-full object-contain"
+                      src={card.brandLogoUrl}
+                      alt=""
+                    />
+                  </span>
+                  <h2 className="text-[20px] font-bold text-[#262626]">
+                    {card.vehicleName}
+                  </h2>
+                </div>
+
+                <div className="mt-[8px] flex items-end gap-[8px]">
+                  <p className="text-[24px] font-black leading-none text-[#351a75]">
+                    ₹{formatCurrency(pricing.dailyRate)}
+                    <span className="ml-[2px] text-[13px] font-bold">/day</span>
+                  </p>
+                  <p className="text-[13px] text-[#6b6b6b]">
+                    ₹{formatCurrency(pricing.total)} total
+                  </p>
+                </div>
+
+                <div className="mt-[16px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[10px] text-[#373737]">
+                  <div className="flex flex-col items-center gap-[5px] border-r border-[#e5e5e5]">
+                    <img className="size-[18px]" src="/images/speedometer-01.png" alt="" />
+                    <span className="text-[11px] font-medium">{card.range} km</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-[5px] border-r border-[#e5e5e5]">
+                    <img className="size-[18px]" src="/images/bi_stopwatch.png" alt="" />
+                    <span className="text-[11px] font-medium">{card.topSpeed} km/h</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-[5px]">
+                    <img
+                      className="size-[18px]"
+                      src="/images/mdi_battery-charging-outline.png"
+                      alt=""
+                    />
+                    <span className="text-[11px] font-medium">{card.chargeTime} hr</span>
+                  </div>
+                </div>
+
+                <div className="mt-[14px] flex items-center justify-between gap-[12px] text-[12px] text-[#626262]">
+                  <span className="flex items-center gap-[5px]">
+                    <span className="text-[#351a75]">✓</span>
+                    {includedKm || "Daily km"} km included
+                  </span>
+                  <span className="flex items-center gap-[5px]">
+                    <span className="text-[#351a75]">✓</span>
+                    No fuel costs
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => handleRentNow(card)}
+                  className={`${
+                    card.isAvailable
+                      ? "cursor-pointer border-[#351a75] text-[#351a75] hover:bg-[#351a75] hover:text-white"
+                      : "cursor-not-allowed border-[#dedede] bg-[#f4f4f4] text-[#999]"
+                  } mt-auto flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
+                  disabled={!card.isAvailable}
+                >
+                  {card.isAvailable ? "Rent now" : "Unavailable"}
+                </button>
+              </div>
+            </article>
+          );
+        })}
     </>
   );
 };

@@ -14,50 +14,49 @@ const Footer = () => {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   return (
-    <footer className="min-h-[100px] bg-[#0F0F0F] flex justify-between items-center px-[10%]">
-      {/* Left blank */}
-      <div className="text-white flex items-center gap-x-[10px]">
+    <footer className="flex min-h-[96px] flex-col items-center justify-between gap-[22px] bg-[#0F0F0F] px-[clamp(20px,8vw,120px)] py-[26px] md:flex-row">
+      <div className="flex items-center gap-x-[10px] text-[13px] text-white">
         <a className="text-white" href="tel:08047190022">
           080-4719-0022
         </a>{" "}
-        <FaPhone className="w-[24px]" />
+        <FaPhone className="w-[16px]" />
       </div>
 
       {/* Center nav */}
-      <nav className="flex justify-center items-center gap-[24px]">
+      <nav className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[10px]">
         <p
           onClick={() => setShowTermsModal(true)}
-          className="text-[#D9DBE1] text-[14px] figtree cursor-pointer hover:text-white transition-colors"
+          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
         >
           Terms & Conditions
         </p>
         <p
           onClick={() => setShowPrivacyModal(true)}
-          className="text-[#D9DBE1] text-[14px] figtree cursor-pointer hover:text-white transition-colors"
+          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
         >
           Privacy Policy
         </p>
         <p
           onClick={() => navigate("/help-center")}
-          className="text-[#D9DBE1] text-[14px] figtree cursor-pointer hover:text-white transition-colors"
+          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
         >
           Help Center
         </p>
         <a
           href="mailto:contact@blive.co.in"
-          className="text-[#D9DBE1] text-[14px] figtree cursor-pointer hover:text-white transition-colors"
+          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
         >
           Contact Us
         </a>
       </nav>
 
       {/* Right socials */}
-      <div className="flex justify-end items-center gap-[16px]">
+      <div className="flex items-center justify-end gap-[14px]">
         <FaInstagram
           onClick={() =>
             window.open("https://www.instagram.com/blive.electric/", "_blank")
           }
-          className="cursor-pointer w-[24px] text-white"
+          className="w-[18px] cursor-pointer text-white"
         />
         <FaLinkedinIn
           onClick={() =>
@@ -66,7 +65,7 @@ const Footer = () => {
               "_blank"
             )
           }
-          className="cursor-pointer w-[24px] text-white"
+          className="w-[18px] cursor-pointer text-white"
         />
         <FaFacebook
           onClick={() =>
@@ -75,7 +74,7 @@ const Footer = () => {
               "_blank"
             )
           }
-          className="cursor-pointer w-[24px] text-white"
+          className="w-[18px] cursor-pointer text-white"
         />
         <FaYoutube
           onClick={() =>
@@ -84,7 +83,7 @@ const Footer = () => {
               "_blank"
             )
           }
-          className="cursor-pointer w-[24px] text-white"
+          className="w-[18px] cursor-pointer text-white"
         />
       </div>
       <TermsAndConditionsModal

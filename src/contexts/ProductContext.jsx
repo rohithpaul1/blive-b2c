@@ -3,7 +3,13 @@ import { createContext, useEffect, useState } from "react";
 const ProductContext = createContext();
 
 const ProductProvider = ({ children }) => {
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("selectedProduct")) || null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const storedProduct = JSON.parse(sessionStorage.getItem("selectedProduct"));

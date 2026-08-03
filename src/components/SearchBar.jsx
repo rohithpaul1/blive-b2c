@@ -82,64 +82,64 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     <div
       className={`${
         onSearchPage
-          ? "relative"
-          : "absolute bg-[#00000005] bottom-0 z-20 border border-[#ffffff60] backdrop-blur-sm translate-y-1/2 left-1/2 -translate-x-1/2 px-[15%] w-full"
-      } w-[70%] max-w-[1000px] rounded-full py-[20px] px-[18px] `}
+          ? "relative mt-[10px]"
+          : "absolute bottom-0 left-1/2 z-20 w-[calc(100%_-_40px)] -translate-x-1/2 translate-y-1/2 border border-white/60 bg-black/5 backdrop-blur-sm"
+      } w-full max-w-[1120px] rounded-full p-[8px]`}
     >
-      <div className="flex items-center bg-white py-[12px] px-[26px] gap-[8px] border border-[#10182814] rounded-full">
-        <div className="flex items-center gap-x-[16px]">
+      <div className="flex items-center rounded-full border border-[#10182814] bg-white px-[10px] py-[8px] shadow-[0_8px_24px_rgba(16,24,40,0.08)]">
+        <div className="flex w-full items-center gap-x-[10px]">
           <div
             id="location"
             onClick={() => setShowLocation(!showLocation)}
-            className="flex cursor-pointer flex-col justify-center min-w-[240px]"
+            className="flex min-w-0 flex-1 cursor-pointer flex-col justify-center rounded-full px-[12px] py-[4px] hover:bg-[#f8f8f8] md:min-w-[180px]"
           >
-            <p className="text-[12px] text-[#717171]">Location</p>
+            <p className="text-[11px] text-[#717171]">City</p>
             <span className="flex items-center py-[4px] gap-x-[4px]">
               <img
                 className="w-[20px] h-[20px]"
                 src="/images/Location.png"
                 alt="Location Icon"
               />
-              <p className="text-[#3A3A3A] truncate w-[250px]">
+              <p className="max-w-[180px] truncate text-[13px] font-medium text-[#3A3A3A]">
                 {selectedLocation}
               </p>
             </span>
           </div>
-          <span className="block w-[1px] h-[32px] bg-[#D9D9D9]" />
+          <span className="hidden h-[32px] w-px bg-[#D9D9D9] sm:block" />
           <div
             id="pickup-btn"
             onClick={() => setShowDatepicker(!showDatepicker)}
-            className="flex cursor-pointer flex-col justify-center min-w-[196px]"
+            className="hidden min-w-[188px] cursor-pointer flex-col justify-center rounded-full px-[12px] py-[4px] hover:bg-[#f8f8f8] sm:flex"
           >
-            <p className="text-[12px] text-[#717171]">Pick-up date & time</p>
+            <p className="text-[11px] text-[#717171]">Pick-up</p>
             <span className="flex items-center py-[4px] gap-x-[4px]">
               <img
                 className="w-[20px] h-[20px]"
                 src="/images/Calendar.png"
                 alt="Calendar Icon"
               />
-              <p className="text-[#3A3A3A]">
+              <p className="text-[13px] font-medium text-[#3A3A3A]">
                 {formattedDate(selectedPickup?.date)}{" "}
-                <span className="text-[14px] text-[#646464]">
+                <span className="text-[12px] text-[#646464]">
                   {selectedPickup?.time}
                 </span>
               </p>
             </span>
           </div>
-          <span className="block w-[1px] h-[32px] bg-[#D9D9D9]" />
+          <span className="hidden h-[32px] w-px bg-[#D9D9D9] md:block" />
           <div
             id="dropoff-btn"
             onClick={() => setShowDatepicker(!showDatepicker)}
-            className="flex cursor-pointer flex-col justify-center min-w-[196px]"
+            className="hidden min-w-[188px] cursor-pointer flex-col justify-center rounded-full px-[12px] py-[4px] hover:bg-[#f8f8f8] md:flex"
           >
-            <p className="text-[12px] text-[#717171]">Drop-off date</p>
+            <p className="text-[11px] text-[#717171]">Drop-off</p>
             <span className="flex items-center py-[4px] gap-x-[4px]">
               <img
                 className="w-[20px] h-[20px]"
                 src="/images/Calendar.png"
                 alt="Calendar Icon"
               />
-              <p className="text-[#3A3A3A]">
+              <p className="text-[13px] font-medium text-[#3A3A3A]">
                 {formattedDate(selectedDropoff?.date)}{" "}
                 <span className="text-[14px] text-[#646464]">
                   {selectedDropoff?.time}
@@ -148,10 +148,21 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             </span>
           </div>
           <button
-            onClick={handleRentNow}
-            className="flex cursor-pointer items-center rounded-[64px] min-w-[164px] justify-center gap-3 max-h-[64px] py-[24px] search-gradient"
+            type="button"
+            onClick={() => setShowDatepicker(!showDatepicker)}
+            className="flex size-[42px] shrink-0 items-center justify-center rounded-full border border-[#e1e1e1] bg-[#fafafa] sm:hidden"
+            aria-label="Change rental dates"
+            title="Change rental dates"
           >
-            <p className="text-white font-medium">Rent Now</p>
+            <img className="size-[18px]" src="/images/Calendar.png" alt="" />
+          </button>
+          <button
+            onClick={handleRentNow}
+            className="ml-auto flex h-[46px] min-w-[132px] cursor-pointer items-center justify-center gap-2 rounded-full bg-[#151226] px-[20px] transition-colors hover:bg-[#351a75]"
+          >
+            <p className="text-[13px] font-bold text-white">
+              {onSearchPage ? "Find vehicles" : "Rent now"}
+            </p>
             <img
               className="w-[18px] h-[18px]"
               src="/images/arrow-right.png"

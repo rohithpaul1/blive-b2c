@@ -8,6 +8,18 @@ import SortDropdown from "../components/SortDropdown";
 import FilterPage from "../components/FilterPage";
 import { ProductContext } from "../contexts/ProductContext";
 import { getAPI } from "../caller/axiosUrls";
+import WhyBlive from "../sections/WhyBlive";
+import Customers from "../sections/Customers";
+import Footer from "../sections/Footer";
+
+const VEHICLE_IMAGES = {
+  Ather: "/images/Scooter (1).png",
+  Ola: "/images/Scooter (3).png",
+  TVS: "/images/Scooter (2).png",
+  Revolt: "/images/Scooter.png",
+  Ampere: "/images/Scooter (2).png",
+  Pure: "/images/Scooter.png",
+};
 
 const SearchPage = () => {
   // Pagination state
@@ -180,7 +192,12 @@ const SearchPage = () => {
         vehicleName: model.modelName,
         manufacturer: model.manufacturer,
         brandName: brand.name,
-        imgUrl: brand.brandLogo || `/images/${brand.name}.png`,
+        imgUrl:
+          model.imageUrl ||
+          model.image ||
+          VEHICLE_IMAGES[brand.name] ||
+          "/images/Scooter.png",
+        brandLogoUrl: brand.brandLogo || `/images/${brand.name}.png`,
         price: price,
         actualPrice: actualPrice,
         range: model.range || 0,
@@ -397,102 +414,37 @@ const SearchPage = () => {
   }, [fromCatalogSelection, planTypes]); // Dependencies to ensure we have current values
 
   return (
-    <div className="w-full overflow-x-hidden overflow-y-auto">
+    <div className="w-full overflow-x-hidden overflow-y-auto bg-white">
       <Navbar
         onSearchPage={true}
         expanded={true}
         onSearchTrigger={handleSearchTrigger}
       />
-      <div className="mt-[200px] pt-[50px] pb-[100px] px-[15%]">
+      <main className="pt-[196px] pb-[88px] px-[clamp(20px,8.5vw,122px)]">
         {isLoading ? (
           <Loader />
         ) : (
           <>
-            <p className="font-bold text-[18px] text-[#222222]">
-              {filteredAndSortedVehicles?.length} Bikes available for rent in{" "}
-              {selectedLocation}
-            </p>
-
-            {/* Plan Type Tabs - Only show if not from catalog selection */}
-            {/* {!fromCatalogSelection && (
-              <div className="mt-[24px] flex items-center justify-center">
-                <div className="relative flex items-center justify-center w-[610px] h-[48px] rounded-[30px] py-[3px] px-[6px] gap-[3px] bg-white overflow-hidden">
-                  <div
-                    className={`absolute top-[3px] left-[6px] h-[42px] w-[calc(33.333%-6px)] rounded-[32px] transition-transform duration-500`}
-                    style={{
-                      transform: `translateX(${selectedTabIndex * 100}%)`,
-                      background:
-                        "linear-gradient(94.52deg, #0F0F0F 12.24%, #561D5D 75.03%)",
-                      boxShadow:
-                        "0px 9px 28px 8px #0000000D, 0px 3px 6px -4px #0000001F, 0px 6px 16px 0px #00000014",
-                    }}
-                  />
-                  {planTypes.map((plan, i) => (
-                    <div
-                      key={"plan-" + plan.name + "-" + i}
-                      onClick={() => handlePlanTypeChange(plan.planType, i)}
-                      className="cursor-pointer flex-1 z-10 flex gap-x-[12px] items-center justify-center"
-                    >
-                      <p
-                        className={`font-bold text-center transition-all duration-500 ${
-                          selectedTabIndex === i ? "text-white" : "text-black"
-                        }`}
-                      >
-                        {plan.name}
-                      </p>
-                      {plan.discount && (
-                        <div className="w-[72px] flex justify-center items-center h-[22px]">
-                          <p className="bg-[#fff5f7] py-[1px] px-[8px] font-bold text-[12px] gap-[4px] border rounded-[4px] border-[#FBB6CE] text-[#702459]">
-                            Save {plan.discount}%
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+            <div className="flex flex-col gap-[6px]">
+              <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b]">
+                Fixed rentals
+              </span>
+              <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
+                <h1 className="text-[24px] font-bold text-[#1f1f1f]">
+                  {filteredAndSortedVehicles?.length} vehicles available in {selectedLocation}
+                </h1>
+                <p className="text-[14px] text-[#6b6b6b]">
+                  Choose a vehicle now. You can confirm pickup and extras next.
+                </p>
               </div>
-            )} */}
+            </div>
 
-            {/* Show selected plan type when coming from catalog */}
-            {/* {fromCatalogSelection && (
-              <div className="mt-[24px] flex items-center justify-center">
-                <div className="flex items-center gap-x-[16px] bg-white rounded-[30px] py-[12px] px-[24px] shadow-md">
-                  <p className="font-bold text-[18px] text-[#0F0F0F]">
-                    {
-                      planTypes.find((p) => p.planType === selectedPlanType)
-                        ?.name
-                    }{" "}
-                    Plan
-                  </p>
-                  {planTypes.find((p) => p.planType === selectedPlanType)
-                    ?.discount && (
-                    <div className="flex justify-center items-center">
-                      <p className="bg-[#fff5f7] py-[1px] px-[8px] font-bold text-[12px] border rounded-[4px] border-[#FBB6CE] text-[#702459]">
-                        Save{" "}
-                        {
-                          planTypes.find((p) => p.planType === selectedPlanType)
-                            ?.discount
-                        }
-                        %
-                      </p>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setFromCatalogSelection(false)}
-                    className="text-[#0F0F0F] underline text-[14px] font-medium hover:text-gray-600"
-                  >
-                    Change Plan
-                  </button>
-                </div>
-              </div>
-            )} */}
-
-            <div className="mt-[16px] flex items-center justify-between">
-              <div className="relative flex items-center gap-x-[8px]">
+            <div className="mt-[24px] flex flex-wrap items-center justify-between gap-[16px] border-b border-[#ededed] pb-[18px]">
+              <div className="relative flex flex-wrap items-center gap-[8px]">
                 <button
                   id="sort-btn"
                   onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="cursor-pointer rounded-[24px] border border-[#D9D9D9] gap-x-[8px] py-[6px] px-[16px] h-[32px] flex items-center"
+                  className="cursor-pointer rounded-full border border-[#D9D9D9] gap-x-[8px] py-[8px] px-[14px] h-[38px] flex items-center bg-white hover:border-[#8d7ab8] transition-colors"
                 >
                   <img
                     className="w-[16px] aspect-sqaure"
@@ -516,11 +468,17 @@ const SearchPage = () => {
                   sortOption={sortOption}
                   setSortOption={handleSortChange}
                 />
-                <span className="block w-[2px] h-[20px] bg-[#EDEDED]" />
+                <span className="hidden sm:block w-[1px] h-[20px] bg-[#EDEDED]" />
+                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[12px] font-medium text-[#3a3a3a]">
+                  All models
+                </span>
+                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[12px] font-medium text-[#3a3a3a]">
+                  EV only
+                </span>
               </div>
               <button
                 onClick={() => setShowFiltersPage(true)}
-                className="cursor-pointer flex items-center p-[2px] gap-x-[8px]"
+                className="cursor-pointer flex items-center rounded-full border border-transparent px-[12px] py-[8px] gap-x-[8px] hover:border-[#e4e4e4] transition-colors"
               >
                 <img
                   className="w-[20px] aspect-sqaure"
@@ -539,7 +497,7 @@ const SearchPage = () => {
                 />
               )}
             </div>
-            <div className="mt-[30px] grid grid-cols-3 gap-x-[38px] gap-y-[54px] w-full">
+            <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[30px] w-full">
               <Cards
                 cards={filteredAndSortedVehicles}
                 selectedPlanType={selectedPlanType}
@@ -552,7 +510,10 @@ const SearchPage = () => {
             />
           </>
         )}
-      </div>
+      </main>
+      <WhyBlive />
+      <Customers />
+      <Footer />
     </div>
   );
 };

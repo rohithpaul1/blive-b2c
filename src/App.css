@@ -1,5 +1,28 @@
+:root {
+  color: #262626;
+  background: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --blive-purple: #351a75;
+  --blive-purple-hover: #2c155f;
+  --blive-text: #262626;
+  --blive-muted: #686868;
+  --blive-surface: #f7f7f7;
+  --blive-stroke: #ebebeb;
+}
+
 * {
   font-family: "Satoshi", sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #ffffff;
+  color: var(--blive-text);
+  -webkit-font-smoothing: antialiased;
 }
 
 .satoshi {

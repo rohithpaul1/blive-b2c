@@ -24,6 +24,7 @@ const Booking = () => {
   const [selectedCountryCode, setSelectedCountryCode] = useState("+91");
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [aadharNumber] = useState("");
   const [addOns, setAddOns] = useState({
     pricePerDay: 19,
@@ -51,7 +52,6 @@ const Booking = () => {
   // Feature flags for upsell blocks not yet enabled in production
   const SHOW_EXTEND_UPSELL = false;
   const SHOW_ADDITIONAL_SERVICES = false;
-  const [offsetTop, setOffsetTop] = useState(168); // start at 168px
   const [showDateChangeModal, setShowDateChangeModal] = useState(false);
 
   const { token, loading, userData } = useContext(UserContext);
@@ -524,7 +524,7 @@ const Booking = () => {
           },
           prefill: {
             name: fullName,
-            email: userData?.email || "",
+            email,
             contact: `${selectedCountryCode}${phoneNumber}`,
           },
           theme: {
@@ -864,31 +864,6 @@ const Booking = () => {
   };
 
 
-  const minTop = 44; // smallest gap
-  const maxTop = 168; // initial gap
-  const scrollRange = 200; // how many px of scroll before it reaches minTop
-
-  const handleScroll = () => {
-    const scrollY = window.scrollY;
-
-    // calculate progress (0 → 1)
-    const progress = Math.min(scrollY / scrollRange, 1);
-
-    // interpolate top between maxTop and minTop
-    const newTop = maxTop - (maxTop - minTop) * progress;
-
-    setOffsetTop(newTop);
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("load", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("load", handleScroll);
-    };
-  }, []);
-
   useEffect(() => {
     if (selectedPickup && selectedDropoff)
       countDays(selectedPickup, selectedDropoff);
@@ -896,8 +871,11 @@ const Booking = () => {
 
   useEffect(() => {
     if (userData) {
-      setFullName(userData?.firstName + " " + userData?.lastName);
+      setFullName(
+        [userData?.firstName, userData?.lastName].filter(Boolean).join(" ")
+      );
       setPhoneNumber(userData?.phoneNumber);
+      setEmail(userData?.email || "");
     }
   }, [userData]);
 
@@ -973,12 +951,12 @@ const Booking = () => {
       />
       <div className="w-full overflow-x-hidden">
         <Navbar onSearchPage={false} expanded={true} />
-        <div className="mt-[124px] pt-[44px] pb-[100px] px-[10%]">
+        <div className="px-[clamp(20px,7.5vw,108px)] pb-[100px] pt-[116px]">
           {isLoading || !token ? (
             <Loader />
           ) : (
-            <div className="flex gap-x-[140px]">
-              <div className="flex-1">
+            <div className="grid items-start gap-[48px] lg:grid-cols-[minmax(0,1fr)_400px] xl:gap-[72px]">
+              <div className="min-w-0">
                 <p className="font-bold text-[24px] text-[#222222]">
                   Customer Details
                 </p>
@@ -1004,7 +982,7 @@ const Booking = () => {
                         onChange={(e) => setSelectedCountryCode(e.target.value)}
                         className="rounded-[8px] cursor-not-allowed border border-[#EDEDED] outline-none p-[16px] bg-black/10 text-gray-500 pr-[40px] bg-[#F7F7F7] font-bold text-[14px] text-[#222222] appearance-none"
                       >
-                        <option value="+91" selected>
+                        <option value="+91">
                           IN (+91)
                         </option>
                       </select>
@@ -1028,6 +1006,16 @@ const Booking = () => {
                       inputMode="numeric"
                     />
                   </div>
+                </div>
+                <div className="mt-[16px] flex flex-col">
+                  <p className="text-[12px] text-[#717171]">Email</p>
+                  <input
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    type="email"
+                    className="mt-[4px] h-[48px] flex-1 rounded-[8px] border border-[#EDEDED] bg-[#F7F7F7] p-[16px] text-[14px] text-[#222222] outline-none focus:border-[#5B21B6] focus:bg-white"
+                    placeholder="Enter Email Address"
+                  />
                 </div>
 
                 <div className="mt-[24px] flex items-center gap-x-[10px]">
@@ -1229,7 +1217,7 @@ const Booking = () => {
                     </div>
                   </div>
                 )}
-                <div className="my-[24px]">
+                <div className="hidden">
                   <p className="font-bold text-[24px] text-[#222222]">
                     Payment & Offers
                   </p>
@@ -1354,11 +1342,9 @@ const Booking = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-[40%]">
-                <div
-                  style={{ top: offsetTop + "px" }}
-                  className="fixed top-[168px] w-[460px] rounded-[16px] p-[20px] bg-[#F7F7F7]"
-                >
+              <aside className="w-full">
+                <div className="sticky top-[104px] space-y-[12px]">
+                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
                   <p className="font-bold text-[24px] text-[#222222]">
                     Booking Overview
                   </p>
@@ -1629,17 +1615,64 @@ const Booking = () => {
                   </div>
                   <button
                     onClick={handlePayment}
-                    className={`mt-[24px] w-full h-[48px] font-medium text-[#FDFDFD] rounded-[24px] py-[13px] px-[24px] ${
+                    className={`mt-[24px] h-[48px] w-full rounded-[24px] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors ${
                       canProceedToPayment()
-                        ? "bg-[#000000] cursor-pointer"
+                        ? "bg-[#351a75] cursor-pointer hover:bg-[#2c155f]"
                         : "bg-[#CBCBCB] cursor-not-allowed"
                     }`}
                     disabled={!canProceedToPayment() || isLoading}
                   >
                     {isLoading ? "Processing..." : "Proceed to Payment"}
                   </button>
+                  </section>
+
+                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
+                    <h2 className="text-[20px] font-bold text-[#222222]">
+                      Payment & Offers
+                    </h2>
+                    <p className="mt-[12px] border-b border-[#dedede] pb-[10px] text-[13px] text-[#3a3a3a]">
+                      Apply discount or coupons
+                    </p>
+                    {appliedPromocode ? (
+                      <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[10px] border border-dashed border-[#cfc6ef] bg-[#f6f3ff] p-[14px]">
+                        <div className="min-w-0">
+                          <p className="truncate text-[14px] font-bold text-[#351a75]">
+                            {appliedPromocode.promocode}
+                          </p>
+                          <p className="mt-[2px] text-[11px] text-[#656565]">
+                            You save ₹{appliedPromocode.discountAmount}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setAppliedPromocode(null)}
+                          className="text-[12px] font-bold text-[#351a75]"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowPromocodePage(true)}
+                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[#8f78c6] px-[16px] text-[13px] font-bold text-[#351a75] transition-colors hover:bg-[#f6f3ff]"
+                      >
+                        <span className="mr-[8px] text-[20px] font-normal">+</span>
+                        Apply coupon
+                      </button>
+                    )}
+                  </section>
+
+                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
+                    <h2 className="text-[20px] font-bold text-[#222222]">
+                      What&apos;s included
+                    </h2>
+                    <ul className="mt-[14px] space-y-[9px] text-[12px] text-[#4f4f4f]">
+                      <li className="flex gap-[8px]"><span className="text-[#1ca05a]">✓</span>{selectedProduct?.perDayKmLimit || selectedProduct?.range || 0} km per day included</li>
+                      <li className="flex gap-[8px]"><span className="text-[#1ca05a]">✓</span>24/7 breakdown assistance</li>
+                      <li className="flex gap-[8px]"><span className="text-[#1ca05a]">✓</span>Vehicle insurance</li>
+                    </ul>
+                  </section>
                 </div>
-              </div>
+              </aside>
             </div>
           )}
         </div>

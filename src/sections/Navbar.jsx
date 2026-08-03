@@ -24,58 +24,54 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
     <>
       {showLoginPage && <Login />}
       <nav
-        className={`w-full px-[40px] flex flex-col pt-[12px] items-center justify-center absolute ${
-          expanded ? "bg-white header-shadow" : "h-[72px]"
-        } z-30`}
+        className={`fixed top-0 z-30 flex w-full flex-col items-center justify-center px-[clamp(20px,4vw,64px)] py-[10px] ${
+          expanded ? "bg-white header-shadow" : "h-[72px] bg-white/95"
+        }`}
       >
-        <div className="flex w-full justify-between items-start self-start">
+        <div className="flex min-h-[48px] w-full items-center justify-between self-start">
           <img
             onClick={() => navigate("/home")}
-            className="h-[50px] cursor-pointer"
+            className="h-[34px] w-auto cursor-pointer"
             src="/images/BliveLogo.svg"
             alt="BLive"
           />
           {token ? (
-            <div className="flex items-center gap-x-[24px]">
-              <div className="flex items-center gap-x-[16px]">
+            <div className="flex items-center gap-x-[12px] md:gap-x-[20px]">
+              <div className="flex items-center gap-x-[2px] md:gap-x-[8px]">
                 <span
                   onClick={() => navigate("/help-center")}
-                  className={`cursor-pointer flex items-center gap-x-[8px] p-[12px] duration-500 transition-all ${
+                  className={`cursor-pointer flex items-center gap-x-[7px] rounded-full p-[9px] duration-300 transition-all ${
                     location.pathname === "/help-center"
-                      ? "bg-[#EDEDED] rounded-[24px]"
-                      : ""
+                      ? "bg-[#f2f2f2]"
+                      : "hover:bg-[#f7f7f7]"
                   }`}
                 >
                   <img
                     className="w-[20px] h-[20px]"
-                    src={`/images/Help${expanded ? "-Black" : ""}.png`}
+                    src="/images/Help-Black.png"
                     alt="Help Icon"
                   />
                   <p
-                    className={`text-[16px] ${
-                      expanded ? "text-black" : "text-white"
-                    } font-bold`}
+                    className="hidden text-[13px] font-bold text-black md:block"
                   >
                     Help
                   </p>
                 </span>
                 <span
                   onClick={() => navigate("/my-bookings")}
-                  className={`cursor-pointer flex items-center gap-x-[8px] p-[12px] duration-500 transition-all ${
+                  className={`cursor-pointer flex items-center gap-x-[7px] rounded-full p-[9px] duration-300 transition-all ${
                     location.pathname === "/my-bookings"
-                      ? "bg-[#EDEDED] rounded-[24px]"
-                      : ""
+                      ? "bg-[#f2f2f2]"
+                      : "hover:bg-[#f7f7f7]"
                   }`}
                 >
                   <img
                     className="w-[20px] h-[20px]"
-                    src={`/images/Trip${expanded ? "-Black" : ""}.png`}
+                    src="/images/Trip-Black.png"
                     alt="Help Icon"
                   />
                   <p
-                    className={`text-[16px] ${
-                      expanded ? "text-black" : "text-white"
-                    } font-bold`}
+                    className="hidden text-[13px] font-bold text-black md:block"
                   >
                     My Bookings
                   </p>
@@ -97,18 +93,16 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                     }
                     navigate("/notifications");
                   }}
-                  className={`cursor-pointer flex items-center gap-x-[8px] p-[12px duration-500 transition-all] ${
+                  className={`cursor-pointer flex items-center gap-x-[7px] rounded-full p-[9px] duration-300 transition-all ${
                     location.pathname === "/notification"
-                      ? "bg-[#EDEDED] rounded-[24px]"
-                      : ""
+                      ? "bg-[#f2f2f2]"
+                      : "hover:bg-[#f7f7f7]"
                   }`}
                 >
                   <div className="relative">
                     <img
                       className="w-[20px] h-[20px]"
-                      src={`/images/Notifications${
-                        expanded ? "-Black" : ""
-                      }.png`}
+                      src="/images/Notifications-Black.png"
                       alt="Help Icon"
                     />
                     {unseenNotificationsCount > 0 && (
@@ -120,9 +114,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                     )}
                   </div>
                   <p
-                    className={`text-[16px] ${
-                      expanded ? "text-black" : "text-white"
-                    } font-bold`}
+                    className="hidden text-[13px] font-bold text-black md:block"
                   >
                     Notifications
                   </p>
@@ -131,13 +123,13 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
               <div
                 id="profile-button"
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="relative cursor-pointer flex items-center w-[105px] gap-x-[16px] border-[#CBCBCB] rounded-[30px] border-[1px] px-[16px] py-[8px] h-[50px]"
+                className="relative flex h-[42px] w-[84px] cursor-pointer items-center gap-x-[10px] rounded-full border border-[#d8d8d8] bg-white px-[10px] py-[5px]"
               >
                 <img
-                  src={`/images/Menu${expanded ? "-Black" : ""}.png`}
+                  src="/images/Menu-Black.png"
                   alt="Menu"
                 />
-                <div className="rounded-[50%] min-w-[32px] min-h-[32px] overflow-hidden border-[2px] border-white">
+                <div className="min-h-[30px] min-w-[30px] overflow-hidden rounded-full border-2 border-white">
                   <img
                     className="w-full h-full object-cover"
                     src={userData?.profileUrl || "/images/placeholder.jpeg"}
@@ -154,7 +146,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
           ) : (
             <button
               onClick={() => setShowLoginPage(true)}
-              className="py-[8px] px-[32px] flex items-center h-[40px] cursor-pointer justify-center rounded-full bg-[#000000] font-bold text-white text-[14px]"
+              className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#351a75] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#2c155f]"
             >
               Login or Signup
             </button>
@@ -164,7 +156,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
           <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} />
         ) : (
           expanded && (
-            <div className="h-[52px] mt-[10px] flex items-center w-full border-b border-[#EDEDED]">
+            <div className="mt-[6px] flex h-[46px] w-full items-center border-t border-[#ededed]">
               <button
                 onClick={() => navigate(-1)}
                 className="cursor-pointer flex items-center gap-x-[10px]"

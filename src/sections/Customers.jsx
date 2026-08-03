@@ -39,28 +39,28 @@ const Customers = () => {
   const t = testimonials[index];
 
   return (
-    <div className="my-[100px] flex flex-col px-[10%] transition-all duration-500">
+    <section className="flex flex-col px-[clamp(20px,8.5vw,122px)] py-[88px] transition-all duration-500">
       <div className="flex items-start justify-between">
-        <p className="font-bold text-[40px] text-[#0F0F0F]">
-          Stories That Move Us
-        </p>
+        <h2 className="text-[32px] font-bold text-[#0F0F0F] md:text-[40px]">
+          What our customers say
+        </h2>
         <div className="flex items-center gap-x-[16px] mt-2">
           <button
             onClick={goPrev}
-            className="flex items-center justify-center bg-white border-[2px] cursor-pointer w-[64px] aspect-square rounded-full border-[#C0C0C0]"
+            className="flex size-[48px] cursor-pointer items-center justify-center rounded-full border border-[#cfcfcf] bg-white transition-colors hover:bg-[#f7f7f7] md:size-[56px]"
           >
             <img
-              className="w-[24px] h-[24px]"
+              className="size-[20px]"
               src="/images/arrow-left.png"
               alt="Arrow Icon"
             />
           </button>
           <button
             onClick={goNext}
-            className="flex items-center justify-center bg-[#0F0F0F] w-[64px] cursor-pointer aspect-square rounded-full"
+            className="flex size-[48px] cursor-pointer items-center justify-center rounded-full bg-[#0F0F0F] transition-colors hover:bg-[#351a75] md:size-[56px]"
           >
             <img
-              className="w-[24px] h-[24px]"
+              className="size-[20px]"
               src="/images/arrow-right.png"
               alt="Arrow Icon"
             />
@@ -68,12 +68,12 @@ const Customers = () => {
         </div>
       </div>
 
-      <p className="mt-[60px] font-medium opacity-[80%] text-[32px] text-[#0F0F0F] mr-[10%] transition-all duration-500">
+      <blockquote className="mt-[48px] max-w-[1120px] text-[20px] font-medium leading-[1.7] text-[#313131] transition-all duration-500 md:text-[26px]">
         “{t.text}”
-      </p>
+      </blockquote>
 
-      <div className="mt-[64px] flex items-center gap-x-[24px]">
-        <div className="w-[80px] aspect-square rounded-full overflow-hidden">
+      <div className="mt-[44px] flex items-center gap-x-[18px]">
+        <div className="size-[64px] overflow-hidden rounded-full">
           <img
             className="h-full w-full object-cover"
             src={t.photo}
@@ -81,11 +81,11 @@ const Customers = () => {
           />
         </div>
         <div className="flex flex-col gap-y-[4px]">
-          <p className="font-bold text-[24px] text-[#0F0F0F]">{t.name}</p>
-          <p className="text-[20px] text-[#737373]">From {t.location}</p>
+          <p className="text-[18px] font-bold text-[#0F0F0F]">{t.name}</p>
+          <p className="text-[14px] text-[#737373]">From {t.location}</p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

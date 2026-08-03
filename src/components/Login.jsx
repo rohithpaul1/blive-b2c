@@ -200,7 +200,7 @@ const Login = () => {
                     onChange={(e) => setSelectedCountryCode(e.target.value)}
                     className="rounded-[8px] border border-[#EDEDED] outline-none p-[16px] pr-[40px] bg-[#F7F7F7] font-bold text-[14px] text-[#222222] appearance-none"
                   >
-                    <option value="+91" selected>
+                    <option value="+91">
                       IN (+91)
                     </option>
                   </select>
