@@ -1,0 +1,37 @@
+# Netlify deploy config — equivalent to vercel.json.
+# Only one of these files is used, depending on the host you pick.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# SPA fallback: React Router owns all client-side routes, so every unmatched
+# path must serve index.html rather than a 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Content-hashed build assets never change — cache them forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The HTML shell must always be revalidated so new deploys are picked up.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=(self), payment=(self)"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"

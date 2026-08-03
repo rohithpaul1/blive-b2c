@@ -1,0 +1,11 @@
+version: "3.4"
+services:
+  b2cfe:
+    image: b2c-fe
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: b2c-frontend
+    ports:
+      - 5007:80

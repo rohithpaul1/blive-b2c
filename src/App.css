@@ -1,0 +1,220 @@
+* {
+  font-family: "Satoshi", sans-serif;
+}
+
+.satoshi {
+  font-family: "Satoshi", sans-serif;
+}
+
+.figtree {
+  font-family: "Figtree", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.poppins {
+  font-family: "Poppins", sans-serif;
+}
+
+.hero-gradient {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.7) 10.31%,
+    rgba(47, 47, 47, 0) 45.7%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+.promo-gradient {
+  background: linear-gradient(
+    90.88deg,
+    #ffc101 2.31%,
+    #ffdd76 47.88%,
+    #ffc101 96.98%
+  );
+}
+
+.promo-shadow {
+  box-shadow: 0px 4px 16px 0px #a6a6a629;
+}
+
+.header-shadow {
+  box-shadow: 0px 4px 12px 0px #c1bcbc26;
+}
+
+.profile-info {
+  background: linear-gradient(
+    174.92deg,
+    #000000 74.53%,
+    rgba(15, 4, 49, 0.71) 95.92%
+  );
+}
+
+.hub-gradient {
+  background: linear-gradient(
+    132.11deg,
+    rgba(0, 0, 0, 0.568) 4.81%,
+    rgba(24, 16, 68, 0.696) 88.39%
+  );
+}
+
+.sidebar-shadow {
+  box-shadow: 0px 0px 20px 0px #72717140;
+}
+
+.profile-tab {
+  background: linear-gradient(177.31deg, #000000 1.86%, #0f0431 97.4%);
+  box-shadow: 0px 4px 26px 0px #88838340;
+}
+
+.input-shadow-upper {
+  box-shadow: 0px -11px 12px 0px #c1bcbc26;
+}
+
+.card-shadow {
+  box-shadow: 0px 4px 16px 0px #a6a6a640;
+}
+
+.calender-shadow {
+  box-shadow: 0px 2px 11px 0px #6c6a6a40;
+}
+
+.not-available-info {
+  box-shadow: 0px 0px 3px 1px #aeaeae33;
+  /* backdrop-filter: blur(20px); */
+}
+
+.image-gradient {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 82.26%, #ffffff 100%);
+}
+
+.menu-gradient {
+  background: linear-gradient(94.52deg, #0f0f0f 12.24%, #561d5d 75.03%);
+  box-shadow: 0px 9px 28px 8px #0000000d, 0px 3px 6px -4px #0000001f,
+    0px 6px 16px 0px #00000014;
+}
+
+.search-gradient {
+  background: linear-gradient(96.92deg, #00010c -0.8%, #000b72 132.79%);
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  background: white url("/images/FilterPrice.png") center/20% no-repeat;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #cbcbcb;
+  margin-top: -14px;
+}
+
+.login-shadow {
+  box-shadow: 0px 4px 26px 0px #88838340;
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  background-color: #f5f5f5;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #3e3e3e;
+}
+
+.horizontalscroll::-webkit-scrollbar-track {
+  background-color: white;
+  border-radius: 30px;
+}
+
+.horizontalscroll::-webkit-scrollbar {
+  height: 5px;
+}
+
+.horizontalscroll::-webkit-scrollbar-thumb {
+  background-color: #3e3e3e;
+  border-radius: 30px;
+}
+
+.noscroll {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox, Safari 18.2+, Chromium 121+ */
+}
+
+.noscroll::-webkit-scrollbar {
+  display: none;
+}
+
+.left::-webkit-slider-thumb {
+  margin-left: -14px;
+}
+
+.right::-webkit-slider-thumb {
+  margin-left: 12px;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 40px;
+  height: 40px;
+  background: white url("/images/FilterPrice.png") center/20% no-repeat;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #cbcbcb;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: transparent;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
