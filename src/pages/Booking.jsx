@@ -189,6 +189,18 @@ const Booking = () => {
     return total.toFixed(2); // always 2 decimal places
   };
 
+  const couponSavings = () => {
+    const quoted = selectedProduct?.calculationData?.payment_breakdown?.discount_amount;
+    const fallback = appliedPromocode?.discountType === "percentage"
+      ? 0
+      : appliedPromocode?.discountAmount;
+    const amount = Number(quoted ?? fallback ?? 0);
+    return Number.isFinite(amount) ? Math.max(0, amount) : 0;
+  };
+
+  const formattedCouponSavings = () =>
+    couponSavings().toLocaleString("en-IN", { maximumFractionDigits: 2 });
+
   // Check if address is required for doorstep delivery
   const isAddressRequired = () => {
     if (!requiredDoorstepDelivery) {
@@ -697,6 +709,12 @@ const Booking = () => {
       if (response.status === "success") {
         console.log("Recalculation response:", response.data);
 
+        if (appliedPromocode?.couponId && !response.data.applied_coupon) {
+          setAppliedPromocode(null);
+          toast.error("This coupon is not valid for the updated booking");
+          return;
+        }
+
         // Update the selected product with new calculation data
         const updatedProduct = {
           ...selectedProduct,
@@ -797,6 +815,12 @@ const Booking = () => {
 
       if (response.status === "success") {
         console.log("Recalculation response:", response.data);
+
+        if (appliedPromocode?.couponId && !response.data.applied_coupon) {
+          setAppliedPromocode(null);
+          toast.error("This coupon is not valid for this booking");
+          return;
+        }
 
         // Update the selected product with new calculation data
         const updatedProduct = {
@@ -942,6 +966,17 @@ const Booking = () => {
           <PromocodePage
             setShowPromocodePage={setShowPromocodePage}
             setAppliedPromocode={setAppliedPromocode}
+            couponContext={{
+              vehicleModelId: selectedProduct?.id,
+              planId: selectedProduct?.planId,
+              pickupDate: selectedPickup?.date,
+              pickupTime: selectedPickup?.time,
+              dropoffDate: selectedDropoff?.date,
+              dropoffTime: selectedDropoff?.time,
+              ratePlan: selectedProduct?.selectedPlanType || "daily",
+              hubId: selectedHubId ? selectedHubId.toString() : undefined,
+              isHomeDelivery: requiredDoorstepDelivery,
+            }}
           />
         </div>
       )}
@@ -1242,7 +1277,7 @@ const Booking = () => {
                             {appliedPromocode.promocode}
                           </p>
                           <p className="mt-[2px] text-[13px] text-[#3A3A3A]">
-                            You will save ₹{appliedPromocode.discountAmount}{" "}
+                            You will save ₹{formattedCouponSavings()}{" "}
                             with this coupon on the bill
                           </p>
                         </div>
@@ -1596,7 +1631,7 @@ const Booking = () => {
                                 />
                               </div>
                               <p className="text-[#1C840F] text-[14px] font-medium">
-                                -₹{appliedPromocode.discountAmount.toFixed(2)}
+                                -₹{couponSavings().toFixed(2)}
                               </p>
                             </div>
                           )}
@@ -1640,7 +1675,7 @@ const Booking = () => {
                             {appliedPromocode.promocode}
                           </p>
                           <p className="mt-[2px] text-[11px] text-[#656565]">
-                            You save ₹{appliedPromocode.discountAmount}
+                            You save ₹{formattedCouponSavings()}
                           </p>
                         </div>
                         <button

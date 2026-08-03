@@ -33,6 +33,7 @@ const serializable = (value) =>
 export async function resolveConvex(method, path, data) {
   if (!client) return { handled: false };
   const p = (path || "").split("?")[0];
+  const queryParams = new URLSearchParams((path || "").split("?")[1] || "");
 
   // ---- mapped B2C endpoints (grow this list per migration slice) ----
   if (method === "GET" && p === "/vehicle-plan/all-hubs") {
@@ -42,6 +43,23 @@ export async function resolveConvex(method, path, data) {
   if (method === "GET" && p.startsWith("/vehicle-plan/vehicle-model-with-plan")) {
     const data = await client.query("b2c/catalog:list", {});
     return { handled: true, result: ok(data) };
+  }
+  if (method === "GET" && p === "/vehicle-plan/check-new-user") {
+    const catalog = await client.query("b2c/booking:couponCatalog", {});
+    return { handled: true, result: ok({ newUser: catalog.newUser }) };
+  }
+  if (method === "GET" && p === "/vehicle-plan/available-coupons") {
+    const rawContext = queryParams.get("couponContext");
+    let input;
+    try {
+      input = rawContext ? JSON.parse(rawContext) : undefined;
+    } catch {
+      input = undefined;
+    }
+    const catalog = await client.query("b2c/booking:couponCatalog", {
+      input: serializable(input),
+    });
+    return { handled: true, result: ok(catalog.coupons) };
   }
   if (method === "POST" && p === "/vehicle-plan/dynamic-calculation") {
     const quote = await client.query("b2c/booking:quote", {

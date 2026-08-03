@@ -4,7 +4,7 @@ import { getAPI } from '../caller/axiosUrls';
 import { useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 
-const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode }) => {
+const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode, couponContext }) => {
     const [promocode, setPromocode] = useState('');
     const [showSucces, setShowSuccess] = useState(false);
     const [hasError, setHasError] = useState(false);
@@ -37,7 +37,10 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode }) => {
         if (!userData?.id) return [];
         
         try {
-            const response = await getAPI(`/vehicle-plan/available-coupons?userId=${userData.id}&newUser=${newUserStatus}`);
+            const context = couponContext
+                ? `&couponContext=${encodeURIComponent(JSON.stringify(couponContext))}`
+                : '';
+            const response = await getAPI(`/vehicle-plan/available-coupons?userId=${userData.id}&newUser=${newUserStatus}${context}`);
             if (response.status === 'success') {
                 return response.data;
             }
@@ -141,7 +144,8 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode }) => {
             // Apply coupon from available coupons list
             result = { 
                 promocode: couponData.code, 
-                discountAmount: couponData.discountType === 'percentage' ? `${couponData.discountValue}%` : `₹${couponData.discountValue}`,
+                discountAmount: parseFloat(couponData.discountValue),
+                discountLabel: couponData.discountType === 'percentage' ? `${couponData.discountValue}% off` : `₹${couponData.discountValue} off`,
                 discountType: couponData.discountType,
                 discountValue: parseFloat(couponData.discountValue),
                 couponId: couponData.id,
@@ -151,7 +155,8 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode }) => {
             // Manual promocode entry (fallback)
             result = { 
                 promocode, 
-                discountAmount: "₹192",
+                discountAmount: 192,
+                discountLabel: "₹192 off",
                 discountType: 'fixed',
                 discountValue: 192
             };
@@ -178,7 +183,7 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode }) => {
                         autoplay
                     />
                     <p className="text-[14px] text-[#222222] mt-[16px]">“{promoConfig?.promocode}” Applied</p>
-                    <p className="text-[22px] font-bold text-[#222222] mt-[4px]">{promoConfig?.discountAmount} savings from this coupon</p>
+                    <p className="text-[22px] font-bold text-[#222222] mt-[4px]">{promoConfig?.discountLabel} with this coupon</p>
                 </div>
             </div>}
             <div className="w-[936px] h-[522px] bg-white rounded-[16px] login-shadow">
