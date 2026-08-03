@@ -19,6 +19,7 @@ import { getAPI, postAPI } from "../caller/axiosUrls";
 import { RAZORPAY_KEY_ID, SIMULATE_PAYMENT } from "../config/env";
 import {
   RENTAL_MODES,
+  planUnit,
   renewalCadenceLabel,
   startingPeriodLabel,
 } from "../utils/subscription";
@@ -216,6 +217,13 @@ const Booking = () => {
 
   const formattedCouponSavings = () =>
     couponSavings().toLocaleString("en-IN", { maximumFractionDigits: 2 });
+
+  const formattedAmount = (value) => {
+    const amount = Number(value ?? 0);
+    return Number.isFinite(amount)
+      ? amount.toLocaleString("en-IN", { maximumFractionDigits: 2 })
+      : "0";
+  };
 
   // Check if address is required for doorstep delivery
   const isAddressRequired = () => {
@@ -1356,14 +1364,18 @@ const Booking = () => {
                     />
                   </div>
                 </div>
-                <WhatToExpect />
+                <WhatToExpect
+                  rentalMode={isSubscription ? "subscription" : "fixed"}
+                  commitmentDuration={commitmentDuration}
+                  commitmentUnit={planUnit(selectedProduct?.selectedPlanType || currentPlanType)}
+                />
                 <div className="mt-[24px]">
                   <p className="font-bold text-[24px] text-[#222222]">
                     Cancellation Policy
                   </p>
                   <p className="mt-[16px] text-[14px] text-[#222222]">
                     {isSubscription
-                      ? "You can schedule your subscription to end after the starting period. It renews automatically unless you cancel before the next renewal."
+                      ? "Choose how long you expect to keep the vehicle. You can extend later, while billing renews automatically until you cancel."
                       : "Cancellations made before 48 hours of the reservation may incur a cancellation fee, based on the selected Rental Plan."}
                   </p>
                   <div className="mt-[32px]">
@@ -1422,17 +1434,17 @@ const Booking = () => {
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
                       <p className="text-center text-[11px] text-[#222222]">
                         {isSubscription
-                          ? `Starts with ${startingPeriodLabel(
+                          ? `${startingPeriodLabel(
                               selectedProduct?.selectedPlanType || currentPlanType,
                               commitmentDuration
-                            )}`
+                            )} planned`
                           : `${days} Days`}
                       </p>
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
                     </div>
                     <div className="flex flex-col">
                       <p className="text-[11px] text-[#3A3A3A] text-right">
-                        {isSubscription ? "First renewal" : "Dropoff"}
+                        {isSubscription ? "Planned until" : "Dropoff"}
                       </p>
                       <p className="font-bold text-[14px] text-[#222222]">
                         {formattedDate(selectedDropoff?.date)}{" "}
@@ -1493,41 +1505,41 @@ const Booking = () => {
                           <div className="flex items-center justify-between">
                             <p className="text-[14px] text-[#3A3A3A]">Recurring charge</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{selectedProduct.calculationData.payment_breakdown.recurring_charge}
+                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.recurring_charge)}
                               <span className="text-[11px] font-normal text-[#717171]">
                                 /{selectedProduct.calculationData.commitment?.unit || "period"}
                               </span>
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Starting period total</p>
+                            <p className="text-[14px] text-[#3A3A3A]">Estimated for planned duration</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{selectedProduct.calculationData.payment_breakdown.commitment_total}
+                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.commitment_total)}
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
                             <p className="text-[14px] text-[#3A3A3A]">Security deposit held in wallet</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{selectedProduct.calculationData.payment_breakdown.security_deposit}
+                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.security_deposit)}
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
                             <p className="text-[14px] text-[#3A3A3A]">Keep available before renewal</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{selectedProduct.calculationData.payment_breakdown.minimum_wallet_balance}
+                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.minimum_wallet_balance)}
                             </p>
                           </div>
                           <div className="mt-[6px] rounded-[10px] border border-[#e6e2ea] bg-white px-[12px] py-[10px]">
                             <div className="flex items-center justify-between text-[12px]">
                               <span className="text-[#67616c]">Wallet available</span>
                               <span className="font-medium text-[#302b34]">
-                                ₹{selectedProduct.calculationData.payment_breakdown.wallet_available}
+                                ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.wallet_available)}
                               </span>
                             </div>
                             <div className="mt-[5px] flex items-center justify-between text-[12px]">
-                              <span className="text-[#67616c]">Add before the subscription starts</span>
+                              <span className="text-[#67616c]">Required at start</span>
                               <span className="font-bold text-[#302b34]">
-                                ₹{selectedProduct.calculationData.payment_breakdown.required_opening_balance}
+                                ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.required_opening_balance)}
                               </span>
                             </div>
                           </div>
@@ -1535,7 +1547,7 @@ const Booking = () => {
                             <div className="flex items-center justify-between">
                               <p className="text-[14px] text-[#3A3A3A]">Home delivery</p>
                               <p className="text-[14px] font-medium text-[#3A3A3A]">
-                                ₹{selectedProduct.calculationData.payment_breakdown.home_delivery_amount}
+                                ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.home_delivery_amount)}
                               </p>
                             </div>
                           )}
@@ -1736,7 +1748,7 @@ const Booking = () => {
                         {isSubscription ? "Add to wallet today" : "Total"}
                       </p>
                       <p className="font-bold text-[22px] text-[#222222]">
-                        ₹{calculateTotal()}
+                        ₹{formattedAmount(calculateTotal())}
                       </p>
                     </div>
                   </div>

@@ -15,6 +15,7 @@ const ProfileDropdown = ({ userData, showProfileDropdown, setShowProfileDropdown
     };
 
     useEffect(() => {
+        if (!showProfileDropdown) return undefined;
         function handleClickOutside(event) {
         // IDs to ignore
         const ignoreIds = ["profile-button"];
@@ -37,10 +38,12 @@ const ProfileDropdown = ({ userData, showProfileDropdown, setShowProfileDropdown
         return () => {
         document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [setShowProfileDropdown, showProfileDropdown]);
+
+    if (!showProfileDropdown) return null;
     
     return (
-        <div ref={profileDropdownRef} className={`absolute right-0 overflow-hidden transition-all duration-500 ${showProfileDropdown ? "max-h-[234px] mt-[300px] w-[316px] opacity-100" : "max-h-0 w-[100px] mt-[50px] opacity-0"} z-20 calender-shadow bg-white rounded-[16px] flex flex-col`}>
+        <div ref={profileDropdownRef} className="absolute right-0 z-20 mt-[300px] flex max-h-[234px] w-[316px] flex-col overflow-hidden rounded-[16px] bg-white opacity-100 calender-shadow">
             <div className="profile-tab p-[24px]">
                 <div className="flex items-center gap-x-[16px]">
                     {userData?.profileImage ? (

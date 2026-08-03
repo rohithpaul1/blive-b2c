@@ -8,6 +8,7 @@ import { SearchBarContext } from "../contexts/SearchBarContext";
 import {
   RENTAL_MODES,
   planUnitLabel,
+  renewalCadenceLabel,
   startingPeriodLabel,
 } from "../utils/subscription";
 
@@ -83,10 +84,10 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
 
   const searchSummary = useMemo(() => {
     if (isSubscription) {
-      return `${formattedDate(selectedPickup?.date, false)} · Start with ${startingPeriodLabel(
+      return `${formattedDate(selectedPickup?.date, false)} · ${startingPeriodLabel(
         currentPlanType,
         subscriptionDuration
-      )}`;
+      )} planned`;
     }
     return `${formattedDate(selectedPickup?.date, false)} – ${formattedDate(
       selectedDropoff?.date,
@@ -238,13 +239,23 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         </button>
         <span className="h-[34px] w-px bg-[#e4e2e5]" />
         {isSubscription ? (
-          <label className="flex min-h-[56px] min-w-[192px] items-center gap-[10px] rounded-full px-[14px] hover:bg-[#f7f7f7]">
+          <div className="flex min-h-[56px] min-w-[276px] items-center gap-[8px] rounded-full px-[12px] hover:bg-[#f7f7f7]">
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-bold text-[#262626]">Start with</span>
+              <span className="block text-[11px] font-bold text-[#262626]">Planned duration</span>
               <span className="block truncate text-[12px] text-[#686868]">
-                First renewal {formattedDate(selectedDropoff?.date, false)}
+                Until {formattedDate(selectedDropoff?.date, false)}
               </span>
             </span>
+            <select
+              aria-label="Subscription billing plan"
+              value={currentPlanType}
+              onChange={(event) => updateCurrentPlanType(event.target.value)}
+              className="min-h-[44px] rounded-full border border-[#dedbe2] bg-white px-[9px] text-[12px] font-bold text-[#351a75] outline-none focus:border-[#351a75]"
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
             <select
               aria-label="Starting subscription period"
               value={subscriptionDuration}
@@ -257,7 +268,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
         ) : (
           <button
             id="dropoff-btn"
@@ -395,7 +406,37 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
 
             {isSubscription && (
               <section className="mt-[12px] rounded-[20px] border border-[#e8e5ea] bg-white p-[16px]">
-                <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#756e79]">How long would you like to start?</p>
+                <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#756e79]">Billing plan</p>
+                <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
+                  {[
+                    ["daily", "Daily"],
+                    ["weekly", "Weekly"],
+                    ["monthly", "Monthly"],
+                  ].map(([planType, label]) => (
+                    <button
+                      key={planType}
+                      type="button"
+                      onClick={() => updateCurrentPlanType(planType)}
+                      className={`min-h-[48px] rounded-[12px] border px-[8px] text-[13px] font-bold ${
+                        currentPlanType === planType
+                          ? "border-[#351a75] bg-[#f5f1fb] text-[#351a75]"
+                          : "border-[#e1dee4] bg-white text-[#4f4953]"
+                      }`}
+                      aria-pressed={currentPlanType === planType}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-[10px] text-[12px] leading-[1.45] text-[#686868]">
+                  Charged {renewalCadenceLabel(currentPlanType)}. Automatic renewal stays on until you cancel.
+                </p>
+              </section>
+            )}
+
+            {isSubscription && (
+              <section className="mt-[12px] rounded-[20px] border border-[#e8e5ea] bg-white p-[16px]">
+                <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#756e79]">How long are you planning to ride?</p>
                 <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
                   {[1, 2, 3, 6, 9, 12].map((duration) => (
                     <button
@@ -413,7 +454,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                   ))}
                 </div>
                 <p className="mt-[12px] text-[13px] leading-[1.45] text-[#686868]">
-                  First renewal on {formattedDate(selectedDropoff?.date)}. It then renews automatically until you cancel.
+                  Planned until {formattedDate(selectedDropoff?.date)}. You can extend later, and billing renews {renewalCadenceLabel(currentPlanType)}.
                 </p>
               </section>
             )}

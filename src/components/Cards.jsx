@@ -344,7 +344,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   </p>
                   <p className="text-[13px] text-[#6b6b6b]">
                     {isSubscription
-                      ? `Starts with ${startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)}`
+                      ? `${startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)} planned`
                       : `₹${formatCurrency(pricing.total)} total`}
                   </p>
                 </div>
@@ -352,7 +352,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                 {isSubscription && (
                   <div className="mt-[12px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[10px] text-[11px]">
                     <span className="font-medium text-[#4e4753]">
-                      First renewal {formatShortDate(selectedDropoff?.date)}
+                      Planned until {formatShortDate(selectedDropoff?.date)}
                     </span>
                     <span className="font-bold text-[#33734b]">
                       Renews {renewalCadenceLabel(selectedPlanType || currentPlanType)}

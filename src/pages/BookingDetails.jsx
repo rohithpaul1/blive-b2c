@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../sections/Navbar";
 import WhatToExpect from "../components/WhatToExpect";
 import { useState, useEffect, useRef } from "react";
@@ -32,6 +32,7 @@ const BookingDetails = () => {
 
     const menuDropdown = useRef(null);
     const { bid } = useParams();
+    const navigate = useNavigate();
     const { isAuthenticated, userData } = useUser();
 
     // Function to handle Get Directions
@@ -528,16 +529,16 @@ const BookingDetails = () => {
                 />
             </div>}
             <Navbar onSearchPage={false} expanded={true} />
-            <div className="mt-[124px] flex items-center w-full border-y border-[#EDEDED] py-[24px] px-[40px] gap-x-[16px]">
-                <p className="font-bold text-[28px] text-[#222222]">Booking details</p>
+            <div className="mt-[124px] flex w-full items-center border-y border-[#EDEDED] px-4 py-[20px] sm:px-8 lg:px-[clamp(40px,7vw,112px)]">
+                <p className="text-[24px] font-bold text-[#222222] sm:text-[28px]">Booking details</p>
             </div>
-            <div className="w-[80%] p-[32px] flex flex-col" >
-                <div className="flex items-start justify-between">
+            <div className="mx-auto flex w-full max-w-[1180px] flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8" >
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
                     <div className="flex flex-col">
                         <p className="font-medium text-[14px] text-[#222222]">Booking Confirmation ID: {data.bookingId}</p>
                         <p className="font-bold text-[28px] text-[#222222]">{data.vehicleName}</p>
                     </div>
-                    <div className="flex items-center gap-x-[14px]">
+                    <div className="flex items-center gap-x-[10px] sm:gap-x-[14px]">
                         {data.status === "Ongoing" && <div className="flex items-center gap-x-[10px] rounded-[8px] py-[6px] px-[12px] bg-[#E3F9E9]">
                             <img className="w-[20px] h-[20px]" src="/images/Ongoing.png" alt="Ongoing Image" />
                             <p className="font-bold text-[#1C7E4A]">Ongoing</p>
@@ -569,11 +570,11 @@ const BookingDetails = () => {
                     </div>
                 </div>
                 <div className="mt-[24px]">
-                    <div className="relative w-full h-[300px] overflow-hidden rounded-[16px]">
+                    <div className="relative h-[220px] w-full overflow-hidden rounded-[16px] sm:h-[300px]">
                         <div className="absolute w-full h-full bg-[#3D3D3D52] z-20" />
                         <img src={data.hubImage} alt="Hub Image" className="w-full h-full object-cover" />
                     </div>
-                    <div className="mt-[8px] flex items-center gap-x-[18px]">
+                    <div className="mt-[8px] flex flex-wrap items-center gap-x-[18px] gap-y-2">
                         <div className="flex gap-x-[4px] items-center">
                             <img className="w-[24px] h-[24px]" src="/images/Location.png" alt="Location Image" />
                             <p className="font-medium text-[14px] text-[#3A3A3A]">
@@ -685,23 +686,23 @@ const BookingDetails = () => {
                         {data.rentalMode === 'subscription' ? 'Subscription schedule' : 'Rental Duration'}
                     </p>
                     <div className="mt-[16px] bg-[#F7F7F7] py-[16px] px-[24px] rounded-[16px] w-full">
-                        <div className='gap-x-[15px] flex items-center'>
+                        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-x-[15px]'>
                             <div className='flex flex-col'>
                                 <p className='text-[11px] text-[#3A3A3A]'>Pick up</p>
                                 <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.pickup?.date)} <span className='text-[#646464] text-[12px]'>{data?.pickup?.time || "10 AM"}</span></p>
                             </div>
-                            <div className='flex-1 flex items-center gap-x-[10px]'>
-                                <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
+                            <div className='flex flex-1 items-center gap-x-[10px]'>
+                                <span className='hidden h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9] sm:block' />
                                 <p className='text-[11px] text-[#222222]'>
                                     {data.rentalMode === 'subscription'
-                                        ? `Starts with ${startingPeriodLabel(data.ratePlan || data.subscription?.commitmentUnit, data.subscription?.commitmentDuration || 1)}`
+                                        ? `${startingPeriodLabel(data.ratePlan || data.subscription?.commitmentUnit, data.subscription?.commitmentDuration || 1)} planned`
                                         : `${countDays(data.pickup, data.dropoff)} Days`}
                                 </p>
-                                <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
+                                <span className='hidden h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9] sm:block' />
                             </div>
                             <div className='flex flex-col'>
                                 <p className='text-[11px] text-[#3A3A3A] text-right'>
-                                    {data.rentalMode === 'subscription' ? 'First renewal' : 'Dropoff'}
+                                    {data.rentalMode === 'subscription' ? 'Planned until' : 'Dropoff'}
                                 </p>
                                 <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.dropoff?.date)} <span className='text-[#646464] text-[12px]'>{data?.dropoff?.time || "10 AM"}</span></p>
                             </div>
@@ -709,9 +710,9 @@ const BookingDetails = () => {
                         {data.rentalMode === 'subscription' && (
                             <div className="mt-[14px] flex items-start justify-between gap-[16px] rounded-[12px] border border-[#E4E2F7] bg-[#F8F7FF] px-[16px] py-[12px]">
                                 <div>
-                                    <p className="font-bold text-[13px] text-[#222222]">Renews automatically</p>
+                                    <p className="font-bold text-[13px] text-[#222222]">Automatic billing</p>
                                     <p className="mt-[2px] text-[12px] text-[#646464]">
-                                        From {formattedDate(data?.dropoff?.date)}, it renews {data.subscription?.commitmentUnit || 'month'}ly until you cancel.
+                                        Renews {data.subscription?.commitmentUnit || 'month'}ly. Your current plan is scheduled until {formattedDate(data?.dropoff?.date)}, and you can extend it later.
                                     </p>
                                 </div>
                                 <p className="shrink-0 font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')}/{data.subscription?.commitmentUnit || 'month'}</p>
@@ -752,8 +753,17 @@ const BookingDetails = () => {
                     </div>}
                 </div>
                 <div className="mt-[32px]">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="font-bold text-[24px] text-[#222222]">Payment Information</p>
+                        {data.rentalMode === 'subscription' && (
+                            <button
+                                type="button"
+                                onClick={() => navigate('/wallet')}
+                                className="min-h-11 rounded-full border border-[#cbbce9] bg-[#f7f4fc] px-5 text-sm font-bold text-[#4a2595] hover:bg-[#f0eafb]"
+                            >
+                                Manage wallet
+                            </button>
+                        )}
                         {data.rentalMode !== 'subscription' && <button
                             onClick={handleViewReceipt} 
                             disabled={isDownloadingReceipt}
@@ -796,7 +806,7 @@ const BookingDetails = () => {
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.securityDeposit || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] text-[#717171]">Starting period total</p>
+                                <p className="text-[11px] text-[#717171]">Estimated for planned duration</p>
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.minimumCommitmentValue || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <p className="text-[12px] leading-[18px] text-[#646464] sm:col-span-3">

@@ -5,6 +5,16 @@ import { UserContext } from "../contexts/UserContext";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import Login from "../components/Login";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useQuery } from "convex/react";
+import { WalletCards } from "lucide-react";
+
+const compactRupees = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(Number(value || 0));
 
 const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -19,6 +29,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const wallet = useQuery("b2c/wallet:summary", token ? {} : "skip");
 
   return (
     <>
@@ -36,11 +47,28 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
             alt="BLive"
           />
           {token ? (
-            <div className="flex items-center gap-x-[12px] md:gap-x-[20px]">
+            <div className="flex items-center gap-x-1.5 md:gap-x-3">
+              {wallet?.showInHeader && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/wallet")}
+                  aria-label={`Wallet balance ${compactRupees(wallet.availableBalance)}`}
+                  className={`flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-bold transition-colors ${
+                    location.pathname === "/wallet"
+                      ? "border-[#cbbce9] bg-[#f4f0fc] text-[#48258f]"
+                      : "border-[#dfdfe3] bg-white text-[#303035] hover:border-[#b8a7dc] hover:bg-[#faf8ff]"
+                  }`}
+                >
+                  <WalletCards size={18} aria-hidden="true" />
+                  <span>{compactRupees(wallet.availableBalance)}</span>
+                </button>
+              )}
               <div className="flex items-center gap-x-[2px] md:gap-x-[8px]">
-                <span
+                <button
+                  type="button"
                   onClick={() => navigate("/help-center")}
-                  className={`cursor-pointer flex items-center gap-x-[7px] rounded-full p-[9px] duration-300 transition-all ${
+                  aria-label="Help"
+                  className={`hidden min-h-10 min-w-10 cursor-pointer items-center gap-x-[7px] rounded-full p-[9px] transition-all duration-300 lg:flex ${
                     location.pathname === "/help-center"
                       ? "bg-[#f2f2f2]"
                       : "hover:bg-[#f7f7f7]"
@@ -56,10 +84,12 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                   >
                     Help
                   </p>
-                </span>
-                <span
+                </button>
+                <button
+                  type="button"
                   onClick={() => navigate("/my-bookings")}
-                  className={`cursor-pointer flex items-center gap-x-[7px] rounded-full p-[9px] duration-300 transition-all ${
+                  aria-label="My Bookings"
+                  className={`hidden min-h-10 min-w-10 cursor-pointer items-center gap-x-[7px] rounded-full p-[9px] transition-all duration-300 sm:flex ${
                     location.pathname === "/my-bookings"
                       ? "bg-[#f2f2f2]"
                       : "hover:bg-[#f7f7f7]"
@@ -75,8 +105,9 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                   >
                     My Bookings
                   </p>
-                </span>
-                <span
+                </button>
+                <button
+                  type="button"
                   onClick={() => {
                     console.log(
                       "🔍 Notifications button clicked, unseen count:",
@@ -93,8 +124,9 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                     }
                     navigate("/notifications");
                   }}
-                  className={`cursor-pointer flex items-center gap-x-[7px] rounded-full p-[9px] duration-300 transition-all ${
-                    location.pathname === "/notification"
+                  aria-label="Notifications"
+                  className={`flex min-h-10 min-w-10 cursor-pointer items-center gap-x-[7px] rounded-full p-[9px] transition-all duration-300 ${
+                    location.pathname === "/notifications"
                       ? "bg-[#f2f2f2]"
                       : "hover:bg-[#f7f7f7]"
                   }`}
@@ -118,12 +150,22 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                   >
                     Notifications
                   </p>
-                </span>
+                </button>
               </div>
               <div
                 id="profile-button"
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="relative flex h-[42px] w-[84px] cursor-pointer items-center gap-x-[10px] rounded-full border border-[#d8d8d8] bg-white px-[10px] py-[5px]"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setShowProfileDropdown(!showProfileDropdown);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label="Open account menu"
+                aria-expanded={showProfileDropdown}
+                className="relative flex h-[42px] w-[70px] cursor-pointer items-center gap-x-[8px] rounded-full border border-[#d8d8d8] bg-white px-[8px] py-[5px] md:w-[84px] md:gap-x-[10px] md:px-[10px]"
               >
                 <img
                   src="/images/Menu-Black.png"
@@ -132,7 +174,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                 <div className="min-h-[30px] min-w-[30px] overflow-hidden rounded-full border-2 border-white">
                   <img
                     className="w-full h-full object-cover"
-                    src={userData?.profileUrl || "/images/placeholder.jpeg"}
+                    src={userData?.profileUrl || userData?.profileImage || "/images/placeholder.jpeg"}
                     alt="User Image"
                   />
                 </div>

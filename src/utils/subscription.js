@@ -4,8 +4,9 @@ export const RENTAL_MODES = {
 };
 
 export const planUnit = (planType) => {
-  if (planType === "monthly") return "month";
-  if (planType === "weekly") return "week";
+  const normalized = String(planType || "").toLowerCase();
+  if (normalized.startsWith("month")) return "month";
+  if (normalized.startsWith("week")) return "week";
   return "day";
 };
 

@@ -22,7 +22,13 @@ const SearchBarProvider = ({ children }) => {
   );
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
-  const [currentPlanType, setCurrentPlanType] = useState("daily");
+  const [currentPlanType, setCurrentPlanType] = useState(
+    () =>
+      sessionStorage.getItem("currentPlanType") ||
+      (sessionStorage.getItem("rentalMode") === RENTAL_MODES.subscription
+        ? "monthly"
+        : "daily")
+  );
   const [rentalModeState, setRentalModeState] = useState(
     () => sessionStorage.getItem("rentalMode") || RENTAL_MODES.fixed
   );
@@ -35,12 +41,21 @@ const SearchBarProvider = ({ children }) => {
       mode === RENTAL_MODES.subscription
         ? RENTAL_MODES.subscription
         : RENTAL_MODES.fixed;
+    const enteringSubscription =
+      next === RENTAL_MODES.subscription &&
+      rentalModeState !== RENTAL_MODES.subscription;
+    const nextPlanType = enteringSubscription ? "monthly" : currentPlanType;
+
     setRentalModeState(next);
     sessionStorage.setItem("rentalMode", next);
     if (next === RENTAL_MODES.subscription) {
+      if (enteringSubscription) {
+        setCurrentPlanType(nextPlanType);
+        sessionStorage.setItem("currentPlanType", nextPlanType);
+      }
       const committedUntil = addPlanDuration(
         selectedPickup.date,
-        currentPlanType,
+        nextPlanType,
         subscriptionDurationState
       );
       setSelectedDropoff((previous) => ({

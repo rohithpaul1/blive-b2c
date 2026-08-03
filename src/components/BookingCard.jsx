@@ -171,13 +171,13 @@ const BookingCard = ({ item, tab, onClick }) => {
         <div 
             key={item.id} 
             onClick={handleCardClick}
-            className="flex w-[calc(100%-32px)] max-w-[1040px] cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[#eceaec] bg-white shadow-[0_6px_20px_rgba(16,24,40,0.08)] transition-shadow hover:shadow-lg md:min-h-[260px] md:flex-row"
+            className="flex w-full max-w-[1040px] cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[#eceaec] bg-white shadow-[0_6px_20px_rgba(16,24,40,0.08)] transition-shadow hover:shadow-lg md:min-h-[260px] md:flex-row"
         >
             <div className="relative h-[210px] w-full overflow-hidden md:h-auto md:min-h-[260px] md:w-[35%]">
                 <img src={item.brandLogo || item.imgUrl} alt="Vehicle Image" className="w-full h-full scale-110 object-cover" />
             </div>
             <div className="flex w-full flex-col px-[16px] py-[22px] sm:px-[24px] md:py-[28px]">
-                <div className="flex items-center justify-between px-[16px]">
+                <div className="flex items-center justify-between px-[8px] sm:px-[16px]">
                     <div className="flex flex-col">
                         <p className="font-bold text-[22px] text-[#222222]">{item.vehicleName}</p>
                         {item.manufacturer && (
@@ -191,7 +191,7 @@ const BookingCard = ({ item, tab, onClick }) => {
                     </div>
                     <img src="/images/MenuDot.png" alt="Menu Dot" className="w-[24px] h-[24px]" />
                 </div>
-                <div className="flex items-center gap-x-[24px] mt-[8px] px-[16px]">
+                <div className="mt-[8px] flex items-center gap-x-[24px] px-[8px] sm:px-[16px]">
                     {tab === "Past" && <div className="flex items-center gap-x-[8px]">
                         <img className="w-[24px] h-[24px]" src="/images/Dropoff.png" alt="Dropoff Icon" />
                         <p className="font-medium text-[12px] text-[#222222]">Dropped off at {item.dropoffLocation || "Location"}</p>
@@ -230,28 +230,33 @@ const BookingCard = ({ item, tab, onClick }) => {
                 </div>
                 <span className="w-full mt-[16px] flex-1 h-[1px] border-b border-dashed border-[#D9D9D9]"/>
                 <div className="mt-[16px] flex flex-col gap-[16px] px-[8px] sm:px-[16px] md:min-h-[56px] md:flex-row md:items-center md:justify-between">
-                    <div className='flex min-w-0 flex-1 items-center gap-x-[10px] sm:gap-x-[15px]'>
+                    <div className='grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-[8px] sm:gap-x-[15px]'>
                         <div className='flex flex-col'>
-                            <p className='font-bold text-[18px] text-[#222222]'>{formattedDate(item.pickup?.date || '')} <span className='text-[#222222B2] text-[14px]'>{item.pickup?.time || 'N/A'}</span></p>
+                            <p className='text-[16px] font-bold text-[#222222] sm:text-[18px]'>{formattedDate(item.pickup?.date || '')} <span className='block text-[13px] text-[#222222B2] sm:inline sm:text-[14px]'>{item.pickup?.time || 'N/A'}</span></p>
                         </div>
-                        <div className='flex-1 flex items-center gap-x-[10px]'>
-                            <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
-                            <p className='text-[11px] text-[#222222]'>
-                                {isSubscription ? `Starts with ${startingPeriod}` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
+                        <div className='flex items-center gap-x-[10px]'>
+                            <span className='hidden h-[1px] w-8 rounded-[8px] bg-[#D9D9D9] sm:block' />
+                            <p className='max-w-[84px] text-center text-[11px] text-[#222222]'>
+                                {isSubscription ? `${startingPeriod} planned` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
                             </p>
-                            <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
+                            <span className='hidden h-[1px] w-8 rounded-[8px] bg-[#D9D9D9] sm:block' />
                         </div>
-                        <div className='flex flex-col'>
-                            <p className='font-bold text-[18px] text-[#222222]'>{formattedDate(item.dropoff?.date || '')} <span className='text-[#222222B2] text-[14px]'>{item.dropoff?.time || 'N/A'}</span></p>
-                            {isSubscription && <p className="text-[11px] text-[#717171]">First renewal</p>}
+                        <div className='flex min-w-0 flex-col items-end text-right'>
+                            <p className='text-[16px] font-bold text-[#222222] sm:text-[18px]'>{formattedDate(item.dropoff?.date || '')} <span className='block text-[13px] text-[#222222B2] sm:inline sm:text-[14px]'>{item.dropoff?.time || 'N/A'}</span></p>
+                            {isSubscription && <p className="text-[11px] text-[#717171]">Planned until</p>}
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="font-bold text-[24px] text-[#222222]">₹{isSubscription ? item.subscription?.recurringCharge : item.price}</p>
-                        {isSubscription && <p className="text-[11px] text-[#717171]">Renews {renewalCadenceLabel(item.planType)}</p>}
+                        <p className="font-bold text-[24px] text-[#222222]">₹{Number(isSubscription ? item.subscription?.recurringCharge : item.price || 0).toLocaleString("en-IN")}</p>
+                        {isSubscription && (
+                            <p className="text-[11px] text-[#717171]">
+                                Renews {renewalCadenceLabel(item.planType)}
+                                {item.subscription?.nextBillingAt ? ` · next ${new Date(item.subscription.nextBillingAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : ""}
+                            </p>
+                        )}
                     </div>
                 </div>
-                <div className="mt-[16px] px-[16px] flex items-center gap-x-[16px]">
+                <div className="mt-[16px] flex flex-wrap items-center gap-[12px] px-[8px] sm:px-[16px]">
                     {tab === "Ongoing" && <button 
                         onClick={handleGetDirections}
                         className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px] hover:bg-gray-50 transition-colors"

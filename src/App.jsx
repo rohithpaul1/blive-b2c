@@ -13,6 +13,7 @@ import BookingDetails from './pages/BookingDetails';
 import Profile from './pages/Profile';
 import HelpCenter from './pages/HelpCenter';
 import Notifications from './pages/Notifications';
+import Wallet from './pages/Wallet';
 
 const App = () => {
   const { loading } = useContext(UserContext);
@@ -35,6 +36,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/help-center" element={<HelpCenter />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/wallet" element={<Wallet />} />
           <Route path="/" element={<Navigate to="/home" />} />
           <Route path="*" element={<Navigate to="/home" />} />
         </Routes>

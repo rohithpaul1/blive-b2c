@@ -114,11 +114,11 @@ const WhatToExpect = ({ showDropoff, rentalMode = "fixed", commitmentDuration = 
             <ul className="mt-[8px] text-[#3A3A3A] flex flex-col list-disc pl-5 gap-y-[4px]">
               <li>
                 {rentalMode === "subscription"
-                  ? `Minimum subscription term: ${commitmentDuration} ${commitmentUnit}${Number(commitmentDuration) === 1 ? "" : "s"}`
+                  ? `Planned duration: ${commitmentDuration} ${commitmentUnit}${Number(commitmentDuration) === 1 ? "" : "s"}. You can extend it later.`
                   : "Minimum booking period: 1 day"}
               </li>
               {rentalMode === "subscription" && (
-                <li>After the minimum term, billing continues automatically until you cancel.</li>
+                <li>Billing renews automatically each cycle until you cancel.</li>
               )}
               <li>
                 {rentalMode === "subscription"
@@ -127,7 +127,7 @@ const WhatToExpect = ({ showDropoff, rentalMode = "fixed", commitmentDuration = 
               </li>
               <li>
                 {rentalMode === "subscription"
-                  ? "To stop renewal after the minimum term, cancel before the next billing date"
+                  ? "To stop the next renewal, cancel before the next billing date"
                   : "Late returns may attract additional charges"}
               </li>
               <li>Doorstep delivery available in select areas</li>

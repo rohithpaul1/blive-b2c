@@ -68,6 +68,18 @@ const SearchPage = () => {
   const isSubscription = rentalMode === RENTAL_MODES.subscription;
   const { setSelectedProduct } = useContext(ProductContext);
 
+  const handleRentalModeChange = (mode) => {
+    const enteringSubscription =
+      mode === RENTAL_MODES.subscription &&
+      rentalMode !== RENTAL_MODES.subscription;
+
+    setRentalMode(mode);
+    if (enteringSubscription) {
+      setSelectedPlanType("monthly");
+      setSelectedTabIndex(2);
+    }
+  };
+
   // Plan type options (same as Catalogs)
   const planTypes = useMemo(
     () => [
@@ -449,7 +461,7 @@ const SearchPage = () => {
                 </h1>
                 <p className="text-[14px] text-[#6b6b6b]">
                   {isSubscription
-                    ? "Choose how long to start. Your plan then renews automatically until you cancel."
+                    ? "Choose how long you expect to ride. Billing renews automatically until you cancel."
                     : "Choose a vehicle now. You can confirm pickup and extras next."}
                 </p>
               </div>
@@ -464,7 +476,7 @@ const SearchPage = () => {
                   <button
                     key={mode}
                     type="button"
-                    onClick={() => setRentalMode(mode)}
+                    onClick={() => handleRentalModeChange(mode)}
                     className={`min-h-[44px] rounded-[10px] px-[14px] py-[9px] text-[12px] font-bold transition ${
                       rentalMode === mode
                         ? "bg-white text-[#26212c] shadow-sm"
