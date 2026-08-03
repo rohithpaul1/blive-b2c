@@ -2,7 +2,11 @@ import { useRef, useEffect, useState, useContext } from "react";
 import { addMonths, format, startOfMonth } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SearchBarContext } from "../contexts/SearchBarContext";
-import { RENTAL_MODES, addPlanDuration, planUnitLabel } from "../utils/subscription";
+import {
+  RENTAL_MODES,
+  addPlanDuration,
+  startingPeriodLabel,
+} from "../utils/subscription";
 
 const times = ["9 AM", "10 AM", "11 AM", "12 PM", "2 PM", "3 PM"];
 
@@ -140,7 +144,7 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
             <div key={d}>{d}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-[12px]">
+        <div className="grid grid-cols-7 gap-[6px] lg:gap-[12px]">
           {days.map((day, i) => {
             if (!day) return <div key={i}></div>;
             const isSelected = pickupDate && format(day, "yyyy-MM-dd") === format(pickupDate, "yyyy-MM-dd");
@@ -151,7 +155,7 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
               <button
                 key={i}
                 onClick={() => handleDateClick(day)}
-                className={`relative cursor-pointer p-2 rounded-[4px] text-sm transition-all aspect-square
+                className={`relative min-h-[40px] cursor-pointer rounded-[8px] p-2 text-sm transition-colors aspect-square
                   ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[#2A244E29]" : "bg-[#F1F2F447] hover:bg-gray-200"}
                 `}
               >
@@ -166,16 +170,18 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
     );
   };
 
+  if (!showDatepicker) return null;
+
   return (
-    <div ref={calendarRef} className={`absolute ${showDatepicker ? "mt-[35px] pt-[24px] pb-[32px] max-h-[660px]" : "mt-0 max-h-0"} w-[850px] px-[32px] overflow-hidden transition-all duration-500 left-1/2 -translate-x-1/2 rounded-[16px] bg-white calender-shadow`}>
+    <div ref={calendarRef} className="absolute left-1/2 mt-[16px] max-h-[min(660px,calc(100vh-190px))] w-[calc(100vw-48px)] max-w-[850px] -translate-x-1/2 overflow-y-auto rounded-[20px] bg-white px-[24px] py-[24px] calender-shadow">
       <div className="flex items-center justify-between mb-4">
-        <button className="cursor-pointer" onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}>
+        <button aria-label="Previous month" className="flex size-[44px] cursor-pointer items-center justify-center rounded-full hover:bg-[#f5f3f6]" onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}>
           <ChevronLeft />
         </button>
         <span className="font-semibold text-[18px] font-bold text-[#222222]">
           {isSubscription ? "Choose subscription start" : "Select dates"}
         </span>
-        <button className="cursor-pointer" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+        <button aria-label="Next month" className="flex size-[44px] cursor-pointer items-center justify-center rounded-full hover:bg-[#f5f3f6]" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
           <ChevronRight />
         </button>
       </div>
@@ -183,9 +189,9 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
       {isSubscription && (
         <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#e6e2ee] bg-[#faf9fc] px-[16px] py-[12px]">
           <div>
-            <p className="text-[12px] font-bold text-[#29252f]">Minimum commitment</p>
+            <p className="text-[12px] font-bold text-[#29252f]">Starting period</p>
             <p className="mt-[2px] text-[11px] text-[#717171]">
-              {subscriptionDuration} {planUnitLabel(currentPlanType, subscriptionDuration)} from the selected start date
+              Start with {startingPeriodLabel(currentPlanType, subscriptionDuration)} from the selected date
             </p>
           </div>
           <p className="text-[12px] font-medium text-[#5b476f]">
@@ -196,8 +202,8 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
 
       <div className="flex justify-center gap-[24px]">
         <div className="flex-1">{renderCalendar(months[0])}</div>
-        <span className="block w-[1px] h-[280px] bg-[#D9D9D9]" />
-        <div className="flex-1">{renderCalendar(months[1])}</div>
+        <span className="hidden w-[1px] h-[280px] bg-[#D9D9D9] lg:block" />
+        <div className="hidden flex-1 lg:block">{renderCalendar(months[1])}</div>
       </div>
 
       <div className="mt-[24px]">
@@ -211,7 +217,7 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
                 setSelectedPickup(prev => ({ ...prev, time: t }));
                 sessionStorage.setItem('selectedPickupTime', t);
               }}
-              className={`flex-1 cursor-pointer h-[40px] px-[16px] py-[6px] rounded-[24px] border text-[12px] text-[#3A3A3A] font-medium transition-all ${pickupTime === t ? "bg-[#DDDCE3] border-[#434249]" : "border-[#D9D9D9] hover:bg-gray-100"}`}
+              className={`min-h-[44px] flex-1 cursor-pointer rounded-[24px] border px-[16px] py-[6px] text-[12px] font-medium text-[#3A3A3A] transition-colors ${pickupTime === t ? "bg-[#DDDCE3] border-[#434249]" : "border-[#D9D9D9] hover:bg-gray-100"}`}
             >
               {t}
             </button>
@@ -230,7 +236,7 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
                 setSelectedDropoff(prev => ({ ...prev, time: t }));
                 sessionStorage.setItem('selectedDropoffTime', t);
               }}
-              className={`flex-1 cursor-pointer h-[40px] px-[16px] py-[6px] rounded-[24px] border text-[12px] text-[#3A3A3A] font-medium transition-all ${dropoffTime === t ? "bg-[#DDDCE3] border-[#434249]" : "border-[#D9D9D9] hover:bg-gray-100"}`}
+              className={`min-h-[44px] flex-1 cursor-pointer rounded-[24px] border px-[16px] py-[6px] text-[12px] font-medium text-[#3A3A3A] transition-colors ${dropoffTime === t ? "bg-[#DDDCE3] border-[#434249]" : "border-[#D9D9D9] hover:bg-gray-100"}`}
             >
               {t}
             </button>

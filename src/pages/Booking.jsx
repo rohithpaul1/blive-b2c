@@ -17,7 +17,11 @@ import HubDropdown from "../components/HubDropdown";
 import TermsAndConditionsModal from "../components/TermsAndConditionsModal";
 import { getAPI, postAPI } from "../caller/axiosUrls";
 import { RAZORPAY_KEY_ID, SIMULATE_PAYMENT } from "../config/env";
-import { RENTAL_MODES, planUnitLabel } from "../utils/subscription";
+import {
+  RENTAL_MODES,
+  renewalCadenceLabel,
+  startingPeriodLabel,
+} from "../utils/subscription";
 // Razorpay will be loaded dynamically via script tag
 
 const Booking = () => {
@@ -1359,7 +1363,7 @@ const Booking = () => {
                   </p>
                   <p className="mt-[16px] text-[14px] text-[#222222]">
                     {isSubscription
-                      ? "You can schedule the subscription to end at the current committed-until date. It renews automatically if no cancellation is scheduled."
+                      ? "You can schedule your subscription to end after the starting period. It renews automatically unless you cancel before the next renewal."
                       : "Cancellations made before 48 hours of the reservation may incur a cancellation fee, based on the selected Rental Plan."}
                   </p>
                   <div className="mt-[32px]">
@@ -1418,17 +1422,17 @@ const Booking = () => {
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
                       <p className="text-center text-[11px] text-[#222222]">
                         {isSubscription
-                          ? `${commitmentDuration} ${planUnitLabel(
+                          ? `Starts with ${startingPeriodLabel(
                               selectedProduct?.selectedPlanType || currentPlanType,
                               commitmentDuration
-                            )} minimum`
+                            )}`
                           : `${days} Days`}
                       </p>
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
                     </div>
                     <div className="flex flex-col">
                       <p className="text-[11px] text-[#3A3A3A] text-right">
-                        {isSubscription ? "Committed until" : "Dropoff"}
+                        {isSubscription ? "First renewal" : "Dropoff"}
                       </p>
                       <p className="font-bold text-[14px] text-[#222222]">
                         {formattedDate(selectedDropoff?.date)}{" "}
@@ -1449,7 +1453,7 @@ const Booking = () => {
                   {isSubscription && (
                     <div className="mt-[14px] flex items-center gap-[8px] rounded-[10px] border border-[#dfe9e2] bg-[#f3faf5] px-[12px] py-[10px] text-[12px] text-[#326443]">
                       <span className="font-bold">✓</span>
-                      Renews automatically for the same billing period
+                      Renews {renewalCadenceLabel(selectedProduct?.selectedPlanType || currentPlanType)} until you cancel
                     </div>
                   )}
                   <div className="mt-[24px]">
@@ -1496,7 +1500,7 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Minimum commitment value</p>
+                            <p className="text-[14px] text-[#3A3A3A]">Starting period total</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
                               ₹{selectedProduct.calculationData.payment_breakdown.commitment_total}
                             </p>
@@ -1508,7 +1512,7 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Minimum wallet balance</p>
+                            <p className="text-[14px] text-[#3A3A3A]">Keep available before renewal</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
                               ₹{selectedProduct.calculationData.payment_breakdown.minimum_wallet_balance}
                             </p>
@@ -1521,7 +1525,7 @@ const Booking = () => {
                               </span>
                             </div>
                             <div className="mt-[5px] flex items-center justify-between text-[12px]">
-                              <span className="text-[#67616c]">Opening balance required</span>
+                              <span className="text-[#67616c]">Add before the subscription starts</span>
                               <span className="font-bold text-[#302b34]">
                                 ₹{selectedProduct.calculationData.payment_breakdown.required_opening_balance}
                               </span>

@@ -1,13 +1,13 @@
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { API_BASE_URL } from "../config/env";
+import { renewalCadenceLabel, startingPeriodLabel } from "../utils/subscription";
 
 const BookingCard = ({ item, tab, onClick }) => {
     const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
     const isSubscription = item.rentalMode === "subscription";
-    const commitmentUnit = item.subscription?.commitmentUnit || item.planType || "month";
     const commitmentDuration = Number(item.subscription?.commitmentDuration || 1);
-    const commitmentLabel = `${commitmentDuration} ${commitmentUnit}${commitmentDuration === 1 ? "" : "s"}`;
+    const startingPeriod = startingPeriodLabel(item.planType, commitmentDuration);
     // Function to handle Get Directions
     const handleGetDirections = (e) => {
         e.stopPropagation(); // Prevent card click
@@ -171,12 +171,12 @@ const BookingCard = ({ item, tab, onClick }) => {
         <div 
             key={item.id} 
             onClick={handleCardClick}
-            className="flex items-center w-[70%] h-[260px] rounded-[16px] card-shadow overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+            className="flex w-[calc(100%-32px)] max-w-[1040px] cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[#eceaec] bg-white shadow-[0_6px_20px_rgba(16,24,40,0.08)] transition-shadow hover:shadow-lg md:min-h-[260px] md:flex-row"
         >
-            <div className="w-[35%] h-full overflow-hidden relative">
+            <div className="relative h-[210px] w-full overflow-hidden md:h-auto md:min-h-[260px] md:w-[35%]">
                 <img src={item.brandLogo || item.imgUrl} alt="Vehicle Image" className="w-full h-full scale-110 object-cover" />
             </div>
-            <div className="py-[32px] px-[20px] flex flex-col w-full">
+            <div className="flex w-full flex-col px-[16px] py-[22px] sm:px-[24px] md:py-[28px]">
                 <div className="flex items-center justify-between px-[16px]">
                     <div className="flex flex-col">
                         <p className="font-bold text-[22px] text-[#222222]">{item.vehicleName}</p>
@@ -229,26 +229,26 @@ const BookingCard = ({ item, tab, onClick }) => {
                     </div>}
                 </div>
                 <span className="w-full mt-[16px] flex-1 h-[1px] border-b border-dashed border-[#D9D9D9]"/>
-                <div className="mt-[16px] h-[44px] flex items-center justify-between px-[16px]">
-                    <div className='w-[70%] gap-x-[15px] flex items-center'>
+                <div className="mt-[16px] flex flex-col gap-[16px] px-[8px] sm:px-[16px] md:min-h-[56px] md:flex-row md:items-center md:justify-between">
+                    <div className='flex min-w-0 flex-1 items-center gap-x-[10px] sm:gap-x-[15px]'>
                         <div className='flex flex-col'>
                             <p className='font-bold text-[18px] text-[#222222]'>{formattedDate(item.pickup?.date || '')} <span className='text-[#222222B2] text-[14px]'>{item.pickup?.time || 'N/A'}</span></p>
                         </div>
                         <div className='flex-1 flex items-center gap-x-[10px]'>
                             <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                             <p className='text-[11px] text-[#222222]'>
-                                {isSubscription ? `${commitmentLabel} minimum` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
+                                {isSubscription ? `Starts with ${startingPeriod}` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
                             </p>
                             <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                         </div>
                         <div className='flex flex-col'>
                             <p className='font-bold text-[18px] text-[#222222]'>{formattedDate(item.dropoff?.date || '')} <span className='text-[#222222B2] text-[14px]'>{item.dropoff?.time || 'N/A'}</span></p>
-                            {isSubscription && <p className="text-[11px] text-[#717171]">Committed until</p>}
+                            {isSubscription && <p className="text-[11px] text-[#717171]">First renewal</p>}
                         </div>
                     </div>
                     <div className="text-right">
                         <p className="font-bold text-[24px] text-[#222222]">₹{isSubscription ? item.subscription?.recurringCharge : item.price}</p>
-                        {isSubscription && <p className="text-[11px] text-[#717171]">per {commitmentUnit} · auto-renews</p>}
+                        {isSubscription && <p className="text-[11px] text-[#717171]">Renews {renewalCadenceLabel(item.planType)}</p>}
                     </div>
                 </div>
                 <div className="mt-[16px] px-[16px] flex items-center gap-x-[16px]">

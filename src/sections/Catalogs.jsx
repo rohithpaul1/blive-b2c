@@ -350,7 +350,7 @@ const Catalogs = () => {
 
   if (loading) {
     return (
-      <div className="mt-[135px] bg-[#F1F2F3] flex flex-col items-center py-[100px] px-[15%]">
+      <div className="mt-[72px] flex flex-col items-center bg-[#F1F2F3] px-[16px] py-[64px] sm:px-[32px] lg:mt-[110px] lg:px-[8vw] lg:py-[88px]">
         <Loader />
       </div>
     );
@@ -358,7 +358,7 @@ const Catalogs = () => {
 
   if (error) {
     return (
-      <div className="mt-[135px] bg-[#F1F2F3] flex flex-col items-center py-[100px] px-[15%]">
+      <div className="mt-[72px] flex flex-col items-center bg-[#F1F2F3] px-[16px] py-[64px] sm:px-[32px] lg:mt-[110px] lg:px-[8vw] lg:py-[88px]">
         <p className="font-bold text-[24px] text-red-600">
           Error loading vehicles
         </p>
@@ -374,15 +374,15 @@ const Catalogs = () => {
   }
 
   return (
-    <div className="mt-[135px] bg-[#F1F2F3] flex flex-col items-center py-[100px] px-[15%]">
-      <p className="font-bold text-[48px] text-[#0F0F0F]">
+    <section className="mt-[72px] flex flex-col items-center bg-[#F1F2F3] px-[16px] py-[64px] sm:px-[32px] lg:mt-[110px] lg:px-[8vw] lg:py-[88px]">
+      <h2 className="max-w-[920px] text-balance text-center text-[30px] font-bold leading-[1.15] text-[#0F0F0F] sm:text-[38px] lg:text-[48px]">
         {isSubscription
           ? "Choose an EV Subscription That Fits Your Routine"
           : "Choose EV Rentals That Match Your Needs"}
-      </p>
-      <p className="mt-[24px] font-medium text-[18px] text-center text-[#0F0F0F] px-[15%]">
+      </h2>
+      <p className="mt-[16px] max-w-[720px] text-pretty text-center text-[16px] font-medium leading-[1.55] text-[#3f3f3f] sm:mt-[20px] sm:text-[18px]">
         {isSubscription
-          ? "Pick your minimum commitment now. Your plan keeps renewing while you need the vehicle."
+          ? "Choose how long you want to start. Your subscription then renews automatically until you cancel."
           : "Day trip, weekend escape, or city errand. BLive EZY fits your life, without the cost of ownership."}
       </p>
 
@@ -394,7 +394,7 @@ const Catalogs = () => {
       />
 
       {/* Vehicle Grid - Show only 6 cards */}
-      <div className="mt-[72px] grid grid-cols-3 gap-x-[38px] gap-y-[54px] w-full">
+      <div className="mt-[40px] grid w-full grid-cols-1 gap-[20px] sm:grid-cols-2 lg:mt-[56px] xl:grid-cols-3 xl:gap-[28px]">
         <Cards
           isCatalog={true}
           cards={displayedVehicles}
@@ -403,10 +403,10 @@ const Catalogs = () => {
       </div>
 
       {/* See All Button */}
-      <div className="mt-[54px] flex flex-col items-center gap-y-[16px]">
+      <div className="mt-[40px] flex flex-col items-center gap-y-[16px] sm:mt-[54px]">
         <button
           onClick={handleSeeAllScooters}
-          className="cursor-pointer flex items-center justify-center rounded-[64px] py-[16px] px-[40px] gap-x-[8px] bg-[#0F0F0F] hover:bg-gray-800 transition-colors"
+          className="flex min-h-[52px] cursor-pointer items-center justify-center gap-x-[8px] rounded-full bg-[#0F0F0F] px-[32px] py-[14px] transition-colors hover:bg-[#2b2b2b]"
         >
           <p className="text-white font-bold">See all Scooters</p>
           <img
@@ -425,7 +425,7 @@ const Catalogs = () => {
           )}
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 

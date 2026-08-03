@@ -434,7 +434,7 @@ const SearchPage = () => {
         expanded={true}
         onSearchTrigger={handleSearchTrigger}
       />
-      <main className="pt-[196px] pb-[88px] px-[clamp(20px,8.5vw,122px)]">
+      <main className="px-[16px] pb-[72px] pt-[158px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[196px]">
         {isLoading ? (
           <Loader />
         ) : (
@@ -449,14 +449,14 @@ const SearchPage = () => {
                 </h1>
                 <p className="text-[14px] text-[#6b6b6b]">
                   {isSubscription
-                    ? "Choose an ongoing plan. Your first commitment renews automatically."
+                    ? "Choose how long to start. Your plan then renews automatically until you cancel."
                     : "Choose a vehicle now. You can confirm pickup and extras next."}
                 </p>
               </div>
             </div>
 
-            <div className="mt-[20px] flex flex-wrap items-center justify-between gap-[12px] rounded-[16px] border border-[#eceaef] bg-[#faf9fb] p-[8px]">
-              <div className="flex items-center rounded-[12px] bg-[#efedf1] p-[3px]">
+            <div className="mt-[20px] flex flex-col gap-[10px] rounded-[16px] border border-[#eceaef] bg-[#faf9fb] p-[8px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-[12px]">
+              <div className="grid grid-cols-2 rounded-[12px] bg-[#efedf1] p-[3px]">
                 {[
                   [RENTAL_MODES.fixed, "Fixed rental"],
                   [RENTAL_MODES.subscription, "Subscription"],
@@ -465,7 +465,7 @@ const SearchPage = () => {
                     key={mode}
                     type="button"
                     onClick={() => setRentalMode(mode)}
-                    className={`rounded-[10px] px-[16px] py-[9px] text-[12px] font-bold transition ${
+                    className={`min-h-[44px] rounded-[10px] px-[14px] py-[9px] text-[12px] font-bold transition ${
                       rentalMode === mode
                         ? "bg-white text-[#26212c] shadow-sm"
                         : "text-[#746e79]"
@@ -475,13 +475,13 @@ const SearchPage = () => {
                   </button>
                 ))}
               </div>
-              <div className="flex items-center gap-[4px] rounded-[12px] border border-[#e4e1e7] bg-white p-[3px]">
+              <div className="grid grid-cols-3 gap-[4px] rounded-[12px] border border-[#e4e1e7] bg-white p-[3px]">
                 {planTypes.map((plan, index) => (
                   <button
                     key={plan.planType}
                     type="button"
                     onClick={() => handleSearchTrigger(plan.planType, index)}
-                    className={`rounded-[9px] px-[14px] py-[8px] text-[12px] font-medium transition ${
+                    className={`min-h-[44px] rounded-[9px] px-[10px] py-[8px] text-[12px] font-medium transition sm:px-[14px] ${
                       selectedPlanType === plan.planType
                         ? "bg-[#2b2630] text-white"
                         : "text-[#5f5964] hover:bg-[#f5f3f6]"
@@ -498,7 +498,7 @@ const SearchPage = () => {
                 <button
                   id="sort-btn"
                   onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="cursor-pointer rounded-full border border-[#D9D9D9] gap-x-[8px] py-[8px] px-[14px] h-[38px] flex items-center bg-white hover:border-[#8d7ab8] transition-colors"
+                  className="flex min-h-[44px] cursor-pointer items-center gap-x-[8px] rounded-full border border-[#D9D9D9] bg-white px-[14px] py-[8px] transition-colors hover:border-[#8d7ab8]"
                 >
                   <img
                     className="w-[16px] aspect-sqaure"
@@ -532,7 +532,7 @@ const SearchPage = () => {
               </div>
               <button
                 onClick={() => setShowFiltersPage(true)}
-                className="cursor-pointer flex items-center rounded-full border border-transparent px-[12px] py-[8px] gap-x-[8px] hover:border-[#e4e4e4] transition-colors"
+                className="flex min-h-[44px] cursor-pointer items-center gap-x-[8px] rounded-full border border-transparent px-[12px] py-[8px] transition-colors hover:border-[#e4e4e4]"
               >
                 <img
                   className="w-[20px] aspect-sqaure"
@@ -551,7 +551,7 @@ const SearchPage = () => {
                 />
               )}
             </div>
-            <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[30px] w-full">
+            <div className="mt-[30px] grid w-full grid-cols-1 gap-[20px] sm:grid-cols-2 xl:grid-cols-3 xl:gap-[28px]">
               <Cards
                 cards={filteredAndSortedVehicles}
                 selectedPlanType={selectedPlanType}

@@ -14,6 +14,14 @@ export const planUnitLabel = (planType, duration = 1) => {
   return `${unit}${Number(duration) === 1 ? "" : "s"}`;
 };
 
+export const startingPeriodLabel = (planType, duration = 1) =>
+  `${Number(duration) || 1} ${planUnitLabel(planType, duration)}`;
+
+export const renewalCadenceLabel = (planType) => {
+  const unit = planUnit(planType);
+  return unit === "day" ? "daily" : unit === "week" ? "weekly" : "monthly";
+};
+
 export const normaliseDuration = (value) =>
   Math.min(24, Math.max(1, Math.floor(Number(value) || 1)));
 

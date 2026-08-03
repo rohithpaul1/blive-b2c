@@ -6,7 +6,12 @@ import { UserContext } from "../contexts/UserContext";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import { postAPI } from "../caller/axiosUrls";
 import { toast } from "react-hot-toast";
-import { RENTAL_MODES, planUnit } from "../utils/subscription";
+import {
+  RENTAL_MODES,
+  planUnit,
+  renewalCadenceLabel,
+  startingPeriodLabel,
+} from "../utils/subscription";
 
 const Cards = ({ cards, isCatalog, selectedPlanType }) => {
   const navigate = useNavigate();
@@ -41,6 +46,12 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
     new Intl.NumberFormat("en-IN", {
       maximumFractionDigits: 0,
     }).format(Math.max(0, Math.round(Number(value) || 0)));
+
+  const formatShortDate = (value) =>
+    new Date(value).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
 
   const getPricing = (card) => {
     const unitDays =
@@ -279,9 +290,9 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
           return (
             <article
               key={"card-menu-" + i}
-              className="group flex min-h-[530px] flex-col overflow-hidden rounded-[24px] border border-[#ebebeb] bg-white shadow-[0_8px_20px_rgba(16,24,40,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(16,24,40,0.12)]"
+              className="group flex min-h-[500px] flex-col overflow-hidden rounded-[24px] border border-[#ebebeb] bg-white shadow-[0_8px_20px_rgba(16,24,40,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(16,24,40,0.12)]"
             >
-              <div className="relative h-[260px] w-full overflow-hidden bg-[linear-gradient(145deg,#f5f4f8_0%,#ebe9ef_100%)]">
+              <div className="relative h-[220px] w-full overflow-hidden bg-[linear-gradient(145deg,#f5f4f8_0%,#ebe9ef_100%)] sm:h-[240px] xl:h-[250px]">
                 {!card.isAvailable ? (
                   <div className="absolute z-20 top-[14px] left-[14px] rounded-full border border-[#e8e8e8] bg-white/95 px-[10px] py-[6px] text-[11px] font-bold text-[#5d5d5d] shadow-sm">
                     Next available {card.nextAvailableDate}
@@ -333,17 +344,19 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   </p>
                   <p className="text-[13px] text-[#6b6b6b]">
                     {isSubscription
-                      ? `₹${formatCurrency(pricing.total)} minimum commitment`
+                      ? `Starts with ${startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)}`
                       : `₹${formatCurrency(pricing.total)} total`}
                   </p>
                 </div>
 
                 {isSubscription && (
-                  <div className="mt-[12px] flex items-center justify-between rounded-[10px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[9px] text-[11px]">
+                  <div className="mt-[12px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[10px] text-[11px]">
                     <span className="font-medium text-[#4e4753]">
-                      {subscriptionDuration} {pricing.unit}{subscriptionDuration === 1 ? "" : "s"} minimum
+                      First renewal {formatShortDate(selectedDropoff?.date)}
                     </span>
-                    <span className="font-bold text-[#33734b]">Auto-renews</span>
+                    <span className="font-bold text-[#33734b]">
+                      Renews {renewalCadenceLabel(selectedPlanType || currentPlanType)}
+                    </span>
                   </div>
                 )}
 

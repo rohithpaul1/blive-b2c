@@ -1,31 +1,33 @@
 const Tabs = ({ selectedTab, setSelectedTab, tabs }) => {
   return (
-    <div className="relative flex items-center justify-center mt-[65px] w-[610px] h-[48px] rounded-[30px] py-[3px] px-[6px] gap-[3px] bg-white overflow-hidden">
-      <div
-        className={`absolute top-[3px] left-[6px] h-[42px] w-[calc(33.333%-6px)] rounded-[32px] menu-gradient transition-transform duration-500`}
-        style={{ transform: `translateX(${selectedTab * 100}%)` }}
-      />
+    <div className="mt-[32px] grid w-full max-w-[610px] grid-cols-3 gap-[4px] rounded-full bg-white p-[4px] sm:mt-[48px]">
       {tabs.map((tab, i) => (
-        <div
+        <button
+          type="button"
           key={"tab-" + tab.name + "-" + i}
           onClick={() => setSelectedTab(i)}
-          className="cursor-pointer flex-1 z-10 flex gap-x-[12px] items-center justify-center"
+          className={`flex min-h-[46px] min-w-0 cursor-pointer items-center justify-center gap-[6px] rounded-full px-[8px] text-center transition-colors sm:gap-[10px] sm:px-[14px] ${
+            selectedTab === i
+              ? "bg-[#151226] text-white"
+              : "text-[#4f4a53] hover:bg-[#f5f3f6]"
+          }`}
+          aria-pressed={selectedTab === i}
         >
           <p
-            className={`font-medium text-center transition-all duration-500 ${
-              selectedTab === i ? "text-white font-bold" : ""
+            className={`truncate text-[13px] font-medium sm:text-[15px] ${
+              selectedTab === i ? "font-bold" : ""
             }`}
           >
             {tab.name}
           </p>
           {tab.discount && (
-            <div className="w-[82px] flex justify-center items-center h-[22px]">
-              <p className="bg-[#fff5f7] py-[1px] px-[8px] font-bold text-[12px] gap-[4px] border rounded-[4px] border-[#FBB6CE] text-[#702459]">
+            <div className="hidden items-center justify-center sm:flex">
+              <p className={`rounded-full px-[7px] py-[2px] text-[10px] font-bold ${selectedTab === i ? "bg-white/14 text-white" : "bg-[#f6f1fb] text-[#5b367e]"}`}>
                 Save {tab.discount}%
               </p>
             </div>
           )}
-        </div>
+        </button>
       ))}
     </div>
   );

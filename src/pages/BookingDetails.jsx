@@ -12,6 +12,7 @@ import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import { useUser } from "../contexts/UserContext";
 import Login from "../components/Login";
+import { startingPeriodLabel } from "../utils/subscription";
 
 const BookingDetails = () => {
     const [openMenu, setOpenMenu] = useState(false);
@@ -681,7 +682,7 @@ const BookingDetails = () => {
                 )}
                 <div className="mt-[36px]">
                     <p className="font-bold text-[24px] text-[#222222]">
-                        {data.rentalMode === 'subscription' ? 'Subscription Term' : 'Rental Duration'}
+                        {data.rentalMode === 'subscription' ? 'Subscription schedule' : 'Rental Duration'}
                     </p>
                     <div className="mt-[16px] bg-[#F7F7F7] py-[16px] px-[24px] rounded-[16px] w-full">
                         <div className='gap-x-[15px] flex items-center'>
@@ -693,14 +694,14 @@ const BookingDetails = () => {
                                 <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                                 <p className='text-[11px] text-[#222222]'>
                                     {data.rentalMode === 'subscription'
-                                        ? `${data.subscription?.commitmentDuration || 1} ${data.subscription?.commitmentUnit || 'month'}${Number(data.subscription?.commitmentDuration || 1) === 1 ? '' : 's'} minimum`
+                                        ? `Starts with ${startingPeriodLabel(data.ratePlan || data.subscription?.commitmentUnit, data.subscription?.commitmentDuration || 1)}`
                                         : `${countDays(data.pickup, data.dropoff)} Days`}
                                 </p>
                                 <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                             </div>
                             <div className='flex flex-col'>
                                 <p className='text-[11px] text-[#3A3A3A] text-right'>
-                                    {data.rentalMode === 'subscription' ? 'Committed until' : 'Dropoff'}
+                                    {data.rentalMode === 'subscription' ? 'First renewal' : 'Dropoff'}
                                 </p>
                                 <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.dropoff?.date)} <span className='text-[#646464] text-[12px]'>{data?.dropoff?.time || "10 AM"}</span></p>
                             </div>
@@ -710,7 +711,7 @@ const BookingDetails = () => {
                                 <div>
                                     <p className="font-bold text-[13px] text-[#222222]">Renews automatically</p>
                                     <p className="mt-[2px] text-[12px] text-[#646464]">
-                                        After {formattedDate(data?.dropoff?.date)}, billing continues {data.subscription?.commitmentUnit || 'month'}ly until you cancel.
+                                        From {formattedDate(data?.dropoff?.date)}, it renews {data.subscription?.commitmentUnit || 'month'}ly until you cancel.
                                     </p>
                                 </div>
                                 <p className="shrink-0 font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')}/{data.subscription?.commitmentUnit || 'month'}</p>
@@ -787,7 +788,7 @@ const BookingDetails = () => {
                     {data.rentalMode === 'subscription' && (
                         <div className="mt-[16px] grid gap-[12px] rounded-[16px] border border-[#EDEDED] bg-[#F7F7F7] p-[16px] sm:grid-cols-3">
                             <div>
-                                <p className="text-[11px] text-[#717171]">Required opening balance</p>
+                                <p className="text-[11px] text-[#717171]">Starting wallet balance</p>
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.requiredOpeningBalance || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <div>
@@ -795,7 +796,7 @@ const BookingDetails = () => {
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.securityDeposit || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] text-[#717171]">Minimum commitment</p>
+                                <p className="text-[11px] text-[#717171]">Starting period total</p>
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.minimumCommitmentValue || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <p className="text-[12px] leading-[18px] text-[#646464] sm:col-span-3">

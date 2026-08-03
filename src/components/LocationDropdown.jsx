@@ -36,8 +36,10 @@ const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation, 
         };
     }, []);
 
+    if (!showLocation) return null;
+
     return (
-        <div ref={locationRef} className={`absolute ${showLocation ? "h-[392px] py-[16px] mt-[35px]" : "h-0 mt-0"} left-[35px] w-[432px] overflow-hidden transition-all duration-500 rounded-[16px] bg-white calender-shadow`}>
+        <div ref={locationRef} className="absolute left-[212px] mt-[16px] max-h-[392px] w-[min(432px,calc(100vw-48px))] overflow-y-auto rounded-[20px] bg-white py-[12px] calender-shadow">
             {/* Get Current Location Option */}
             {!locationPermissionGranted && (
                 <button 
@@ -45,7 +47,7 @@ const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation, 
                         getUserLocation();
                         setShowLocation(false);
                     }} 
-                    className="w-full hover:bg-blue-50 cursor-pointer flex items-center h-[60px] truncate overflow-hidden px-[32px] gap-x-[10px] border-b border-gray-100"
+                    className="flex min-h-[56px] w-full cursor-pointer items-center gap-x-[10px] overflow-hidden truncate border-b border-gray-100 px-[24px] hover:bg-[#f7f4fb]"
                 >
                     <img className="w-[24px] aspect-square" src="/images/Location.png" alt="Location Icon" />
                     <div className="flex flex-col items-start">
@@ -61,7 +63,7 @@ const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation, 
                     setSelectedLocation(location);
                     sessionStorage.setItem('selectedLocation', location);
                     setShowLocation(false);
-                }} key={location + i} className="w-full hover:bg-gray-200 cursor-pointer flex items-center h-[60px] truncate overflow-hidden px-[32px] gap-x-[10px]">
+                }} key={location + i} className="flex min-h-[56px] w-full cursor-pointer items-center gap-x-[10px] overflow-hidden truncate px-[24px] hover:bg-[#f6f5f7]">
                     <img className="w-[24px] aspect-square" src="/images/Location.png" alt="Location Icon" />
                     <p className="font-medium text-[#222222]">{location}</p>
                 </button>
