@@ -17,11 +17,12 @@ export default defineConfig(({ command, mode }) => {
   // vars aren't required. VITE_USE_MOCKS=true routes all API calls to the
   // in-app mock layer (src/caller/mockData.js).
   const useMocks = String(env.VITE_USE_MOCKS || '').trim() === 'true'
+  const simulatePayment = String(env.VITE_SIMULATE_PAYMENT || 'true').trim() !== 'false'
 
   if (isProdBuild && !useMocks) {
-    const missing = ['VITE_BACKEND_URL', 'VITE_RAZORPAY_KEY_ID'].filter(
-      (key) => !env[key] || !env[key].trim()
-    )
+    const required = ['VITE_BACKEND_URL', 'VITE_CONVEX_URL']
+    if (!simulatePayment) required.push('VITE_RAZORPAY_KEY_ID')
+    const missing = required.filter((key) => !env[key] || !env[key].trim())
     if (missing.length) {
       throw new Error(
         `\n\n  Production build aborted — missing required environment variable(s):\n` +
@@ -31,7 +32,7 @@ export default defineConfig(({ command, mode }) => {
           `  See .env.example for the expected format.\n`
       )
     }
-    if (env.VITE_RAZORPAY_KEY_ID.startsWith('rzp_test_')) {
+    if (!simulatePayment && env.VITE_RAZORPAY_KEY_ID.startsWith('rzp_test_')) {
       console.warn(
         '\n  WARNING: building production with a Razorpay TEST key ' +
           '(rzp_test_*). Real payments will not be collected.\n'

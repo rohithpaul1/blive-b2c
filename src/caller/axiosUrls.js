@@ -1,5 +1,6 @@
 import axios from './axiosConfig';
 import { USE_MOCKS, resolveMock } from './mockData';
+import { resolveConvex } from './convexClient';
 
 const handleResponseError = (error) => {
     if (error.response) {
@@ -40,6 +41,8 @@ const handleResponseError = (error) => {
 };
 
 const getAPI = async (path) => {
+    const cx = await resolveConvex('GET', path);
+    if (cx.handled) return cx.result;
     if (USE_MOCKS) return resolveMock('GET', path);
     try {
         const response = await axios.get(path);
@@ -50,6 +53,8 @@ const getAPI = async (path) => {
 };
 
 const postAPI = async (path, data) => {
+    const cx = await resolveConvex('POST', path, data);
+    if (cx.handled) return cx.result;
     if (USE_MOCKS) return resolveMock('POST', path, data);
     try {
         const response = await axios.post(path, data);
@@ -60,6 +65,8 @@ const postAPI = async (path, data) => {
 };
 
 const postAPIMedia = async (path, formData) => {
+    const cx = await resolveConvex('POST', path, formData);
+    if (cx.handled) return cx.result;
     if (USE_MOCKS) return resolveMock('POST', path, formData);
     try {
         const response = await axios.post(path, formData, {
@@ -74,6 +81,8 @@ const postAPIMedia = async (path, formData) => {
 };
 
 const putAPI = async (path, data = null) => {
+    const cx = await resolveConvex('PUT', path, data);
+    if (cx.handled) return cx.result;
     if (USE_MOCKS) return resolveMock('PUT', path, data);
     try {
         const response = await axios.put(path, data);

@@ -229,9 +229,9 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
             key={"card-menu-" + i}
             className="bg-white rounded-[24px] overflow-hidden flex flex-col items-center justify-center border border-[#0000001A]"
           >
-            <div className="relative flex-1 w-full h-[200px]">
+            <div className="relative flex-1 w-full h-[200px] bg-[#F5F5F5]">
               {" "}
-              {/* Fixed height for consistent sizing */}
+              {/* Fixed height + neutral bg so mixed photos frame consistently */}
               {!card.isAvailable && (
                 <div className="absolute z-20 top-[16px] left-[16px] flex items-center rounded-[6px] py-[6px] px-[8px] gap-x-[6px] bg-white not-available-info">
                   <img
@@ -247,13 +247,23 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
               <img
                 className={
                   (!card.isAvailable ? "opacity-[50%] " : "") +
-                  `w-full h-full object-cover object-center`
+                  `w-full h-full object-contain object-center p-[10px]`
                 }
                 src={card.imgUrl}
                 alt="Scooter Image"
                 onError={(e) => {
-                  // Fallback to local image if brand logo fails to load
-                  e.target.src = `/images/${card.brandName}.png`;
+                  // Fall back in fixed steps and then STOP, so a missing image
+                  // can never loop (setting src to another 404 re-fires onError).
+                  const img = e.target;
+                  const step = img.dataset.fbStep || "0";
+                  if (step === "0") {
+                    img.dataset.fbStep = "1";
+                    img.src = `/images/${card.brandName}.png`;
+                  } else if (step === "1") {
+                    img.dataset.fbStep = "2";
+                    img.src = "/images/placeholder.jpeg";
+                  }
+                  // step "2": give up — no further swaps, loop cannot continue.
                 }}
               />
               <div className="absolute inset-0 z-10 image-gradient" />

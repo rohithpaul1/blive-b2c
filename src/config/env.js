@@ -22,6 +22,13 @@ export const API_BASE_URL = (
 ).replace(/\/+$/, '');
 
 /**
+ * Convex deployment URL (shared with the admin). When set, mapped B2C endpoints
+ * route to Convex via src/caller/convexClient.js; unmapped ones fall back to the
+ * mock layer or REST. e.g. https://clever-wildcat-573.convex.cloud
+ */
+export const CONVEX_URL = (import.meta.env.VITE_CONVEX_URL || '').trim().replace(/\/+$/, '');
+
+/**
  * Razorpay publishable key id (key_id, NOT key_secret).
  * The backend also returns this on the handle-payment response; that value
  * takes precedence at the call site, and this is the fallback.
