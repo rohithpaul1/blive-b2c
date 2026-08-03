@@ -11,6 +11,7 @@ import { getAPI } from "../caller/axiosUrls";
 import WhyBlive from "../sections/WhyBlive";
 import Customers from "../sections/Customers";
 import Footer from "../sections/Footer";
+import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
 
 const VEHICLE_IMAGES = {
   Ather: "/images/Scooter (1).png",
@@ -57,8 +58,14 @@ const SearchPage = () => {
     selectedRange: null,
   });
 
-  const { selectedLocation, adjustDropoffDateForPlan, updateCurrentPlanType } =
-    useContext(SearchBarContext);
+  const {
+    selectedLocation,
+    adjustDropoffDateForPlan,
+    updateCurrentPlanType,
+    rentalMode,
+    setRentalMode,
+  } = useContext(SearchBarContext);
+  const isSubscription = rentalMode === RENTAL_MODES.subscription;
   const { setSelectedProduct } = useContext(ProductContext);
 
   // Plan type options (same as Catalogs)
@@ -166,6 +173,9 @@ const SearchPage = () => {
   const transformVehicleData = (vehicleData, planType) => {
     return vehicleData.map((vehicle) => {
       const { model, plan, brand, availableVehiclesCount } = vehicle;
+      const configuredPlan = rentalPlanFor(vehicle, rentalMode, planType);
+
+      if (isSubscription && !configuredPlan) return null;
 
       // Get price based on selected plan type
       let price;
@@ -173,14 +183,14 @@ const SearchPage = () => {
 
       switch (planType) {
         case "daily":
-          price = plan.enterDailyPlanPrice;
+          price = configuredPlan?.price ?? plan.enterDailyPlanPrice;
           break;
         case "weekly":
-          price = plan.enterWeeklyPlanPrice;
+          price = configuredPlan?.price ?? plan.enterWeeklyPlanPrice;
           actualPrice = plan.enterDailyPlanPrice * 7;
           break;
         case "monthly":
-          price = plan.enterMonthlyPlanPrice;
+          price = configuredPlan?.price ?? plan.enterMonthlyPlanPrice;
           actualPrice = plan.enterDailyPlanPrice * 30;
           break;
         default:
@@ -215,10 +225,13 @@ const SearchPage = () => {
         nextAvailableDate:
           availableVehiclesCount > 0 ? "Available Now" : "30th Aug, 10am",
         availableCount: availableVehiclesCount,
-        planId: plan.id,
-        planName: plan.name,
+        planId: configuredPlan?.id ?? plan.id,
+        planName: configuredPlan?.name ?? plan.name,
+        usageModel: isSubscription ? "payg" : "one_off",
+        rentalMode,
+        billingPolicy: configuredPlan?.billingPolicy ?? null,
       };
-    });
+    }).filter(Boolean);
   };
 
   // Apply client-side filtering and sorting
@@ -285,7 +298,7 @@ const SearchPage = () => {
     });
 
     return transformedVehicles;
-  }, [vehicles, selectedPlanType, selectedFilters, sortOption]);
+  }, [vehicles, selectedPlanType, selectedFilters, sortOption, rentalMode]);
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -315,6 +328,7 @@ const SearchPage = () => {
     );
     setSelectedPlanType(planType);
     setSelectedTabIndex(tabIndex);
+    updateCurrentPlanType(planType);
     setSelectedPage(1); // Reset to first page
     setFromCatalogSelection(false); // Mark as not from catalog selection
 
@@ -427,15 +441,55 @@ const SearchPage = () => {
           <>
             <div className="flex flex-col gap-[6px]">
               <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b]">
-                Fixed rentals
+                {isSubscription ? "Subscriptions" : "Fixed rentals"}
               </span>
               <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
                 <h1 className="text-[24px] font-bold text-[#1f1f1f]">
                   {filteredAndSortedVehicles?.length} vehicles available in {selectedLocation}
                 </h1>
                 <p className="text-[14px] text-[#6b6b6b]">
-                  Choose a vehicle now. You can confirm pickup and extras next.
+                  {isSubscription
+                    ? "Choose an ongoing plan. Your first commitment renews automatically."
+                    : "Choose a vehicle now. You can confirm pickup and extras next."}
                 </p>
+              </div>
+            </div>
+
+            <div className="mt-[20px] flex flex-wrap items-center justify-between gap-[12px] rounded-[16px] border border-[#eceaef] bg-[#faf9fb] p-[8px]">
+              <div className="flex items-center rounded-[12px] bg-[#efedf1] p-[3px]">
+                {[
+                  [RENTAL_MODES.fixed, "Fixed rental"],
+                  [RENTAL_MODES.subscription, "Subscription"],
+                ].map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setRentalMode(mode)}
+                    className={`rounded-[10px] px-[16px] py-[9px] text-[12px] font-bold transition ${
+                      rentalMode === mode
+                        ? "bg-white text-[#26212c] shadow-sm"
+                        : "text-[#746e79]"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-[4px] rounded-[12px] border border-[#e4e1e7] bg-white p-[3px]">
+                {planTypes.map((plan, index) => (
+                  <button
+                    key={plan.planType}
+                    type="button"
+                    onClick={() => handleSearchTrigger(plan.planType, index)}
+                    className={`rounded-[9px] px-[14px] py-[8px] text-[12px] font-medium transition ${
+                      selectedPlanType === plan.planType
+                        ? "bg-[#2b2630] text-white"
+                        : "text-[#5f5964] hover:bg-[#f5f3f6]"
+                    }`}
+                  >
+                    {plan.name}
+                  </button>
+                ))}
               </div>
             </div>
 

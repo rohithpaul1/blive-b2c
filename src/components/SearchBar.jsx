@@ -3,6 +3,7 @@ import Datepicker from "./Datepicker";
 import LocationDropdown from "./LocationDropdown";
 import { useNavigate } from "react-router-dom";
 import { SearchBarContext } from "../contexts/SearchBarContext";
+import { RENTAL_MODES, planUnitLabel } from "../utils/subscription";
 
 const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
   const [showLocation, setShowLocation] = useState(false);
@@ -20,7 +21,21 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     getUserLocation,
     detectPlanTypeFromDateRange,
     updateCurrentPlanType,
+    currentPlanType,
+    rentalMode,
+    setRentalMode,
+    subscriptionDuration,
+    setSubscriptionDuration,
   } = useContext(SearchBarContext);
+  const isSubscription = rentalMode === RENTAL_MODES.subscription;
+
+  const selectedSearchPlan = () =>
+    isSubscription
+      ? currentPlanType
+      : detectPlanTypeFromDateRange(
+          selectedPickup?.date || null,
+          selectedDropoff?.date || null
+        );
 
   const formattedDate = (date) => {
     if (!date) return "No date selected";
@@ -35,9 +50,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     if (!onSearchPage) {
       // Determine plan type from selected dates and persist for SearchPage
       try {
-        const pickupDate = selectedPickup?.date || null;
-        const dropoffDate = selectedDropoff?.date || null;
-        const planType = detectPlanTypeFromDateRange(pickupDate, dropoffDate);
+        const planType = selectedSearchPlan();
 
         // Update context and session so SearchPage can pick it up
         updateCurrentPlanType(planType);
@@ -55,9 +68,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     } else {
       // On search page, trigger search refresh with updated plan type
       try {
-        const pickupDate = selectedPickup?.date || null;
-        const dropoffDate = selectedDropoff?.date || null;
-        const planType = detectPlanTypeFromDateRange(pickupDate, dropoffDate);
+        const planType = selectedSearchPlan();
 
         // Update context and session
         updateCurrentPlanType(planType);
@@ -88,6 +99,25 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     >
       <div className="flex items-center rounded-full border border-[#10182814] bg-white px-[10px] py-[8px] shadow-[0_8px_24px_rgba(16,24,40,0.08)]">
         <div className="flex w-full items-center gap-x-[10px]">
+          <div className="hidden shrink-0 items-center rounded-full bg-[#f3f2f5] p-[3px] md:flex">
+            {[
+              [RENTAL_MODES.fixed, "Fixed"],
+              [RENTAL_MODES.subscription, "Subscription"],
+            ].map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setRentalMode(mode)}
+                className={`rounded-full px-[12px] py-[8px] text-[11px] font-bold transition-colors ${
+                  rentalMode === mode
+                    ? "bg-white text-[#221d2a] shadow-sm"
+                    : "text-[#77717e] hover:text-[#221d2a]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <div
             id="location"
             onClick={() => setShowLocation(!showLocation)}
@@ -127,26 +157,44 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             </span>
           </div>
           <span className="hidden h-[32px] w-px bg-[#D9D9D9] md:block" />
-          <div
-            id="dropoff-btn"
-            onClick={() => setShowDatepicker(!showDatepicker)}
-            className="hidden min-w-[188px] cursor-pointer flex-col justify-center rounded-full px-[12px] py-[4px] hover:bg-[#f8f8f8] md:flex"
-          >
-            <p className="text-[11px] text-[#717171]">Drop-off</p>
-            <span className="flex items-center py-[4px] gap-x-[4px]">
-              <img
-                className="w-[20px] h-[20px]"
-                src="/images/Calendar.png"
-                alt="Calendar Icon"
-              />
-              <p className="text-[13px] font-medium text-[#3A3A3A]">
-                {formattedDate(selectedDropoff?.date)}{" "}
-                <span className="text-[14px] text-[#646464]">
-                  {selectedDropoff?.time}
-                </span>
-              </p>
-            </span>
-          </div>
+          {isSubscription ? (
+            <div className="hidden min-w-[188px] flex-col justify-center rounded-full px-[12px] py-[4px] md:flex">
+              <p className="text-[11px] text-[#717171]">Minimum commitment</p>
+              <span className="flex items-center gap-x-[8px] py-[2px]">
+                <select
+                  aria-label="Subscription duration"
+                  value={subscriptionDuration}
+                  onChange={(event) => setSubscriptionDuration(event.target.value)}
+                  className="h-[30px] rounded-full border border-[#dedce2] bg-white px-[10px] text-[12px] font-bold text-[#3a3540] outline-none"
+                >
+                  {Array.from({ length: 12 }, (_, index) => index + 1).map((value) => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+                <p className="min-w-0 text-[12px] font-medium text-[#3A3A3A]">
+                  {planUnitLabel(currentPlanType, subscriptionDuration)}
+                  <span className="block truncate text-[10px] font-normal text-[#77717e]">
+                    until {formattedDate(selectedDropoff?.date)}
+                  </span>
+                </p>
+              </span>
+            </div>
+          ) : (
+            <div
+              id="dropoff-btn"
+              onClick={() => setShowDatepicker(!showDatepicker)}
+              className="hidden min-w-[188px] cursor-pointer flex-col justify-center rounded-full px-[12px] py-[4px] hover:bg-[#f8f8f8] md:flex"
+            >
+              <p className="text-[11px] text-[#717171]">Drop-off</p>
+              <span className="flex items-center py-[4px] gap-x-[4px]">
+                <img className="h-[20px] w-[20px]" src="/images/Calendar.png" alt="Calendar Icon" />
+                <p className="text-[13px] font-medium text-[#3A3A3A]">
+                  {formattedDate(selectedDropoff?.date)}{" "}
+                  <span className="text-[14px] text-[#646464]">{selectedDropoff?.time}</span>
+                </p>
+              </span>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setShowDatepicker(!showDatepicker)}

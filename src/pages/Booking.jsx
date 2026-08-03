@@ -17,6 +17,7 @@ import HubDropdown from "../components/HubDropdown";
 import TermsAndConditionsModal from "../components/TermsAndConditionsModal";
 import { getAPI, postAPI } from "../caller/axiosUrls";
 import { RAZORPAY_KEY_ID, SIMULATE_PAYMENT } from "../config/env";
+import { RENTAL_MODES, planUnitLabel } from "../utils/subscription";
 // Razorpay will be loaded dynamically via script tag
 
 const Booking = () => {
@@ -91,7 +92,18 @@ const Booking = () => {
     selectedDropoff,
     setSelectedPickup,
     setSelectedDropoff,
+    rentalMode,
+    subscriptionDuration,
+    currentPlanType,
   } = useContext(SearchBarContext);
+  const isSubscription =
+    selectedProduct?.usageModel === "payg" ||
+    selectedProduct?.rentalMode === RENTAL_MODES.subscription ||
+    rentalMode === RENTAL_MODES.subscription;
+  const commitmentDuration = Math.max(
+    1,
+    Number(selectedProduct?.subscriptionDuration ?? subscriptionDuration) || 1
+  );
 
   const navigate = useNavigate();
 
@@ -369,6 +381,8 @@ const Booking = () => {
             }`
           : null,
         specialRequests: specialRequests.trim() || null,
+        usageModel: isSubscription ? "payg" : "one_off",
+        durationUnits: isSubscription ? commitmentDuration : undefined,
         gstPaid:
           selectedProduct?.calculationData?.payment_breakdown?.gst_amount || 0,
       };
@@ -406,7 +420,7 @@ const Booking = () => {
         const options = {
           key: razorpayKey, // Get from environment or API response
 
-          amount: paymentData.amount * 100, // Convert to paise for Razorpay
+          amount: Number(response.data.amount ?? paymentData.amount) * 100,
           currency: "INR",
           name: "Blive EV Rental",
           description: `Payment for ${selectedProduct?.vehicleName} rental`,
@@ -692,6 +706,8 @@ const Booking = () => {
         ratePlan: ratePlan.toLowerCase(),
         isHomeDelivery,
         hubId: selectedHubId ? selectedHubId.toString() : undefined,
+        usageModel: isSubscription ? "payg" : "one_off",
+        durationUnits: isSubscription ? commitmentDuration : undefined,
       };
 
       // Include promo code if applied
@@ -799,6 +815,8 @@ const Booking = () => {
         ratePlan: ratePlan,
         isHomeDelivery: isHomeDelivery,
         hubId: selectedHubId ? selectedHubId.toString() : undefined,
+        usageModel: isSubscription ? "payg" : "one_off",
+        durationUnits: isSubscription ? commitmentDuration : undefined,
       };
 
       // Add coupon ID if a coupon is applied
@@ -976,6 +994,8 @@ const Booking = () => {
               ratePlan: selectedProduct?.selectedPlanType || "daily",
               hubId: selectedHubId ? selectedHubId.toString() : undefined,
               isHomeDelivery: requiredDoorstepDelivery,
+              usageModel: isSubscription ? "payg" : "one_off",
+              durationUnits: isSubscription ? commitmentDuration : undefined,
             }}
           />
         </div>
@@ -990,7 +1010,7 @@ const Booking = () => {
           {isLoading || !token ? (
             <Loader />
           ) : (
-            <div className="grid items-start gap-[48px] lg:grid-cols-[minmax(0,1fr)_400px] xl:gap-[72px]">
+            <div className="grid items-start gap-[48px] min-[900px]:grid-cols-[minmax(0,1fr)_340px] min-[900px]:gap-[32px] xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-[72px]">
               <div className="min-w-0">
                 <p className="font-bold text-[24px] text-[#222222]">
                   Customer Details
@@ -1338,10 +1358,9 @@ const Booking = () => {
                     Cancellation Policy
                   </p>
                   <p className="mt-[16px] text-[14px] text-[#222222]">
-                    Cancellations made before 48 hours of the reservation will
-                    incur a cancellation fee. This fee is applied to cover the
-                    costs associated with holding the reservation and the
-                    potential impact on our schedule.
+                    {isSubscription
+                      ? "You can schedule the subscription to end at the current committed-until date. It renews automatically if no cancellation is scheduled."
+                      : "Cancellations made before 48 hours of the reservation may incur a cancellation fee, based on the selected Rental Plan."}
                   </p>
                   <div className="mt-[32px]">
                     <CancellationBar
@@ -1377,15 +1396,17 @@ const Booking = () => {
                   </div>
                 </div>
               </div>
-              <aside className="w-full">
+              <aside className="w-full min-[900px]:sticky min-[900px]:top-[96px]">
                 <div className="sticky top-[104px] space-y-[12px]">
                   <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
                   <p className="font-bold text-[24px] text-[#222222]">
-                    Booking Overview
+                    {isSubscription ? "Subscription Overview" : "Booking Overview"}
                   </p>
                   <div className="mt-[24px] gap-x-[15px] flex items-center">
                     <div className="flex flex-col">
-                      <p className="text-[11px] text-[#3A3A3A]">Pick up</p>
+                      <p className="text-[11px] text-[#3A3A3A]">
+                        {isSubscription ? "Starts" : "Pick up"}
+                      </p>
                       <p className="font-bold text-[14px] text-[#222222]">
                         {formattedDate(selectedPickup?.date)}{" "}
                         <span className="text-[#646464] text-[12px]">
@@ -1395,27 +1416,42 @@ const Booking = () => {
                     </div>
                     <div className="flex-1 flex items-center gap-x-[10px]">
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
-                      <p className="text-[11px] text-[#222222]">{days} Days</p>
+                      <p className="text-center text-[11px] text-[#222222]">
+                        {isSubscription
+                          ? `${commitmentDuration} ${planUnitLabel(
+                              selectedProduct?.selectedPlanType || currentPlanType,
+                              commitmentDuration
+                            )} minimum`
+                          : `${days} Days`}
+                      </p>
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
                     </div>
                     <div className="flex flex-col">
                       <p className="text-[11px] text-[#3A3A3A] text-right">
-                        Dropoff
+                        {isSubscription ? "Committed until" : "Dropoff"}
                       </p>
                       <p className="font-bold text-[14px] text-[#222222]">
                         {formattedDate(selectedDropoff?.date)}{" "}
                         <span className="text-[#646464] text-[12px]">
-                          {selectedDropoff?.time || "10 AM"}
+                          {!isSubscription && (selectedDropoff?.time || "10 AM")}
                         </span>
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowDateChangeModal(true)}
-                    className="mt-[12px] text-[14px] font-medium text-[#1B29A9] hover:text-[#3844B4] transition-colors cursor-pointer"
-                  >
-                    Change Dates
-                  </button>
+                  {!isSubscription && (
+                    <button
+                      onClick={() => setShowDateChangeModal(true)}
+                      className="mt-[12px] cursor-pointer text-[14px] font-medium text-[#1B29A9] transition-colors hover:text-[#3844B4]"
+                    >
+                      Change dates
+                    </button>
+                  )}
+                  {isSubscription && (
+                    <div className="mt-[14px] flex items-center gap-[8px] rounded-[10px] border border-[#dfe9e2] bg-[#f3faf5] px-[12px] py-[10px] text-[12px] text-[#326443]">
+                      <span className="font-bold">✓</span>
+                      Renews automatically for the same billing period
+                    </div>
+                  )}
                   <div className="mt-[24px]">
                     <p className="font-bold text-[14px] text-[#3A3A3A]">
                       Vehicle Details
@@ -1448,7 +1484,59 @@ const Booking = () => {
                     </p>
                     <div className="mt-[8px] flex flex-col gap-y-[4px]">
                       {/* Dynamic calculation breakdown if available */}
-                      {selectedProduct?.calculationData?.payment_breakdown ? (
+                      {isSubscription && selectedProduct?.calculationData?.payment_breakdown ? (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <p className="text-[14px] text-[#3A3A3A]">Recurring charge</p>
+                            <p className="text-[14px] font-medium text-[#3A3A3A]">
+                              ₹{selectedProduct.calculationData.payment_breakdown.recurring_charge}
+                              <span className="text-[11px] font-normal text-[#717171]">
+                                /{selectedProduct.calculationData.commitment?.unit || "period"}
+                              </span>
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-[14px] text-[#3A3A3A]">Minimum commitment value</p>
+                            <p className="text-[14px] font-medium text-[#3A3A3A]">
+                              ₹{selectedProduct.calculationData.payment_breakdown.commitment_total}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-[14px] text-[#3A3A3A]">Security deposit held in wallet</p>
+                            <p className="text-[14px] font-medium text-[#3A3A3A]">
+                              ₹{selectedProduct.calculationData.payment_breakdown.security_deposit}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-[14px] text-[#3A3A3A]">Minimum wallet balance</p>
+                            <p className="text-[14px] font-medium text-[#3A3A3A]">
+                              ₹{selectedProduct.calculationData.payment_breakdown.minimum_wallet_balance}
+                            </p>
+                          </div>
+                          <div className="mt-[6px] rounded-[10px] border border-[#e6e2ea] bg-white px-[12px] py-[10px]">
+                            <div className="flex items-center justify-between text-[12px]">
+                              <span className="text-[#67616c]">Wallet available</span>
+                              <span className="font-medium text-[#302b34]">
+                                ₹{selectedProduct.calculationData.payment_breakdown.wallet_available}
+                              </span>
+                            </div>
+                            <div className="mt-[5px] flex items-center justify-between text-[12px]">
+                              <span className="text-[#67616c]">Opening balance required</span>
+                              <span className="font-bold text-[#302b34]">
+                                ₹{selectedProduct.calculationData.payment_breakdown.required_opening_balance}
+                              </span>
+                            </div>
+                          </div>
+                          {selectedProduct.calculationData.payment_breakdown.home_delivery_amount > 0 && (
+                            <div className="flex items-center justify-between">
+                              <p className="text-[14px] text-[#3A3A3A]">Home delivery</p>
+                              <p className="text-[14px] font-medium text-[#3A3A3A]">
+                                ₹{selectedProduct.calculationData.payment_breakdown.home_delivery_amount}
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      ) : selectedProduct?.calculationData?.payment_breakdown ? (
                         <>
                           <div className="flex items-center justify-between">
                             <p className="text-[14px] text-[#3A3A3A]">
@@ -1641,7 +1729,7 @@ const Booking = () => {
                     <div className="mt-[10px] min-h-[1px] w-full rounded-[8px] flex-1 bg-[#EDEDED]" />
                     <div className="flex mt-[12px] items-center justify-between">
                       <p className="font-medium text-[22px] text-[#222222]">
-                        Total
+                        {isSubscription ? "Add to wallet today" : "Total"}
                       </p>
                       <p className="font-bold text-[22px] text-[#222222]">
                         ₹{calculateTotal()}
@@ -1657,11 +1745,17 @@ const Booking = () => {
                     }`}
                     disabled={!canProceedToPayment() || isLoading}
                   >
-                    {isLoading ? "Processing..." : "Proceed to Payment"}
+                    {isLoading
+                      ? "Processing..."
+                      : isSubscription
+                        ? Number(calculateTotal()) > 0
+                          ? "Fund wallet & subscribe"
+                          : "Confirm subscription"
+                        : "Proceed to Payment"}
                   </button>
                   </section>
 
-                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
+                  {!isSubscription && <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
                     <h2 className="text-[20px] font-bold text-[#222222]">
                       Payment & Offers
                     </h2>
@@ -1694,7 +1788,7 @@ const Booking = () => {
                         Apply coupon
                       </button>
                     )}
-                  </section>
+                  </section>}
 
                   <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
                     <h2 className="text-[20px] font-bold text-[#222222]">
@@ -1714,13 +1808,15 @@ const Booking = () => {
       </div>
 
       {/* Date Change Modal */}
-      <DateChangeModal
-        isOpen={showDateChangeModal}
-        onClose={() => setShowDateChangeModal(false)}
-        currentPickup={selectedPickup}
-        currentDropoff={selectedDropoff}
-        onDateChange={handleDateChange}
-      />
+      {!isSubscription && (
+        <DateChangeModal
+          isOpen={showDateChangeModal}
+          onClose={() => setShowDateChangeModal(false)}
+          currentPickup={selectedPickup}
+          currentDropoff={selectedDropoff}
+          onDateChange={handleDateChange}
+        />
+      )}
     </>
   );
 };

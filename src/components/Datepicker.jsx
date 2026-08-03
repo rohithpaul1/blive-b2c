@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useContext } from "react";
 import { addMonths, format, startOfMonth } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SearchBarContext } from "../contexts/SearchBarContext";
+import { RENTAL_MODES, addPlanDuration, planUnitLabel } from "../utils/subscription";
 
 const times = ["9 AM", "10 AM", "11 AM", "12 PM", "2 PM", "3 PM"];
 
@@ -13,7 +14,14 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
   const [dropoffTime, setDropoffTime] = useState(selectedDropoff.time || "10 AM");
   const calendarRef = useRef(null);
   
-  const { handlePickupDateChange, autoAdjustPlanTypeFromDates } = useContext(SearchBarContext);
+  const {
+    handlePickupDateChange,
+    autoAdjustPlanTypeFromDates,
+    rentalMode,
+    subscriptionDuration,
+    currentPlanType,
+  } = useContext(SearchBarContext);
+  const isSubscription = rentalMode === RENTAL_MODES.subscription;
 
   const months = [
     currentMonth,
@@ -21,6 +29,26 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
   ];
 
   const handleDateClick = (date) => {
+    if (isSubscription) {
+      const commitmentEnd = addPlanDuration(
+        date,
+        currentPlanType,
+        subscriptionDuration
+      );
+      setPickupDate(date);
+      setDropoffDate(commitmentEnd);
+      setSelectedPickup((previous) => ({ ...previous, date }));
+      setSelectedDropoff((previous) => ({
+        ...previous,
+        date: commitmentEnd,
+        time: pickupTime,
+      }));
+      sessionStorage.setItem("selectedPickupDate", date.toISOString());
+      sessionStorage.setItem("selectedDropoffDate", commitmentEnd.toISOString());
+      sessionStorage.setItem("selectedDropoffTime", pickupTime);
+      handlePickupDateChange(date);
+      return;
+    }
     if (!pickupDate || (pickupDate && dropoffDate)) {
       setPickupDate(date);
       setSelectedPickup(prev => ({ ...prev, date }));
@@ -77,6 +105,14 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (!showDatepicker) return;
+    setPickupDate(selectedPickup?.date || null);
+    setDropoffDate(selectedDropoff?.date || null);
+    setPickupTime(selectedPickup?.time || "10 AM");
+    setDropoffTime(selectedDropoff?.time || "10 AM");
+  }, [showDatepicker, selectedPickup, selectedDropoff]);
 
   const renderCalendar = (month) => {
     const year = month.getFullYear();
@@ -136,11 +172,27 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
         <button className="cursor-pointer" onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}>
           <ChevronLeft />
         </button>
-        <span className="font-semibold text-[18px] font-bold text-[#222222]">Select Dates</span>
+        <span className="font-semibold text-[18px] font-bold text-[#222222]">
+          {isSubscription ? "Choose subscription start" : "Select dates"}
+        </span>
         <button className="cursor-pointer" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
           <ChevronRight />
         </button>
       </div>
+
+      {isSubscription && (
+        <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#e6e2ee] bg-[#faf9fc] px-[16px] py-[12px]">
+          <div>
+            <p className="text-[12px] font-bold text-[#29252f]">Minimum commitment</p>
+            <p className="mt-[2px] text-[11px] text-[#717171]">
+              {subscriptionDuration} {planUnitLabel(currentPlanType, subscriptionDuration)} from the selected start date
+            </p>
+          </div>
+          <p className="text-[12px] font-medium text-[#5b476f]">
+            Renews automatically
+          </p>
+        </div>
+      )}
 
       <div className="flex justify-center gap-[24px]">
         <div className="flex-1">{renderCalendar(months[0])}</div>
@@ -167,7 +219,7 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
         </div>
       </div>
 
-      <div>
+      {!isSubscription && <div>
         <p className="font-medium mt-[24px] text-[12px] text-[#3A3A3A]">Dropoff time</p>
         <div className="flex flex-wrap gap-x-[16px] mt-[8px]">
           {times.map((t) => (
@@ -184,7 +236,7 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
             </button>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

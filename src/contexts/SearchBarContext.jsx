@@ -1,4 +1,9 @@
 import { createContext, useEffect, useState } from "react";
+import {
+  RENTAL_MODES,
+  addPlanDuration,
+  normaliseDuration,
+} from "../utils/subscription";
 
 const SearchBarContext = createContext();
 
@@ -18,31 +23,72 @@ const SearchBarProvider = ({ children }) => {
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [currentPlanType, setCurrentPlanType] = useState("daily");
+  const [rentalModeState, setRentalModeState] = useState(
+    () => sessionStorage.getItem("rentalMode") || RENTAL_MODES.fixed
+  );
+  const [subscriptionDurationState, setSubscriptionDurationState] = useState(
+    () => normaliseDuration(sessionStorage.getItem("subscriptionDuration"))
+  );
+
+  const setRentalMode = (mode) => {
+    const next =
+      mode === RENTAL_MODES.subscription
+        ? RENTAL_MODES.subscription
+        : RENTAL_MODES.fixed;
+    setRentalModeState(next);
+    sessionStorage.setItem("rentalMode", next);
+    if (next === RENTAL_MODES.subscription) {
+      const committedUntil = addPlanDuration(
+        selectedPickup.date,
+        currentPlanType,
+        subscriptionDurationState
+      );
+      setSelectedDropoff((previous) => ({
+        ...previous,
+        date: committedUntil,
+        time: selectedPickup.time,
+      }));
+      sessionStorage.setItem("selectedDropoffDate", committedUntil.toISOString());
+      sessionStorage.setItem("selectedDropoffTime", selectedPickup.time);
+    }
+  };
+
+  const setSubscriptionDuration = (duration) => {
+    const next = normaliseDuration(duration);
+    setSubscriptionDurationState(next);
+    sessionStorage.setItem("subscriptionDuration", String(next));
+    if (rentalModeState === RENTAL_MODES.subscription) {
+      const committedUntil = addPlanDuration(
+        selectedPickup.date,
+        currentPlanType,
+        next
+      );
+      setSelectedDropoff((previous) => ({
+        ...previous,
+        date: committedUntil,
+        time: selectedPickup.time,
+      }));
+      sessionStorage.setItem("selectedDropoffDate", committedUntil.toISOString());
+      sessionStorage.setItem("selectedDropoffTime", selectedPickup.time);
+    }
+  };
 
   // Function to adjust dropoff date based on plan type
   const adjustDropoffDateForPlan = (
     planType,
-    pickupDate = selectedPickup.date
+    pickupDate = selectedPickup.date,
+    duration = rentalModeState === RENTAL_MODES.subscription
+      ? subscriptionDurationState
+      : 1
   ) => {
-    const newDropoffDate = new Date(pickupDate);
-
-    switch (planType) {
-      case "weekly":
-        newDropoffDate.setDate(newDropoffDate.getDate() + 7);
-        break;
-      case "monthly":
-        newDropoffDate.setDate(newDropoffDate.getDate() + 30);
-        break;
-      case "daily":
-      default:
-        // For daily, set dropoff to next day (1 day rental)
-        newDropoffDate.setDate(newDropoffDate.getDate() + 1);
-        break;
-    }
+    const newDropoffDate = addPlanDuration(pickupDate, planType, duration);
 
     const updatedDropoff = {
       ...selectedDropoff,
       date: newDropoffDate,
+      ...(rentalModeState === RENTAL_MODES.subscription
+        ? { time: selectedPickup.time }
+        : {}),
     };
 
     setSelectedDropoff(updatedDropoff);
@@ -81,6 +127,19 @@ const SearchBarProvider = ({ children }) => {
     console.log("Updating current plan type to:", planType);
     setCurrentPlanType(planType);
     sessionStorage.setItem("currentPlanType", planType);
+    if (rentalModeState === RENTAL_MODES.subscription) {
+      const committedUntil = addPlanDuration(
+        selectedPickup.date,
+        planType,
+        subscriptionDurationState
+      );
+      setSelectedDropoff((previous) => ({
+        ...previous,
+        date: committedUntil,
+        time: selectedPickup.time,
+      }));
+      sessionStorage.setItem("selectedDropoffDate", committedUntil.toISOString());
+    }
   };
 
   // Function to auto-detect plan type based on date range
@@ -326,6 +385,10 @@ const SearchBarProvider = ({ children }) => {
         updateCurrentPlanType,
         detectPlanTypeFromDateRange,
         autoAdjustPlanTypeFromDates,
+        rentalMode: rentalModeState,
+        setRentalMode,
+        subscriptionDuration: subscriptionDurationState,
+        setSubscriptionDuration,
       }}
     >
       {children}

@@ -54,6 +54,8 @@ const MyBookings = () => {
             planType: booking.planType,
             vehicleModel: booking.vehicleModel,
             plan: booking.plan,
+            rentalMode: booking.rentalMode || "fixed",
+            subscription: booking.subscription || null,
             hub: booking.hub,
             isHomeDelivery: booking.isHomeDelivery,
             promoCodeId: booking.promoCodeId,

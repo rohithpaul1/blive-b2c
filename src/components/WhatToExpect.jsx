@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const WhatToExpect = ({ showDropoff }) => {
+const WhatToExpect = ({ showDropoff, rentalMode = "fixed", commitmentDuration = 1, commitmentUnit = "month" }) => {
   const [openVehicleCheckup, setOpenVehicleCheckup] = useState(false);
   const [openRulesAndRegulations, setOpenRulesAndRegulations] = useState(false);
   const [openDropoff, setOpenDropoff] = useState(false);
@@ -109,12 +109,27 @@ const WhatToExpect = ({ showDropoff }) => {
         >
           <div className="flex flex-col gap-y-[8px]">
             <p className="font-bold text-[#222222]">
-              Booking & Pick-Up / Drop-Off
+              {rentalMode === "subscription" ? "Subscription & Pick-Up" : "Booking & Pick-Up / Drop-Off"}
             </p>
             <ul className="mt-[8px] text-[#3A3A3A] flex flex-col list-disc pl-5 gap-y-[4px]">
-              <li>Minimum booking period: 1 day</li>
-              <li>Vehicle must be picked up/dropped off at the agreed time</li>
-              <li>Late returns may attract additional charges</li>
+              <li>
+                {rentalMode === "subscription"
+                  ? `Minimum subscription term: ${commitmentDuration} ${commitmentUnit}${Number(commitmentDuration) === 1 ? "" : "s"}`
+                  : "Minimum booking period: 1 day"}
+              </li>
+              {rentalMode === "subscription" && (
+                <li>After the minimum term, billing continues automatically until you cancel.</li>
+              )}
+              <li>
+                {rentalMode === "subscription"
+                  ? "Vehicle must be picked up at the agreed start date and time"
+                  : "Vehicle must be picked up/dropped off at the agreed time"}
+              </li>
+              <li>
+                {rentalMode === "subscription"
+                  ? "To stop renewal after the minimum term, cancel before the next billing date"
+                  : "Late returns may attract additional charges"}
+              </li>
               <li>Doorstep delivery available in select areas</li>
             </ul>
           </div>

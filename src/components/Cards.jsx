@@ -6,6 +6,7 @@ import { UserContext } from "../contexts/UserContext";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import { postAPI } from "../caller/axiosUrls";
 import { toast } from "react-hot-toast";
+import { RENTAL_MODES, planUnit } from "../utils/subscription";
 
 const Cards = ({ cards, isCatalog, selectedPlanType }) => {
   const navigate = useNavigate();
@@ -18,7 +19,14 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
   const { setSelectedProduct } = useContext(ProductContext);
   const { setShowLoginPage } = useContext(LoginPageContext);
   const { token } = useContext(UserContext);
-  const { selectedPickup, selectedDropoff } = useContext(SearchBarContext);
+  const {
+    selectedPickup,
+    selectedDropoff,
+    rentalMode,
+    subscriptionDuration,
+    currentPlanType,
+  } = useContext(SearchBarContext);
+  const isSubscription = rentalMode === RENTAL_MODES.subscription;
 
   const rentalDays = Math.max(
     1,
@@ -43,10 +51,14 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
         : 1;
     const dailyRate = (Number(card.price) || 0) / unitDays;
 
-    return {
-      dailyRate,
-      total: dailyRate * rentalDays,
-    };
+    if (isSubscription) {
+      return {
+        cycleRate: Number(card.price) || 0,
+        total: (Number(card.price) || 0) * subscriptionDuration,
+        unit: planUnit(selectedPlanType || currentPlanType),
+      };
+    }
+    return { dailyRate, total: dailyRate * rentalDays, unit: "day" };
   };
 
   // Helper function to format date and time for API
@@ -123,6 +135,8 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
         planId: card.planId,
         ratePlan: ratePlan,
         isHomeDelivery: true,
+        usageModel: isSubscription ? "payg" : "one_off",
+        durationUnits: isSubscription ? subscriptionDuration : undefined,
       };
 
       // Note: promoCodeId will be added later when user apples a coupon
@@ -198,6 +212,9 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
             ...card,
             calculationData: calculationData,
             selectedPlanType: ratePlan, // Store the selected plan type
+            rentalMode,
+            usageModel: isSubscription ? "payg" : "one_off",
+            subscriptionDuration: isSubscription ? subscriptionDuration : undefined,
           };
 
           console.log(
@@ -256,9 +273,8 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
       {cards &&
         cards.map((card, i) => {
           const pricing = getPricing(card);
-          const includedKm =
-            (Number(card.perDayKmLimit) || Number(card.range) || 0) *
-            rentalDays;
+          const dailyIncludedKm = Number(card.perDayKmLimit) || Number(card.range) || 0;
+          const includedKm = dailyIncludedKm * rentalDays;
 
           return (
             <article
@@ -280,7 +296,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                     !card.isAvailable ? "opacity-50 grayscale" : ""
                   } h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.025]`}
                   src={card.imgUrl}
-                  alt={`${card.vehicleName} available for fixed rental`}
+                  alt={`${card.vehicleName} available for ${isSubscription ? "subscription" : "fixed rental"}`}
                   onError={(e) => {
                     const img = e.target;
                     const step = img.dataset.fbStep || "0";
@@ -312,13 +328,24 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
 
                 <div className="mt-[8px] flex items-end gap-[8px]">
                   <p className="text-[24px] font-black leading-none text-[#351a75]">
-                    ₹{formatCurrency(pricing.dailyRate)}
-                    <span className="ml-[2px] text-[13px] font-bold">/day</span>
+                    ₹{formatCurrency(isSubscription ? pricing.cycleRate : pricing.dailyRate)}
+                    <span className="ml-[2px] text-[13px] font-bold">/{pricing.unit}</span>
                   </p>
                   <p className="text-[13px] text-[#6b6b6b]">
-                    ₹{formatCurrency(pricing.total)} total
+                    {isSubscription
+                      ? `₹${formatCurrency(pricing.total)} minimum commitment`
+                      : `₹${formatCurrency(pricing.total)} total`}
                   </p>
                 </div>
+
+                {isSubscription && (
+                  <div className="mt-[12px] flex items-center justify-between rounded-[10px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[9px] text-[11px]">
+                    <span className="font-medium text-[#4e4753]">
+                      {subscriptionDuration} {pricing.unit}{subscriptionDuration === 1 ? "" : "s"} minimum
+                    </span>
+                    <span className="font-bold text-[#33734b]">Auto-renews</span>
+                  </div>
+                )}
 
                 <div className="mt-[16px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[10px] text-[#373737]">
                   <div className="flex flex-col items-center gap-[5px] border-r border-[#e5e5e5]">
@@ -342,7 +369,11 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                 <div className="mt-[14px] flex items-center justify-between gap-[12px] text-[12px] text-[#626262]">
                   <span className="flex items-center gap-[5px]">
                     <span className="text-[#351a75]">✓</span>
-                    {includedKm || "Daily km"} km included
+                    {dailyIncludedKm > 0
+                      ? isSubscription
+                        ? `${dailyIncludedKm} km/day included`
+                        : `${includedKm} km included`
+                      : "Usage allowance shown at checkout"}
                   </span>
                   <span className="flex items-center gap-[5px]">
                     <span className="text-[#351a75]">✓</span>
@@ -359,7 +390,11 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   } mt-auto flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
                   disabled={!card.isAvailable}
                 >
-                  {card.isAvailable ? "Rent now" : "Unavailable"}
+                  {card.isAvailable
+                    ? isSubscription
+                      ? "Choose subscription"
+                      : "Rent now"
+                    : "Unavailable"}
                 </button>
               </div>
             </article>

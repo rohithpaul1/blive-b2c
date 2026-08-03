@@ -4,6 +4,10 @@ import { API_BASE_URL } from "../config/env";
 
 const BookingCard = ({ item, tab, onClick }) => {
     const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+    const isSubscription = item.rentalMode === "subscription";
+    const commitmentUnit = item.subscription?.commitmentUnit || item.planType || "month";
+    const commitmentDuration = Number(item.subscription?.commitmentDuration || 1);
+    const commitmentLabel = `${commitmentDuration} ${commitmentUnit}${commitmentDuration === 1 ? "" : "s"}`;
     // Function to handle Get Directions
     const handleGetDirections = (e) => {
         e.stopPropagation(); // Prevent card click
@@ -180,7 +184,9 @@ const BookingCard = ({ item, tab, onClick }) => {
                             <p className="text-[14px] text-[#717171] mt-[2px]">{item.manufacturer}</p>
                         )}
                         {item.planType && (
-                            <p className="text-[12px] text-[#1B29A9] mt-[2px] font-medium capitalize">{item.planType} Plan</p>
+                            <p className="text-[12px] text-[#1B29A9] mt-[2px] font-medium capitalize">
+                                {isSubscription ? `${item.planType} subscription` : `${item.planType} plan`}
+                            </p>
                         )}
                     </div>
                     <img src="/images/MenuDot.png" alt="Menu Dot" className="w-[24px] h-[24px]" />
@@ -230,14 +236,20 @@ const BookingCard = ({ item, tab, onClick }) => {
                         </div>
                         <div className='flex-1 flex items-center gap-x-[10px]'>
                             <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
-                            <p className='text-[11px] text-[#222222]'>{countDays(item.pickup || {}, item.dropoff || {})} Days</p>
+                            <p className='text-[11px] text-[#222222]'>
+                                {isSubscription ? `${commitmentLabel} minimum` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
+                            </p>
                             <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                         </div>
                         <div className='flex flex-col'>
                             <p className='font-bold text-[18px] text-[#222222]'>{formattedDate(item.dropoff?.date || '')} <span className='text-[#222222B2] text-[14px]'>{item.dropoff?.time || 'N/A'}</span></p>
+                            {isSubscription && <p className="text-[11px] text-[#717171]">Committed until</p>}
                         </div>
                     </div>
-                    <p className="font-bold text-[24px] text-[#222222]">₹{item.price}</p>
+                    <div className="text-right">
+                        <p className="font-bold text-[24px] text-[#222222]">₹{isSubscription ? item.subscription?.recurringCharge : item.price}</p>
+                        {isSubscription && <p className="text-[11px] text-[#717171]">per {commitmentUnit} · auto-renews</p>}
+                    </div>
                 </div>
                 <div className="mt-[16px] px-[16px] flex items-center gap-x-[16px]">
                     {tab === "Ongoing" && <button 

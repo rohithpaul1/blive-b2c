@@ -7,6 +7,7 @@ import { getAPI } from "../caller/axiosUrls";
 import Loader from "../components/Loader";
 import { useContext } from "react";
 import { SearchBarContext } from "../contexts/SearchBarContext";
+import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
 
 const Catalogs = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -35,7 +36,9 @@ const Catalogs = () => {
     selectedDropoff,
     adjustDropoffDateForPlan,
     updateCurrentPlanType,
+    rentalMode,
   } = useContext(SearchBarContext);
+  const isSubscription = rentalMode === RENTAL_MODES.subscription;
 
   const tabs = [
     { name: "Daily", planType: "daily" },
@@ -207,6 +210,8 @@ const Catalogs = () => {
   const transformVehicleData = (vehicleData, planType) => {
     return vehicleData.map((vehicle) => {
       const { model, plan, brand, availableVehiclesCount } = vehicle;
+      const configuredPlan = rentalPlanFor(vehicle, rentalMode, planType);
+      if (isSubscription && !configuredPlan) return null;
 
       // Get price based on selected tab
       let price;
@@ -214,14 +219,14 @@ const Catalogs = () => {
 
       switch (planType) {
         case "daily":
-          price = plan.enterDailyPlanPrice;
+          price = configuredPlan?.price ?? plan.enterDailyPlanPrice;
           break;
         case "weekly":
-          price = plan.enterWeeklyPlanPrice;
+          price = configuredPlan?.price ?? plan.enterWeeklyPlanPrice;
           actualPrice = plan.enterDailyPlanPrice * 7;
           break;
         case "monthly":
-          price = plan.enterMonthlyPlanPrice;
+          price = configuredPlan?.price ?? plan.enterMonthlyPlanPrice;
           actualPrice = plan.enterDailyPlanPrice * 30;
           break;
         default:
@@ -255,10 +260,13 @@ const Catalogs = () => {
         nextAvailableDate:
           availableVehiclesCount > 0 ? "Available Now" : "30th Aug, 10am",
         availableCount: availableVehiclesCount,
-        planId: plan.id,
-        planName: plan.name,
+        planId: configuredPlan?.id ?? plan.id,
+        planName: configuredPlan?.name ?? plan.name,
+        usageModel: isSubscription ? "payg" : "one_off",
+        rentalMode,
+        billingPolicy: configuredPlan?.billingPolicy ?? null,
       };
-    });
+    }).filter(Boolean);
   };
 
   // Apply client-side filtering, sorting, and pagination
@@ -312,6 +320,7 @@ const Catalogs = () => {
     availabilityFilter,
     sortBy,
     sortOrder,
+    rentalMode,
   ]);
 
   // Get only the first 6 items for display
@@ -365,11 +374,14 @@ const Catalogs = () => {
   return (
     <div className="mt-[135px] bg-[#F1F2F3] flex flex-col items-center py-[100px] px-[15%]">
       <p className="font-bold text-[48px] text-[#0F0F0F]">
-        Choose EV Rentals That Match Your Needs
+        {isSubscription
+          ? "Choose an EV Subscription That Fits Your Routine"
+          : "Choose EV Rentals That Match Your Needs"}
       </p>
       <p className="mt-[24px] font-medium text-[18px] text-center text-[#0F0F0F] px-[15%]">
-        Day trip, weekend escape, or city errand. BLive EZY fits your life,
-        without the cost of ownership.
+        {isSubscription
+          ? "Pick your minimum commitment now. Your plan keeps renewing while you need the vehicle."
+          : "Day trip, weekend escape, or city errand. BLive EZY fits your life, without the cost of ownership."}
       </p>
 
       {/* Tabs */}

@@ -184,7 +184,10 @@ const Login = () => {
                     {selectedProduct.vehicleName}
                   </p>
                   <p className="text-[#3A3A3A] text-[11px]">
-                    Rate Plan : Daily
+                    {selectedProduct.rentalMode === "subscription" ? "Subscription" : "Rate plan"}: {selectedProduct.selectedPlanType || "daily"}
+                    {selectedProduct.rentalMode === "subscription" && selectedProduct.subscriptionDuration
+                      ? ` · ${selectedProduct.subscriptionDuration} ${selectedProduct.selectedPlanType === "monthly" ? "month" : selectedProduct.selectedPlanType === "weekly" ? "week" : "day"}${Number(selectedProduct.subscriptionDuration) === 1 ? "" : "s"} minimum`
+                      : ""}
                   </p>
                 </div>
               </div>

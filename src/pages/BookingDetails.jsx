@@ -336,6 +336,8 @@ const BookingDetails = () => {
             },
             imgUrl: "/images/Scooter (3).png", // Default image, you might want to get this from vehicleModel
             ratePlan: getPlanDisplayName(apiData.planType),
+            rentalMode: apiData.rentalMode || 'fixed',
+            subscription: apiData.subscription || null,
             paymentStatus: apiData.lastPaymentAt ? "Completed" : "Pending",
             amountPaid: apiData.lastPaymentAmount || "0",
             refundAmount: apiData.lastPaymentAmount || "0",
@@ -551,16 +553,16 @@ const BookingDetails = () => {
                         <div className="relative">
                             <img id="menu" onClick={() => setOpenMenu(!openMenu)} className="p-[6px] cursor-pointer" src="/images/MenuDot.png" alt="Menu Dot Image" />
                             <div ref={menuDropdown} className={`absolute duration-500 transition-all right-0 z-30 w-[325px] overflow-hidden mt-[20px] ${openMenu ? "py-[16px] max-h-[1000px]" : "py-0 max-h-0"} flex flex-col bg-white rounded-[16px] calender-shadow`}>
-                                <button onClick={() => {
+                                {data.rentalMode !== 'subscription' && <button onClick={() => {
                                     handleViewReceipt();
                                     setOpenMenu(false);
-                                }} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">View Receipt</button>
+                                }} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">View Receipt</button>}
                                 {data.status === "Upcoming" && <>
-                                    <button onClick={() => setOpenModifyDates(true)} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Modify Booking Dates</button>
+                                    {data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Modify Booking Dates</button>}
                                     {/* <button className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Modify Add-ons</button> */}
                                     <button onClick={() => setOpenCancelPage(true)} className="font-medium cursor-pointer text-[#FE7171] py-[16px] px-[32px] hover:bg-gray-200 text-left">Cancel Booking</button>
                                 </>}
-                                {data.status !== "Upcoming" && <button onClick={() => setOpenModifyDates(true)} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Extend Rental</button>}
+                                {data.status !== "Upcoming" && data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Extend Rental</button>}
                             </div> 
                         </div>
                     </div>
@@ -678,7 +680,9 @@ const BookingDetails = () => {
                     </div>
                 )}
                 <div className="mt-[36px]">
-                    <p className="font-bold text-[24px] text-[#222222]">Rental Duration</p>
+                    <p className="font-bold text-[24px] text-[#222222]">
+                        {data.rentalMode === 'subscription' ? 'Subscription Term' : 'Rental Duration'}
+                    </p>
                     <div className="mt-[16px] bg-[#F7F7F7] py-[16px] px-[24px] rounded-[16px] w-full">
                         <div className='gap-x-[15px] flex items-center'>
                             <div className='flex flex-col'>
@@ -687,22 +691,39 @@ const BookingDetails = () => {
                             </div>
                             <div className='flex-1 flex items-center gap-x-[10px]'>
                                 <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
-                                <p className='text-[11px] text-[#222222]'>{countDays(data.pickup, data.dropoff)} Days</p>
+                                <p className='text-[11px] text-[#222222]'>
+                                    {data.rentalMode === 'subscription'
+                                        ? `${data.subscription?.commitmentDuration || 1} ${data.subscription?.commitmentUnit || 'month'}${Number(data.subscription?.commitmentDuration || 1) === 1 ? '' : 's'} minimum`
+                                        : `${countDays(data.pickup, data.dropoff)} Days`}
+                                </p>
                                 <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                             </div>
                             <div className='flex flex-col'>
-                                <p className='text-[11px] text-[#3A3A3A] text-right'>Dropoff</p>
+                                <p className='text-[11px] text-[#3A3A3A] text-right'>
+                                    {data.rentalMode === 'subscription' ? 'Committed until' : 'Dropoff'}
+                                </p>
                                 <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.dropoff?.date)} <span className='text-[#646464] text-[12px]'>{data?.dropoff?.time || "10 AM"}</span></p>
                             </div>
                         </div>
+                        {data.rentalMode === 'subscription' && (
+                            <div className="mt-[14px] flex items-start justify-between gap-[16px] rounded-[12px] border border-[#E4E2F7] bg-[#F8F7FF] px-[16px] py-[12px]">
+                                <div>
+                                    <p className="font-bold text-[13px] text-[#222222]">Renews automatically</p>
+                                    <p className="mt-[2px] text-[12px] text-[#646464]">
+                                        After {formattedDate(data?.dropoff?.date)}, billing continues {data.subscription?.commitmentUnit || 'month'}ly until you cancel.
+                                    </p>
+                                </div>
+                                <p className="shrink-0 font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')}/{data.subscription?.commitmentUnit || 'month'}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="mt-[16px] flex items-center gap-x-[16px]">
-                    {data.status === "Ongoing" && <button onClick={() => setOpenModifyDates(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
+                    {data.status === "Ongoing" && data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
                         <img className="w-[20px] h-[20px]" src="/images/Extend.png" alt="Extend Image" />
                         <p className="font-medium text-[12px] text-[#3A3A3A]">Extend Rental</p>
                     </button>}
-                    {data.status === "Upcoming" && <button onClick={() => setOpenModifyDates(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
+                    {data.status === "Upcoming" && data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
                         <img className="w-[20px] h-[20px]" src="/images/Extend.png" alt="Extend Image" />
                         <p className="font-medium text-[12px] text-[#3A3A3A]">Change Dates</p>
                     </button>}
@@ -718,7 +739,9 @@ const BookingDetails = () => {
                             <img className="w-[64px] h-[64px] rounded-[8px] object-cover" src={data.imgUrl} alt="Scooter Book Image" />
                             <div className="flex flex-col">
                                 <p className="font-bold text-[18px] text-[#484848]">{data.vehicleName}</p>
-                                <p className="text-[#3A3A3A] text-[11px]">Rate Plan : {data.ratePlan}</p>
+                                <p className="text-[#3A3A3A] text-[11px]">
+                                    {data.rentalMode === 'subscription' ? 'Subscription cycle' : 'Rate plan'}: {data.ratePlan}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -730,7 +753,7 @@ const BookingDetails = () => {
                 <div className="mt-[32px]">
                     <div className="flex items-center justify-between">
                         <p className="font-bold text-[24px] text-[#222222]">Payment Information</p>
-                        <button 
+                        {data.rentalMode !== 'subscription' && <button
                             onClick={handleViewReceipt} 
                             disabled={isDownloadingReceipt}
                             className={`font-bold text-[14px] flex items-center gap-x-[8px] transition-colors ${
@@ -747,16 +770,39 @@ const BookingDetails = () => {
                             ) : (
                                 'View Receipt'
                             )}
-                        </button>   
+                        </button>}
                     </div>
-                    <p className="mt-[18px] font-medium text-[#222222]">Total Amount</p>
+                    <p className="mt-[18px] font-medium text-[#222222]">
+                        {data.rentalMode === 'subscription' ? 'Wallet top-up paid' : 'Total Amount'}
+                    </p>
                     <div className="mt-[2px] flex items-center gap-x-[16px]">
-                        <p className="font-bold text-[18px] text-[#222222]">₹{data.amountPaid}</p>
+                        <p className="font-bold text-[18px] text-[#222222]">
+                            ₹{Number(data.rentalMode === 'subscription' ? data.subscription?.walletTopUpAmount : data.amountPaid || 0).toLocaleString('en-IN')}
+                        </p>
                         <div className="flex items-center gap-x-[8px]">
                             <p className="font-medium text-[12px] text-[#222222]">Payment Status</p>
-                            {data.paymentStatus === "Completed" && <span className="bg-[#DFFAEB] py-[4px] px-[16px] h-[26px] font-medium text-[12px] text-[#222222] rounded-[12px]">Completed</span>}
+                            {data.paymentStatus === "Completed" && <span className="bg-[#DFFAEB] py-[4px] px-[16px] h-[26px] font-medium text-[12px] text-[#222222] rounded-[12px]">{data.rentalMode === 'subscription' ? 'Wallet funded' : 'Completed'}</span>}
                         </div>
                     </div> 
+                    {data.rentalMode === 'subscription' && (
+                        <div className="mt-[16px] grid gap-[12px] rounded-[16px] border border-[#EDEDED] bg-[#F7F7F7] p-[16px] sm:grid-cols-3">
+                            <div>
+                                <p className="text-[11px] text-[#717171]">Required opening balance</p>
+                                <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.requiredOpeningBalance || 0).toLocaleString('en-IN')}</p>
+                            </div>
+                            <div>
+                                <p className="text-[11px] text-[#717171]">Security deposit</p>
+                                <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.securityDeposit || 0).toLocaleString('en-IN')}</p>
+                            </div>
+                            <div>
+                                <p className="text-[11px] text-[#717171]">Minimum commitment</p>
+                                <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.minimumCommitmentValue || 0).toLocaleString('en-IN')}</p>
+                            </div>
+                            <p className="text-[12px] leading-[18px] text-[#646464] sm:col-span-3">
+                                Your wallet funds the ₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')} {data.subscription?.commitmentUnit || 'month'}ly charge. Automatic renewal is always on.
+                            </p>
+                        </div>
+                    )}
                     {data.refundDate && <div className="flex flex-col mt-[8px]">
                         <p className="text-[14px] text-[#222222]">Refund Processed on {(formattedDate(data.refundDate.date))}</p>
                         <p className="text-[#969696] text-[14px] italic">Refunds (if applicable) will reflect in 5–7 business days.</p>
@@ -776,7 +822,12 @@ const BookingDetails = () => {
                         </div>
                     </div>
                     <div className="mt-[32px]">
-                        <WhatToExpect showDropoff={true} />
+                        <WhatToExpect
+                            showDropoff={data.rentalMode !== 'subscription'}
+                            rentalMode={data.rentalMode}
+                            commitmentDuration={data.subscription?.commitmentDuration || 1}
+                            commitmentUnit={data.subscription?.commitmentUnit || 'month'}
+                        />
                     </div>
                     <div className="mt-[32px]">
                         <p className="font-bold text-[24px] text-[#222222]">Cancellation Policy</p>
