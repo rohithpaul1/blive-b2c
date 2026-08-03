@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ProductContext } from "../contexts/ProductContext";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import { UserContext } from "../contexts/UserContext";
@@ -12,6 +12,65 @@ import {
   renewalCadenceLabel,
   startingPeriodLabel,
 } from "../utils/subscription";
+
+const OEM_LOGOS = [
+  { match: "ather", src: "/images/Ather.png" },
+  { match: "tvs", src: "/images/TVS.png" },
+  { match: "hero", src: "/images/HeroHonda.png" },
+  { match: "bounce", src: "/images/Bounce.png" },
+  { match: "ola", src: "/images/Ola.png" },
+];
+
+const getOemIdentity = (card) => {
+  const label =
+    card.brandName ||
+    card.manufacturer ||
+    card.vehicleName?.split(" ")[0] ||
+    "EV";
+  const searchableName = [
+    card.brandName,
+    card.manufacturer,
+    card.vehicleName,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const logo = OEM_LOGOS.find(({ match }) => searchableName.includes(match));
+  const initials = label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+
+  return { label, initials, src: logo?.src };
+};
+
+const OemBrandMark = ({ card }) => {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const { label, initials, src } = getOemIdentity(card);
+
+  return (
+    <span
+      className="flex h-[28px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[#ececec] bg-white px-[6px] py-[4px]"
+      aria-label={`${label} logo`}
+      role="img"
+    >
+      {src && !logoFailed ? (
+        <img
+          className="h-full w-full object-contain"
+          src={src}
+          alt=""
+          onError={() => setLogoFailed(true)}
+        />
+      ) : (
+        <span className="text-[10px] font-black tracking-[0.04em] text-[#444]">
+          {initials}
+        </span>
+      )}
+    </span>
+  );
+};
 
 const Cards = ({ cards, isCatalog, selectedPlanType }) => {
   const navigate = useNavigate();
@@ -325,13 +384,7 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
 
               <div className="flex flex-1 flex-col px-[20px] pb-[22px] pt-[4px] sm:pt-[6px]">
                 <div className="flex items-center gap-[8px]">
-                  <span className="flex size-[24px] items-center justify-center overflow-hidden rounded-full border border-[#e6e6e6] bg-white p-[3px]">
-                    <img
-                      className="h-full w-full object-contain"
-                      src={card.brandLogoUrl}
-                      alt=""
-                    />
-                  </span>
+                  <OemBrandMark card={card} />
                   <h2 className="text-[20px] font-bold text-[#262626]">
                     {card.vehicleName}
                   </h2>
