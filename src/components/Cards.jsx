@@ -41,13 +41,14 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
       return `${hours.toString().padStart(2, "0")}:${minutes}`;
     };
 
-    // Create date object and format as ISO string
+    // Treat the selected clock as local time, then send the corresponding
+    // instant. Appending `Z` to the wall-clock value shifts Indian selections
+    // by +5:30 when they are displayed again after checkout.
     const dateObj = new Date(date);
     const timeStr = parseTime(time || "10 AM");
-
-    // Format as ISO string with time
-    const isoString = dateObj.toISOString().split("T")[0];
-    return `${isoString}T${timeStr}:00.000Z`;
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    dateObj.setHours(hours, minutes, 0, 0);
+    return dateObj.toISOString();
   };
 
   // Function to call dynamic calculation API

@@ -296,36 +296,21 @@ const Booking = () => {
     try {
       setIsLoading(true);
 
-      // Helper function to format time for API
-      const formatTimeForAPI = (timeStr) => {
-        if (!timeStr) return "10:00";
-
-        const [time, modifier] = timeStr.split(" ");
-        let [hours, minutes] = time.split(":");
-        if (!minutes) minutes = "00";
-
-        hours = parseInt(hours, 10);
-        if (modifier.toUpperCase() === "PM" && hours < 12) {
-          hours += 12;
-        }
-        if (modifier.toUpperCase() === "AM" && hours === 12) {
-          hours = 0;
-        }
-
-        return `${hours.toString().padStart(2, "0")}:${minutes}`;
-      };
-
       const paymentData = {
         userId: userData?.id,
         amount: parseFloat(calculateTotal()), // Amount in rupees
         vehicleModelId: selectedProduct?.id,
         planId: selectedProduct?.planId,
-        pickupDate:
-          selectedPickup?.date || new Date().toISOString().split("T")[0],
-        pickupTime: formatTimeForAPI(selectedPickup?.time),
-        dropoffDate:
-          selectedDropoff?.date || new Date().toISOString().split("T")[0],
-        dropoffTime: formatTimeForAPI(selectedDropoff?.time),
+        // Send complete instants so the selected local clock survives storage
+        // and renders identically in booking history and admin operations.
+        pickupDate: formatDateTimeForAPI(
+          selectedPickup?.date || new Date(),
+          selectedPickup?.time
+        ),
+        dropoffDate: formatDateTimeForAPI(
+          selectedDropoff?.date || new Date(),
+          selectedDropoff?.time
+        ),
         ratePlan: (() => {
           // Try multiple sources for plan type
           const planTypeFromProduct = selectedProduct?.selectedPlanType || "";
@@ -629,13 +614,12 @@ const Booking = () => {
       return `${hours.toString().padStart(2, "0")}:${minutes}`;
     };
 
-    // Create date object and format as ISO string
+    // Treat the selected clock as local time before converting to an instant.
     const dateObj = new Date(date);
     const timeStr = parseTime(time || "10 AM");
-
-    // Format as ISO string with time
-    const isoString = dateObj.toISOString().split("T")[0];
-    return `${isoString}T${timeStr}:00.000Z`;
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    dateObj.setHours(hours, minutes, 0, 0);
+    return dateObj.toISOString();
   };
 
   // Function to recalculate pricing with new dates
