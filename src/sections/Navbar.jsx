@@ -48,6 +48,17 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
           />
           {token ? (
             <div className="flex items-center gap-x-1.5 md:gap-x-3">
+              <button
+                type="button"
+                onClick={() => navigate("/business")}
+                className={`hidden min-h-10 items-center rounded-full px-4 text-[13px] font-bold transition-colors sm:flex ${
+                  location.pathname === "/business"
+                    ? "bg-[#f2eef8] text-[#351a75]"
+                    : "text-[#3f3a42] hover:bg-[#f7f7f7]"
+                }`}
+              >
+                For Business
+              </button>
               {wallet?.showInHeader && (
                 <button
                   type="button"
@@ -186,12 +197,25 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => setShowLoginPage(true)}
-              className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#351a75] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#2c155f]"
-            >
-              Login or Signup
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigate("/business")}
+                className={`hidden h-10 items-center justify-center rounded-full px-4 text-[13px] font-bold transition-colors sm:flex ${
+                  location.pathname === "/business"
+                    ? "bg-[#f2eef8] text-[#351a75]"
+                    : "text-[#3f3a42] hover:bg-[#f7f7f7]"
+                }`}
+              >
+                For Business
+              </button>
+              <button
+                onClick={() => setShowLoginPage(true)}
+                className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#351a75] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#2c155f]"
+              >
+                Login or Signup
+              </button>
+            </div>
           )}
         </div>
         {onSearchPage ? (

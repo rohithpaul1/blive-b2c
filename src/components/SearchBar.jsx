@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
+  Building2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -194,9 +195,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
 
   const modeSwitch = (mobile = false) => (
     <div
-      className={`flex items-center gap-[8px] ${mobile ? "w-full" : ""}`}
+      className={mobile ? "grid w-full grid-cols-3 gap-[6px]" : "flex items-center gap-[8px]"}
       role="tablist"
-      aria-label="Rental type"
+      aria-label="Rental journey"
     >
       {[
         [RENTAL_MODES.fixed, "Fixed rental", <CalendarDays key="fixed-icon" className="size-[17px]" aria-hidden="true" />],
@@ -206,8 +207,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           key={mode}
           type="button"
           onClick={() => handleModeChange(mode)}
-          className={`flex min-h-[44px] items-center justify-center gap-[8px] rounded-full border px-[18px] text-[13px] font-bold transition-colors ${
-            mobile ? "flex-1" : ""
+          className={`flex min-h-[44px] items-center justify-center rounded-full border font-bold transition-colors ${
+            mobile ? "gap-[5px] px-[8px] text-[12px]" : "gap-[8px] px-[18px] text-[13px]"
           } ${
             rentalMode === mode
               ? "border-[#2f2350] bg-[#2f2350] text-white"
@@ -217,9 +218,24 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           role="tab"
         >
           {icon}
-          {label}
+          {mobile && mode === RENTAL_MODES.fixed ? "Fixed" : label}
         </button>
       ))}
+      <button
+        type="button"
+        onClick={() => {
+          setMobileOpen(false);
+          navigate("/business");
+        }}
+        className={`flex min-h-[44px] items-center justify-center rounded-full border border-transparent bg-[#f3f2f4] font-bold text-[#514d56] transition-colors hover:bg-[#ebe9ed] ${
+          mobile ? "gap-[5px] px-[8px] text-[12px]" : "gap-[8px] px-[18px] text-[13px]"
+        }`}
+        role="tab"
+        aria-selected="false"
+      >
+        <Building2 className="size-[17px]" aria-hidden="true" />
+        {mobile ? "Business" : "For business"}
+      </button>
     </div>
   );
 

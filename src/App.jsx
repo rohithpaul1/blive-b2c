@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import HelpCenter from './pages/HelpCenter';
 import Notifications from './pages/Notifications';
 import Wallet from './pages/Wallet';
+import Business from './pages/Business';
 
 const App = () => {
   const { loading } = useContext(UserContext);
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/help-center" element={<HelpCenter />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/business" element={<Business />} />
           <Route path="/" element={<Navigate to="/home" />} />
           <Route path="*" element={<Navigate to="/home" />} />
         </Routes>

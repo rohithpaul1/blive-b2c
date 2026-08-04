@@ -42,6 +42,12 @@ const Footer = () => {
         >
           Help Center
         </p>
+        <p
+          onClick={() => navigate("/business")}
+          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
+        >
+          For Business
+        </p>
         <a
           href="mailto:contact@blive.co.in"
           className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
