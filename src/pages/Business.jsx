@@ -3,14 +3,11 @@ import { useMutation, useQuery } from "convex/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
-  BadgeIndianRupee,
   Building2,
   CalendarDays,
-  Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock3,
   Mail,
   MapPin,
   Phone,
@@ -36,29 +33,6 @@ const CITY_OPTIONS = [
 ];
 
 const DURATION_OPTIONS = [1, 3, 6, 12, 18, 24, 36];
-
-const BUSINESS_USE_CASES = [
-  {
-    title: "Quick commerce deliveries",
-    image: "/images/business/quick-commerce.png",
-  },
-  {
-    title: "3PL and logistics operations",
-    image: "/images/business/logistics.png",
-  },
-  {
-    title: "Employee commute programmes",
-    image: "/images/business/employee-commute.png",
-  },
-  {
-    title: "Field service operations",
-    image: "/images/business/field-service.png",
-  },
-  {
-    title: "Food delivery fleets",
-    image: "/images/business/food-delivery.png",
-  },
-];
 
 const inputClass =
   "mt-2 h-12 w-full rounded-[12px] border border-[#dedce1] bg-white px-4 text-[15px] text-[#262626] outline-none transition placeholder:text-[#969198] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
@@ -342,60 +316,37 @@ function Business() {
       <main className="pt-[72px]">
         <section className="relative overflow-hidden bg-[#17131f] text-white">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(108,77,166,0.32),transparent_38%)]" />
-          <div className="relative mx-auto grid max-w-[1280px] items-center gap-10 px-5 py-14 sm:px-8 md:min-h-[610px] md:grid-cols-[minmax(0,1fr)_minmax(420px,0.9fr)] md:px-12 md:py-20 lg:px-16">
+          <div className="relative mx-auto grid max-w-[1280px] items-center gap-8 px-5 py-12 sm:px-8 md:min-h-[440px] md:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] md:px-12 md:py-14 lg:px-16">
             <div className="max-w-[650px]">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[12px] font-bold text-white/85">
                 <Building2 className="size-4" aria-hidden="true" />
                 BLive for Business
               </span>
-              <h1 className="mt-6 text-[42px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[58px] md:text-[66px]">
-                The smarter way to rent vehicles
+              <h1 className="mt-6 text-[40px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[52px] md:text-[58px]">
+                Choose vehicles
                 <span className="block text-[#c9b8f0]">for your business.</span>
               </h1>
-              <p className="mt-6 max-w-[560px] text-[17px] leading-7 text-white/68 sm:text-[19px]">
-                Fleet rentals for delivery, employee commute, field operations,
-                and enterprise mobility—planned around your requirements.
+              <p className="mt-5 max-w-[560px] text-[16px] leading-7 text-white/68 sm:text-[18px]">
+                Select the vehicle models and quantities you need. We will review
+                availability and return with one tailored quotation.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#business-fleet-builder"
                   className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[14px] bg-white px-6 text-[15px] font-bold text-[#24183d] transition hover:bg-[#f4f0fc]"
                 >
-                  Plan your fleet
+                  Choose vehicles
                   <ArrowRight className="size-[18px]" aria-hidden="true" />
                 </a>
-                <a
-                  href="#how-business-works"
-                  className="inline-flex min-h-[54px] items-center justify-center rounded-[14px] border border-white/20 px-6 text-[15px] font-bold text-white transition hover:bg-white/10"
-                >
-                  See how it works
-                </a>
-                <button
-                  type="button"
-                  onClick={() => navigate("/business/access")}
-                  className="inline-flex min-h-[54px] items-center justify-center rounded-[14px] border border-white/20 px-6 text-[15px] font-bold text-white transition hover:bg-white/10"
-                >
-                  Client login
-                </button>
-              </div>
-              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-[13px] font-medium text-white/70">
-                {["Multiple models", "Flexible fleet sizes", "Deployment support"].map(
-                  (item) => (
-                    <span key={item} className="flex items-center gap-2">
-                      <Check className="size-4 text-[#bba4ef]" aria-hidden="true" />
-                      {item}
-                    </span>
-                  )
-                )}
               </div>
             </div>
 
-            <div className="relative mx-auto h-[390px] w-full max-w-[520px] sm:h-[480px]">
+            <div className="relative mx-auto h-[280px] w-full max-w-[460px] sm:h-[330px]">
               <div className="absolute left-0 top-4 w-[70%] overflow-hidden rounded-[26px] border border-white/10 bg-white/10 p-3 shadow-2xl backdrop-blur">
                 <img
                   src="/images/vehicle-models/ather-450x-electric.jpg"
                   alt="Ather electric scooter for a business fleet"
-                  className="h-[230px] w-full rounded-[18px] object-cover sm:h-[300px]"
+                  className="h-[165px] w-full rounded-[18px] object-cover sm:h-[205px]"
                 />
                 <div className="flex items-center justify-between px-2 pb-1 pt-3">
                   <span className="text-[14px] font-bold">Urban mobility</span>
@@ -406,7 +357,7 @@ function Business() {
                 <img
                   src="/images/vehicle-models/tvs-iqube-electric.jpg"
                   alt="TVS electric scooter for business rentals"
-                  className="h-[165px] w-full rounded-[16px] object-cover sm:h-[210px]"
+                  className="h-[110px] w-full rounded-[16px] object-cover sm:h-[135px]"
                 />
                 <div className="px-2 pb-1 pt-3">
                   <span className="text-[13px] font-bold">Built around your requirement</span>
@@ -419,13 +370,13 @@ function Business() {
                 <span className="block text-[10px] font-bold uppercase tracking-[0.08em] text-[#746b7b]">
                   One workflow
                 </span>
-                <span className="mt-1 block text-[16px] font-black">Enquire → Deploy</span>
+                <span className="mt-1 block text-[16px] font-black">Select → Enquire</span>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="business-fleet-builder" className="scroll-mt-[72px] bg-[#f6f6f6] px-5 py-16 sm:px-8 md:py-24">
+        <section id="business-fleet-builder" className="scroll-mt-[72px] bg-[#f6f6f6] px-5 py-14 sm:px-8 md:py-20">
           <div className="mx-auto max-w-[1180px]">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <div>
@@ -433,7 +384,7 @@ function Business() {
                   Business vehicle catalogue
                 </p>
                 <h2 className="mt-3 text-[34px] font-black tracking-[-0.04em] sm:text-[44px]">
-                  Build your fleet requirement.
+                  Vehicles for your business.
                 </h2>
                 <p className="mt-3 max-w-[650px] text-[15px] leading-6 text-[#716c75]">
                   Select one or more models, set the number of vehicles, and then
@@ -548,33 +499,6 @@ function Business() {
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </button>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="how-business-works" className="bg-[#f7f6f8] px-5 py-16 sm:px-8 md:py-20">
-          <div className="mx-auto max-w-[1180px]">
-            <div className="max-w-[650px]">
-              <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6a5294]">
-                A simple commercial journey
-              </p>
-              <h2 className="mt-3 text-[32px] font-black tracking-[-0.035em] sm:text-[42px]">
-                From requirement to deployment, in one flow.
-              </h2>
-            </div>
-            <div className="mt-10 grid gap-4 md:grid-cols-4">
-              {[
-                ["01", "Share your requirement", "Choose the models, quantity, city, and expected rental duration."],
-                ["02", "Review your quotation", "Receive one proposal with vehicle rates and commercial terms."],
-                ["03", "Complete business verification", "Upload KYB documents only after you accept the quotation."],
-                ["04", "Plan deployment", "We align vehicles, hub, and delivery before your rental starts."],
-              ].map(([step, title, copy]) => (
-                <article key={step} className="rounded-[20px] border border-[#e6e3e8] bg-white p-5">
-                  <span className="text-[12px] font-black text-[#6a5294]">{step}</span>
-                  <h3 className="mt-7 text-[18px] font-black">{title}</h3>
-                  <p className="mt-3 text-[14px] leading-6 text-[#716c75]">{copy}</p>
-                </article>
-              ))}
             </div>
           </div>
         </section>
@@ -903,99 +827,6 @@ function Business() {
           </div>
         )}
 
-        <section className="border-y border-[#ece9ee] bg-[#fbfafc] px-5 py-16 sm:px-8 md:py-24">
-          <div className="mx-auto max-w-[1180px]">
-            <div className="mx-auto max-w-[720px] text-center">
-              <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6a5294]">
-                Built for real operations
-              </p>
-              <h2 className="mt-3 text-[32px] font-black tracking-[-0.035em] sm:text-[42px]">
-                Tailored fleet solutions for every business need.
-              </h2>
-              <p className="mt-4 text-[15px] leading-6 text-[#716c75] sm:text-[16px]">
-                Purpose-built fleet programmes for delivery, logistics, employee
-                mobility, and field operations.
-              </p>
-            </div>
-
-            <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
-              {BUSINESS_USE_CASES.map((item) => (
-                <article key={item.title} className="text-center">
-                  <div className="mx-auto aspect-square w-full max-w-[190px] overflow-hidden rounded-full bg-white shadow-[0_14px_35px_rgba(35,29,39,0.12)]">
-                    <img
-                      src={item.image}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <h3 className="mx-auto mt-5 max-w-[190px] text-[14px] font-black leading-5 text-[#2d2930] sm:text-[15px]">
-                    {item.title}
-                  </h3>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#17131f] px-5 py-16 text-white sm:px-8 md:py-24">
-          <div className="mx-auto max-w-[1180px]">
-            <div className="mx-auto max-w-[700px] text-center">
-              <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#c9b8f0]">
-                Why BLive for Business
-              </p>
-              <h2 className="mt-3 text-[32px] font-black tracking-[-0.035em] sm:text-[42px]">
-                One partner from quotation to deployment.
-              </h2>
-              <p className="mt-4 text-[15px] leading-6 text-white/62 sm:text-[16px]">
-                Clear commercial terms, a connected onboarding journey, and
-                operational support after your fleet goes live.
-              </p>
-            </div>
-
-            <div className="mt-11 grid gap-4 md:grid-cols-3">
-              {[
-                [<Building2 key="models" className="size-5" aria-hidden="true" />, "Fleet choice that fits", "Request multiple models and quantities in the same enquiry."],
-                [<BadgeIndianRupee key="pricing" className="size-5" aria-hidden="true" />, "One clear quotation", "Review vehicle pricing and commercial terms before KYB begins."],
-                [<Clock3 key="support" className="size-5" aria-hidden="true" />, "Deployment support", "Coordinate vehicles, hub, and start dates through one connected flow."],
-              ].map(([icon, title, copy]) => (
-                <article key={title} className="rounded-[20px] border border-white/10 bg-white/[0.06] p-6">
-                  <span className="flex size-11 items-center justify-center rounded-full bg-white text-[#351a75]">
-                    {icon}
-                  </span>
-                  <h3 className="mt-7 text-[18px] font-black">{title}</h3>
-                  <p className="mt-3 text-[14px] leading-6 text-white/58">{copy}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="px-5 py-16 sm:px-8 md:py-24">
-          <div className="relative mx-auto min-h-[360px] max-w-[1180px] overflow-hidden rounded-[28px] bg-[#29252d] sm:min-h-[420px]">
-            <img
-              src="/images/business/fleet-cta.png"
-              alt="Commercial vehicle fleet ready for deployment"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20" />
-            <div className="relative flex min-h-[360px] max-w-[600px] flex-col items-start justify-center px-7 py-12 text-white sm:min-h-[420px] sm:px-12">
-              <h2 className="text-[34px] font-black leading-[1.08] tracking-[-0.04em] sm:text-[48px]">
-                Ready to move your business forward?
-              </h2>
-              <p className="mt-4 max-w-[500px] text-[15px] leading-6 text-white/72 sm:text-[17px]">
-                Share your fleet requirement and let our commercial team build a
-                proposal around your operation.
-              </p>
-              <a
-                href="#business-fleet-builder"
-                className="mt-7 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[13px] bg-white px-6 text-[14px] font-bold text-[#261d30] transition hover:bg-[#f3eff8]"
-              >
-                Make an enquiry
-                <ArrowRight className="size-[18px]" aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />

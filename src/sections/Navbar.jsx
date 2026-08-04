@@ -29,11 +29,15 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const wallet = useQuery("b2c/wallet:summary", token ? {} : "skip");
+  const isBusinessWebsite = location.pathname.startsWith("/business");
+  const wallet = useQuery(
+    "b2c/wallet:summary",
+    token && !isBusinessWebsite ? {} : "skip"
+  );
 
   return (
     <>
-      {showLoginPage && <Login />}
+      {showLoginPage && !isBusinessWebsite && <Login />}
       <nav
         className={`fixed top-0 z-30 flex w-full flex-col items-center justify-center px-[clamp(20px,4vw,64px)] py-[10px] ${
           expanded ? "bg-white header-shadow" : "h-[72px] bg-white/95"
@@ -41,25 +45,37 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
       >
         <div className="flex min-h-[48px] w-full items-center justify-between self-start">
           <img
-            onClick={() => navigate("/home")}
+            onClick={() => navigate(isBusinessWebsite ? "/business" : "/home")}
             className="h-[34px] w-auto cursor-pointer"
             src="/images/BliveLogo.svg"
             alt="BLive"
           />
-          {token ? (
+          {isBusinessWebsite ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigate("/home")}
+                className="flex h-10 items-center justify-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:px-4 sm:text-[13px]"
+              >
+                <span className="sm:hidden">Personal</span>
+                <span className="hidden sm:inline">Personal rentals</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/business/access")}
+                className="flex h-10 items-center justify-center rounded-full bg-[#351a75] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[#2c155f] sm:px-5 sm:text-[13px]"
+              >
+                Business login
+              </button>
+            </div>
+          ) : token ? (
             <div className="flex items-center gap-x-1.5 md:gap-x-3">
               <button
                 type="button"
-                onClick={() => navigate(location.pathname.startsWith("/business") ? "/home" : "/business")}
-                className={`${
-                  location.pathname.startsWith("/business") ? "flex" : "hidden sm:flex"
-                } min-h-10 items-center rounded-full px-3 text-[12px] font-bold transition-colors sm:px-4 sm:text-[13px] ${
-                  location.pathname === "/business"
-                    ? "bg-[#f2eef8] text-[#351a75]"
-                    : "text-[#3f3a42] hover:bg-[#f7f7f7]"
-                }`}
+                onClick={() => navigate("/business")}
+                className="hidden min-h-10 items-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:flex sm:px-4 sm:text-[13px]"
               >
-                {location.pathname.startsWith("/business") ? "Personal rentals" : "For Business"}
+                For Business
               </button>
               {wallet?.showInHeader && (
                 <button
@@ -202,16 +218,10 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => navigate(location.pathname.startsWith("/business") ? "/home" : "/business")}
-                className={`${
-                  location.pathname.startsWith("/business") ? "flex" : "hidden sm:flex"
-                } h-10 items-center justify-center rounded-full px-3 text-[12px] font-bold transition-colors sm:px-4 sm:text-[13px] ${
-                  location.pathname === "/business"
-                    ? "bg-[#f2eef8] text-[#351a75]"
-                    : "text-[#3f3a42] hover:bg-[#f7f7f7]"
-                }`}
+                onClick={() => navigate("/business")}
+                className="hidden h-10 items-center justify-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:flex sm:px-4 sm:text-[13px]"
               >
-                {location.pathname.startsWith("/business") ? "Personal rentals" : "For Business"}
+                For Business
               </button>
               <button
                 onClick={() => setShowLoginPage(true)}
