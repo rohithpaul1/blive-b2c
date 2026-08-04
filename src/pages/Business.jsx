@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   BadgeIndianRupee,
@@ -8,14 +8,19 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Mail,
   MapPin,
+  Minus,
   Phone,
   Plus,
+  Search,
   ShieldCheck,
   Trash2,
   Users,
+  Zap,
 } from "lucide-react";
 import Navbar from "../sections/Navbar";
 import Footer from "../sections/Footer";
@@ -55,8 +60,6 @@ const BUSINESS_USE_CASES = [
   },
 ];
 
-const emptyLine = () => ({ modelName: "", quantity: 10 });
-
 const inputClass =
   "mt-2 h-12 w-full rounded-[12px] border border-[#dedce1] bg-white px-4 text-[15px] text-[#262626] outline-none transition placeholder:text-[#969198] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
 
@@ -70,9 +73,11 @@ function FieldLabel({ children }) {
 
 function Business() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const catalog = useQuery("b2c/catalog:list", {});
   const createEnquiry = useMutation("enquiries:createEnquiry");
   const submissionReference = useRef(null);
+  const preselectedModelReference = useRef(null);
 
   const [form, setForm] = useState({
     companyName: "",
@@ -86,7 +91,10 @@ function Business() {
     consent: false,
     website: "",
   });
-  const [lines, setLines] = useState([emptyLine()]);
+  const [lines, setLines] = useState([]);
+  const [modelQuery, setModelQuery] = useState("");
+  const [evOnly, setEvOnly] = useState(false);
+  const [modelPage, setModelPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(null);
@@ -98,29 +106,100 @@ function Business() {
       const name = row?.model?.modelName?.trim();
       if (!name || unique.has(name)) return;
       unique.set(name, {
+        id: String(row?.model?.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-")),
         name,
+        brandName: row?.brand?.name || row?.model?.manufacturer || "BLive fleet",
         image:
           row?.model?.imageUrl ||
           row?.model?.images?.[0] ||
           row?.brand?.brandLogo ||
           "/images/vehicle-models/electric-scooter-generic.jpg",
         available: Number(row?.availableVehiclesCount || 0),
+        dailyRate: Number(row?.plan?.enterDailyPlanPrice || 0),
+        engineType: String(row?.model?.engineType || "ev").toLowerCase(),
       });
     });
     return [...unique.values()];
   }, [catalog]);
+
+  const filteredModels = useMemo(() => {
+    const query = modelQuery.trim().toLowerCase();
+    return models.filter((model) => {
+      const matchesQuery =
+        !query ||
+        model.name.toLowerCase().includes(query) ||
+        model.brandName.toLowerCase().includes(query);
+      const matchesEngine = !evOnly || model.engineType === "ev" || model.engineType === "electric";
+      return matchesQuery && matchesEngine;
+    });
+  }, [evOnly, modelQuery, models]);
+
+  const modelPageSize = 6;
+  const modelPageCount = Math.max(1, Math.ceil(filteredModels.length / modelPageSize));
+  const visibleModels = filteredModels.slice(
+    (modelPage - 1) * modelPageSize,
+    modelPage * modelPageSize
+  );
+  const selectedVehicleCount = lines.reduce(
+    (total, line) => total + Number(line.quantity || 0),
+    0
+  );
+
+  useEffect(() => {
+    setModelPage(1);
+  }, [evOnly, modelQuery]);
+
+  useEffect(() => {
+    if (modelPage > modelPageCount) setModelPage(modelPageCount);
+  }, [modelPage, modelPageCount]);
+
+  useEffect(() => {
+    const requestedModelId = searchParams.get("model");
+    if (
+      !requestedModelId ||
+      models.length === 0 ||
+      preselectedModelReference.current === requestedModelId
+    ) return;
+    const requestedModel = models.find((model) => model.id === requestedModelId);
+    if (!requestedModel) return;
+    preselectedModelReference.current = requestedModelId;
+    setLines((current) =>
+      current.some((line) => line.modelName === requestedModel.name)
+        ? current
+        : [...current, { modelName: requestedModel.name, quantity: 10 }]
+    );
+    requestAnimationFrame(() => {
+      document.getElementById("business-fleet-builder")?.scrollIntoView({ block: "start" });
+    });
+  }, [models, searchParams]);
 
   const updateForm = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
     setError("");
   };
 
-  const updateLine = (index, patch) => {
+  const selectModel = (modelName) => {
     setLines((current) =>
-      current.map((line, lineIndex) =>
-        lineIndex === index ? { ...line, ...patch } : line
+      current.some((line) => line.modelName === modelName)
+        ? current
+        : [...current, { modelName, quantity: 10 }]
+    );
+    setError("");
+  };
+
+  const changeModelQuantity = (modelName, amount) => {
+    setLines((current) =>
+      current.map((line) =>
+        line.modelName === modelName
+          ? { ...line, quantity: Math.max(1, Math.min(5000, Number(line.quantity || 1) + amount)) }
+          : line
       )
     );
+    setError("");
+  };
+
+  const removeModel = (modelName) => {
+    setLines((current) => current.filter((line) => line.modelName !== modelName));
     setError("");
   };
 
@@ -132,9 +211,8 @@ function Business() {
     }
     if (!form.phone.trim()) return "Enter a contact number.";
     if (!form.rentalStartDate) return "Choose an expected start date.";
-    if (lines.some((line) => !line.modelName || Number(line.quantity) < 1)) {
-      return "Choose a model and quantity for every fleet line.";
-    }
+    if (lines.length === 0) return "Choose at least one vehicle model for your fleet.";
+    if (lines.some((line) => Number(line.quantity) < 1)) return "Enter a valid quantity for every selected model.";
     if (!form.consent) return "Confirm that we may contact you about this enquiry.";
     return "";
   };
@@ -218,7 +296,7 @@ function Business() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
-                  href="#business-enquiry"
+                  href="#business-fleet-builder"
                   className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[14px] bg-white px-6 text-[15px] font-bold text-[#24183d] transition hover:bg-[#f4f0fc]"
                 >
                   Plan your fleet
@@ -285,6 +363,202 @@ function Business() {
           </div>
         </section>
 
+        <section id="business-fleet-builder" className="scroll-mt-[72px] bg-[#f6f6f6] px-5 py-16 sm:px-8 md:py-24">
+          <div className="mx-auto max-w-[1180px]">
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6a5294]">
+                  Business vehicle catalogue
+                </p>
+                <h2 className="mt-3 text-[34px] font-black tracking-[-0.04em] sm:text-[44px]">
+                  Build your fleet requirement.
+                </h2>
+                <p className="mt-3 max-w-[650px] text-[15px] leading-6 text-[#716c75]">
+                  Select one or more models, set the number of vehicles, and then
+                  share your business details for a tailored quotation.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <label className="relative block min-w-0 sm:w-[280px]">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 size-[17px] -translate-y-1/2 text-[#777179]" aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={modelQuery}
+                    onChange={(event) => setModelQuery(event.target.value)}
+                    placeholder="Search vehicle models"
+                    aria-label="Search business vehicle models"
+                    className="h-12 w-full rounded-full border border-[#dedce1] bg-white pl-11 pr-4 text-[14px] outline-none transition focus:border-[#252127]"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setEvOnly((current) => !current)}
+                  aria-pressed={evOnly}
+                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-full border px-5 text-[13px] font-bold transition ${
+                    evOnly
+                      ? "border-[#252127] bg-[#252127] text-white"
+                      : "border-[#dedce1] bg-white text-[#4d484f] hover:border-[#aaa5ac]"
+                  }`}
+                >
+                  <Zap className="size-4" aria-hidden="true" />
+                  EV only
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-9 overflow-hidden rounded-[24px] border border-[#e2e0e3] bg-white shadow-[0_12px_35px_rgba(34,29,38,0.06)]">
+              <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-3 lg:gap-6">
+                {catalog === undefined &&
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="h-[320px] animate-pulse rounded-[18px] bg-[#f2f1f3]" />
+                  ))}
+
+                {catalog !== undefined && visibleModels.length === 0 && (
+                  <div className="col-span-full flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
+                    <Search className="size-7 text-[#9a959d]" aria-hidden="true" />
+                    <h3 className="mt-4 text-[17px] font-black">No matching models</h3>
+                    <p className="mt-2 text-[13px] text-[#777179]">Try another model name or turn off the EV filter.</p>
+                  </div>
+                )}
+
+                {visibleModels.map((model) => {
+                  const selectedLine = lines.find((line) => line.modelName === model.name);
+                  const isSelected = Boolean(selectedLine);
+                  return (
+                    <article
+                      key={model.id}
+                      className={`flex min-h-[320px] flex-col overflow-hidden rounded-[18px] border bg-white p-4 transition ${
+                        isSelected
+                          ? "border-[#332d36] shadow-[0_6px_18px_rgba(32,28,35,0.10)]"
+                          : "border-[#e5e3e6] shadow-[0_3px_7px_rgba(32,28,35,0.05)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(32,28,35,0.09)]"
+                      }`}
+                    >
+                      <Link
+                        to={`/business/vehicles/${encodeURIComponent(model.id)}`}
+                        className="group block"
+                        aria-label={`View ${model.name} business vehicle details`}
+                      >
+                        <div className="flex h-[150px] items-center justify-center overflow-hidden rounded-[14px] bg-[#f7f7f7] p-3">
+                          <img
+                            src={model.image}
+                            alt={model.name}
+                            className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]"
+                          />
+                        </div>
+                        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.08em] text-[#8a858c]">
+                          {model.brandName}
+                        </p>
+                        <div className="mt-1 flex items-start justify-between gap-3">
+                          <h3 className="text-[17px] font-black leading-6 text-[#262326]">{model.name}</h3>
+                          <span className={`mt-1 size-2 shrink-0 rounded-full ${model.available > 0 ? "bg-[#2da56b]" : "bg-[#b8b4ba]"}`} title={model.available > 0 ? "Currently available" : "Availability on request"} />
+                        </div>
+                      </Link>
+                      <p className="mt-3 text-[12px] text-[#777179]">
+                        {model.dailyRate > 0 ? (
+                          <>Indicative from <strong className="text-[15px] text-[#262326]">₹{model.dailyRate.toLocaleString("en-IN")}/day</strong></>
+                        ) : (
+                          "Pricing included in your quotation"
+                        )}
+                      </p>
+
+                      <div className="mt-auto border-t border-[#eceaec] pt-4">
+                        {isSelected ? (
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center rounded-[10px] bg-[#f3f2f4] p-1">
+                              <button
+                                type="button"
+                                onClick={() => changeModelQuantity(model.name, -1)}
+                                className="flex size-9 items-center justify-center rounded-[8px] text-[#625d65] transition hover:bg-white"
+                                aria-label={`Decrease ${model.name} quantity`}
+                              >
+                                <Minus className="size-4" aria-hidden="true" />
+                              </button>
+                              <span className="min-w-10 text-center text-[14px] font-black" aria-label={`${selectedLine.quantity} vehicles`}>
+                                {selectedLine.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => changeModelQuantity(model.name, 1)}
+                                className="flex size-9 items-center justify-center rounded-[8px] text-[#625d65] transition hover:bg-white"
+                                aria-label={`Increase ${model.name} quantity`}
+                              >
+                                <Plus className="size-4" aria-hidden="true" />
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeModel(model.name)}
+                              className="inline-flex min-h-10 items-center gap-1.5 rounded-[9px] px-3 text-[12px] font-bold text-[#b42318] transition hover:bg-[#fff2f1]"
+                            >
+                              <Trash2 className="size-4" aria-hidden="true" />
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => selectModel(model.name)}
+                            className="min-h-11 w-full rounded-full border border-[#312d32] text-[13px] font-black text-[#312d32] transition hover:bg-[#312d32] hover:text-white"
+                          >
+                            Select
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-col gap-4 border-t border-[#e7e4e8] px-4 py-5 sm:px-6 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-[18px] font-black">Your fleet ({lines.length})</p>
+                  <p className="mt-1 text-[12px] text-[#777179]">
+                    {selectedVehicleCount > 0
+                      ? `${selectedVehicleCount} vehicles selected across ${lines.length} ${lines.length === 1 ? "model" : "models"}`
+                      : "Choose a model to start your business enquiry"}
+                  </p>
+                </div>
+
+                {modelPageCount > 1 && (
+                  <div className="flex items-center justify-center gap-2" aria-label="Vehicle catalogue pages">
+                    <button
+                      type="button"
+                      onClick={() => setModelPage((current) => Math.max(1, current - 1))}
+                      disabled={modelPage === 1}
+                      className="flex size-9 items-center justify-center rounded-full border border-[#e2dfe4] disabled:opacity-35"
+                      aria-label="Previous vehicle models"
+                    >
+                      <ChevronLeft className="size-4" aria-hidden="true" />
+                    </button>
+                    <span className="min-w-16 text-center text-[12px] font-bold text-[#625d65]">
+                      {modelPage} of {modelPageCount}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setModelPage((current) => Math.min(modelPageCount, current + 1))}
+                      disabled={modelPage === modelPageCount}
+                      className="flex size-9 items-center justify-center rounded-full border border-[#e2dfe4] disabled:opacity-35"
+                      aria-label="Next vehicle models"
+                    >
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  disabled={lines.length === 0}
+                  onClick={() => document.getElementById("business-enquiry")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#252127] px-6 text-[14px] font-black text-white transition hover:bg-black disabled:cursor-not-allowed disabled:bg-[#aaa6ac]"
+                >
+                  Continue enquiry
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="how-business-works" className="bg-[#f7f6f8] px-5 py-16 sm:px-8 md:py-20">
           <div className="mx-auto max-w-[1180px]">
             <div className="max-w-[650px]">
@@ -313,8 +587,8 @@ function Business() {
         </section>
 
         <section id="business-enquiry" className="px-5 py-16 sm:px-8 md:py-24">
-          <div className="mx-auto grid max-w-[1180px] items-start gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(600px,1.28fr)]">
-            <div className="lg:sticky lg:top-[104px]">
+          <div className="mx-auto max-w-[1180px]">
+            <div className="max-w-[720px]">
               <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6a5294]">
                 Fleet enquiry
               </p>
@@ -344,7 +618,7 @@ function Business() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[24px] border border-[#e0dde3] bg-white shadow-[0_20px_60px_rgba(32,24,43,0.09)]">
+            <div className="mt-10 overflow-hidden rounded-[24px] border border-[#e0dde3] bg-white shadow-[0_20px_60px_rgba(32,24,43,0.09)]">
               {submitted ? (
                 <div className="flex min-h-[620px] flex-col items-center justify-center px-6 py-14 text-center sm:px-12">
                   <span className="flex size-16 items-center justify-center rounded-full bg-[#edf8f1] text-[#208653]">
@@ -508,82 +782,60 @@ function Business() {
                       </label>
                     </div>
 
-                    <div className="mt-7">
+                    <div className="mt-7 rounded-[18px] border border-[#e1dee4] bg-[#fbfafc] p-4 sm:p-5">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <FieldLabel>Vehicles</FieldLabel>
+                          <FieldLabel>Selected fleet</FieldLabel>
                           <p className="mt-1 text-[12px] text-[#777179]">
-                            Quantities are the number of vehicles, not model variants.
+                            {selectedVehicleCount} vehicles across {lines.length} {lines.length === 1 ? "model" : "models"}.
                           </p>
                         </div>
-                        <span className="rounded-full bg-[#f3f1f5] px-3 py-1.5 text-[11px] font-bold text-[#5e5861]">
-                          {lines.length} {lines.length === 1 ? "model" : "models"}
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById("business-fleet-builder")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                          className="shrink-0 rounded-full border border-[#d8d4da] bg-white px-4 py-2 text-[12px] font-bold text-[#423d44]"
+                        >
+                          Edit fleet
+                        </button>
                       </div>
 
-                      <div className="mt-4 space-y-3">
-                        {lines.map((line, index) => {
-                          const selectedModel = models.find((model) => model.name === line.modelName);
-                          return (
-                            <div key={index} className="grid gap-3 rounded-[16px] border border-[#e1dee4] p-3 sm:grid-cols-[56px_minmax(0,1fr)_130px_42px] sm:items-center">
-                              <span className="hidden size-14 overflow-hidden rounded-[12px] bg-[#f4f2f5] sm:block">
-                                <img
-                                  src={selectedModel?.image || "/images/vehicle-models/electric-scooter-generic.jpg"}
-                                  alt=""
-                                  className="h-full w-full object-cover"
-                                />
-                              </span>
-                              <label>
-                                <span className="mb-1 block text-[11px] font-bold text-[#716c75] sm:hidden">Vehicle model</span>
-                                <select
-                                  aria-label={`Vehicle model ${index + 1}`}
-                                  value={line.modelName}
-                                  onChange={(event) => updateLine(index, { modelName: event.target.value })}
-                                  className="h-11 w-full rounded-[10px] border border-[#dedce1] bg-white px-3 text-[14px] font-medium outline-none focus:border-[#6a5294]"
+                      {lines.length === 0 ? (
+                        <div className="mt-4 rounded-[14px] border border-dashed border-[#d6d2d9] bg-white px-4 py-6 text-center">
+                          <p className="text-[13px] font-bold">No vehicles selected yet</p>
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById("business-fleet-builder")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                            className="mt-3 text-[12px] font-black text-[#5b3b8e]"
+                          >
+                            Choose vehicle models
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                          {lines.map((line) => {
+                            const selectedModel = models.find((model) => model.name === line.modelName);
+                            return (
+                              <div key={line.modelName} className="flex items-center gap-3 rounded-[14px] border border-[#e3e0e5] bg-white p-3">
+                                <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-[#f4f3f5] p-1">
+                                  <img src={selectedModel?.image || "/images/vehicle-models/electric-scooter-generic.jpg"} alt="" className="h-full w-full object-contain" />
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-[13px] font-black">{line.modelName}</p>
+                                  <p className="mt-1 text-[11px] text-[#777179]">{line.quantity} vehicles</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeModel(line.modelName)}
+                                  aria-label={`Remove ${line.modelName} from fleet`}
+                                  className="flex size-9 shrink-0 items-center justify-center rounded-[9px] text-[#9a4540] hover:bg-[#fff1f0]"
                                 >
-                                  <option value="">Select a vehicle model</option>
-                                  {models.map((model) => (
-                                    <option key={model.name} value={model.name}>
-                                      {model.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-                              <label>
-                                <span className="mb-1 block text-[11px] font-bold text-[#716c75] sm:hidden">Quantity</span>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  max="5000"
-                                  aria-label={`Vehicle quantity ${index + 1}`}
-                                  value={line.quantity}
-                                  onChange={(event) => updateLine(index, { quantity: event.target.value })}
-                                  className="h-11 w-full rounded-[10px] border border-[#dedce1] bg-white px-3 text-[14px] outline-none focus:border-[#6a5294]"
-                                />
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => setLines((current) => current.filter((_, lineIndex) => lineIndex !== index))}
-                                disabled={lines.length === 1}
-                                aria-label={`Remove vehicle model ${index + 1}`}
-                                className="flex size-10 items-center justify-center rounded-[10px] text-[#777179] transition hover:bg-[#fff0f0] hover:text-[#b42318] disabled:cursor-not-allowed disabled:opacity-30"
-                              >
-                                <Trash2 className="size-[17px]" aria-hidden="true" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setLines((current) => [...current, emptyLine()])}
-                        disabled={lines.length >= 10}
-                        className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-[11px] border border-[#dcd8e0] px-4 text-[13px] font-bold text-[#3f3a42] transition hover:bg-[#f8f6fa] disabled:opacity-40"
-                      >
-                        <Plus className="size-4" aria-hidden="true" />
-                        Add another model
-                      </button>
+                                  <Trash2 className="size-4" aria-hidden="true" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <label className="mt-7 block">
@@ -717,7 +969,7 @@ function Business() {
                 proposal around your operation.
               </p>
               <a
-                href="#business-enquiry"
+                href="#business-fleet-builder"
                 className="mt-7 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[13px] bg-white px-6 text-[14px] font-bold text-[#261d30] transition hover:bg-[#f3eff8]"
               >
                 Make an enquiry

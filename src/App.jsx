@@ -15,6 +15,7 @@ import HelpCenter from './pages/HelpCenter';
 import Notifications from './pages/Notifications';
 import Wallet from './pages/Wallet';
 import Business from './pages/Business';
+import BusinessVehicle from './pages/BusinessVehicle';
 import BusinessPortalAccess from './pages/BusinessPortalAccess';
 import BusinessPortal from './pages/BusinessPortal';
 
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/business" element={<Business />} />
+          <Route path="/business/vehicles/:modelId" element={<BusinessVehicle />} />
           <Route path="/business/access" element={<BusinessPortalAccess />} />
           <Route path="/business/portal" element={<BusinessPortal />} />
           <Route path="/" element={<Navigate to="/home" />} />
