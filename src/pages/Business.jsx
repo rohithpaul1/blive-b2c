@@ -230,6 +230,13 @@ function Business() {
                 >
                   See how it works
                 </a>
+                <button
+                  type="button"
+                  onClick={() => navigate("/business/access")}
+                  className="inline-flex min-h-[54px] items-center justify-center rounded-[14px] border border-white/20 px-6 text-[15px] font-bold text-white transition hover:bg-white/10"
+                >
+                  Client login
+                </button>
               </div>
               <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-[13px] font-medium text-white/70">
                 {["Multiple models", "Flexible fleet sizes", "Deployment support"].map(
