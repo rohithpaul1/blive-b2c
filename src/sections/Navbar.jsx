@@ -50,14 +50,16 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
             <div className="flex items-center gap-x-1.5 md:gap-x-3">
               <button
                 type="button"
-                onClick={() => navigate("/business")}
-                className={`hidden min-h-10 items-center rounded-full px-4 text-[13px] font-bold transition-colors sm:flex ${
+                onClick={() => navigate(location.pathname.startsWith("/business") ? "/home" : "/business")}
+                className={`${
+                  location.pathname.startsWith("/business") ? "flex" : "hidden sm:flex"
+                } min-h-10 items-center rounded-full px-3 text-[12px] font-bold transition-colors sm:px-4 sm:text-[13px] ${
                   location.pathname === "/business"
                     ? "bg-[#f2eef8] text-[#351a75]"
                     : "text-[#3f3a42] hover:bg-[#f7f7f7]"
                 }`}
               >
-                For Business
+                {location.pathname.startsWith("/business") ? "Personal rentals" : "For Business"}
               </button>
               {wallet?.showInHeader && (
                 <button
@@ -200,14 +202,16 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => navigate("/business")}
-                className={`hidden h-10 items-center justify-center rounded-full px-4 text-[13px] font-bold transition-colors sm:flex ${
+                onClick={() => navigate(location.pathname.startsWith("/business") ? "/home" : "/business")}
+                className={`${
+                  location.pathname.startsWith("/business") ? "flex" : "hidden sm:flex"
+                } h-10 items-center justify-center rounded-full px-3 text-[12px] font-bold transition-colors sm:px-4 sm:text-[13px] ${
                   location.pathname === "/business"
                     ? "bg-[#f2eef8] text-[#351a75]"
                     : "text-[#3f3a42] hover:bg-[#f7f7f7]"
                 }`}
               >
-                For Business
+                {location.pathname.startsWith("/business") ? "Personal rentals" : "For Business"}
               </button>
               <button
                 onClick={() => setShowLoginPage(true)}

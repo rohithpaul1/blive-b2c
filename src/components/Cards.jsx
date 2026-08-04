@@ -72,7 +72,18 @@ const OemBrandMark = ({ card }) => {
   );
 };
 
-const Cards = ({ cards, isCatalog, selectedPlanType }) => {
+const Cards = ({
+  cards,
+  isCatalog,
+  selectedPlanType,
+  variant = "customer",
+  getSelectedQuantity,
+  onSelect,
+  onIncrease,
+  onDecrease,
+  onRemove,
+  getDetailsPath,
+}) => {
   const navigate = useNavigate();
 
   console.log("Cards component received props:", {
@@ -90,7 +101,8 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
     subscriptionDuration,
     currentPlanType,
   } = useContext(SearchBarContext);
-  const isSubscription = rentalMode === RENTAL_MODES.subscription;
+  const isBusiness = variant === "business";
+  const isSubscription = !isBusiness && rentalMode === RENTAL_MODES.subscription;
 
   const rentalDays = Math.max(
     1,
@@ -121,6 +133,13 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
         : 1;
     const dailyRate = (Number(card.price) || 0) / unitDays;
 
+    if (isBusiness) {
+      return {
+        dailyRate: Number(card.price) || 0,
+        total: Number(card.price) || 0,
+        unit: "day",
+      };
+    }
     if (isSubscription) {
       return {
         cycleRate: Number(card.price) || 0,
@@ -345,6 +364,9 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
           const pricing = getPricing(card);
           const dailyIncludedKm = Number(card.perDayKmLimit) || Number(card.range) || 0;
           const includedKm = dailyIncludedKm * rentalDays;
+          const selectedQuantity = isBusiness
+            ? Number(getSelectedQuantity?.(card) || 0)
+            : 0;
 
           return (
             <article
@@ -385,9 +407,20 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
               <div className="flex flex-1 flex-col px-[20px] pb-[22px] pt-[4px] sm:pt-[6px]">
                 <div className="flex items-center gap-[8px]">
                   <OemBrandMark card={card} />
-                  <h2 className="text-[20px] font-bold text-[#262626]">
-                    {card.vehicleName}
-                  </h2>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-[20px] font-bold text-[#262626]">
+                      {card.vehicleName}
+                    </h2>
+                    {isBusiness && getDetailsPath?.(card) && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(getDetailsPath(card))}
+                        className="mt-[2px] text-[11px] font-bold text-[#6b5a78] underline-offset-2 hover:underline"
+                      >
+                        View model details
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-[10px] flex flex-wrap items-end gap-x-[8px] gap-y-[4px]">
@@ -396,7 +429,9 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                     <span className="ml-[2px] text-[13px] font-bold">/{pricing.unit}</span>
                   </p>
                   <p className="text-[13px] text-[#6b6b6b]">
-                    {isSubscription
+                    {isBusiness
+                      ? "Indicative business rate"
+                      : isSubscription
                       ? `${startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)} planned`
                       : `₹${formatCurrency(pricing.total)} total`}
                   </p>
@@ -438,6 +473,8 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                     {dailyIncludedKm > 0
                       ? isSubscription
                         ? `${dailyIncludedKm} km/day included`
+                        : isBusiness
+                        ? `${dailyIncludedKm} km/day included`
                         : `${includedKm} km included`
                       : "Usage allowance shown at checkout"}
                   </span>
@@ -447,21 +484,62 @@ const Cards = ({ cards, isCatalog, selectedPlanType }) => {
                   </span>
                 </div>
 
-                <button
-                  onClick={() => handleRentNow(card)}
-                  className={`${
-                    card.isAvailable
-                      ? "cursor-pointer border-[#351a75] text-[#351a75] hover:bg-[#351a75] hover:text-white"
-                      : "cursor-not-allowed border-[#dedede] bg-[#f4f4f4] text-[#999]"
-                  } mt-[16px] flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
-                  disabled={!card.isAvailable}
-                >
-                  {card.isAvailable
-                    ? isSubscription
-                      ? "Choose subscription"
-                      : "Rent now"
-                    : "Unavailable"}
-                </button>
+                {isBusiness ? (
+                  selectedQuantity > 0 ? (
+                    <div className="mt-[16px] flex h-[46px] items-center gap-[10px]">
+                      <div className="flex h-full flex-1 items-center justify-between rounded-full border border-[#351a75] px-[6px] text-[#351a75]">
+                        <button
+                          type="button"
+                          onClick={() => onDecrease?.(card)}
+                          className="flex size-[34px] items-center justify-center rounded-full text-[22px] leading-none hover:bg-[#f2eef6]"
+                          aria-label={`Decrease ${card.vehicleName} quantity`}
+                        >
+                          −
+                        </button>
+                        <span className="text-[14px] font-black">{selectedQuantity} vehicles</span>
+                        <button
+                          type="button"
+                          onClick={() => onIncrease?.(card)}
+                          className="flex size-[34px] items-center justify-center rounded-full text-[20px] leading-none hover:bg-[#f2eef6]"
+                          aria-label={`Increase ${card.vehicleName} quantity`}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onRemove?.(card)}
+                        className="flex h-full items-center justify-center rounded-full border border-[#dedede] px-[15px] text-[12px] font-bold text-[#6c666e] hover:bg-[#f7f7f7]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onSelect?.(card)}
+                      className="mt-[16px] flex h-[46px] w-full items-center justify-center rounded-full border border-[#351a75] px-[24px] text-[15px] font-bold text-[#351a75] transition-colors hover:bg-[#351a75] hover:text-white"
+                    >
+                      Add to fleet
+                    </button>
+                  )
+                ) : (
+                  <button
+                    onClick={() => handleRentNow(card)}
+                    className={`${
+                      card.isAvailable
+                        ? "cursor-pointer border-[#351a75] text-[#351a75] hover:bg-[#351a75] hover:text-white"
+                        : "cursor-not-allowed border-[#dedede] bg-[#f4f4f4] text-[#999]"
+                    } mt-[16px] flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
+                    disabled={!card.isAvailable}
+                  >
+                    {card.isAvailable
+                      ? isSubscription
+                        ? "Choose subscription"
+                        : "Rent now"
+                      : "Unavailable"}
+                  </button>
+                )}
               </div>
             </article>
           );

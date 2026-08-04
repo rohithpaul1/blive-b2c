@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   BadgeIndianRupee,
@@ -13,15 +13,15 @@ import {
   Clock3,
   Mail,
   MapPin,
-  Minus,
   Phone,
-  Plus,
   Search,
   ShieldCheck,
   Trash2,
   Users,
+  X,
   Zap,
 } from "lucide-react";
+import Cards from "../components/Cards";
 import Navbar from "../sections/Navbar";
 import Footer from "../sections/Footer";
 
@@ -98,6 +98,7 @@ function Business() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(null);
+  const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
 
   const models = useMemo(() => {
     const rows = Array.isArray(catalog?.data) ? catalog.data : [];
@@ -117,6 +118,10 @@ function Business() {
         available: Number(row?.availableVehiclesCount || 0),
         dailyRate: Number(row?.plan?.enterDailyPlanPrice || 0),
         engineType: String(row?.model?.engineType || "ev").toLowerCase(),
+        range: Number(row?.model?.range || row?.model?.perDayKmLimit || 0),
+        topSpeed: Number(row?.model?.speed || row?.model?.topSpeed || 0),
+        chargeTime: Number(row?.model?.batteryChargingTime || 0),
+        perDayKmLimit: Number(row?.model?.perDayKmLimit || 0),
       });
     });
     return [...unique.values()];
@@ -145,6 +150,27 @@ function Business() {
     0
   );
 
+  const visibleBusinessCards = useMemo(
+    () =>
+      visibleModels.map((model) => ({
+        id: model.id,
+        vehicleName: model.name,
+        manufacturer: model.brandName,
+        brandName: model.brandName,
+        imgUrl: model.image,
+        price: model.dailyRate,
+        range: model.range,
+        topSpeed: model.topSpeed,
+        chargeTime: model.chargeTime,
+        perDayKmLimit: model.perDayKmLimit,
+        engineType: model.engineType,
+        isAvailable: true,
+        availableCount: model.available,
+        nextAvailableDate: model.available > 0 ? "Available now" : "On request",
+      })),
+    [visibleModels]
+  );
+
   useEffect(() => {
     setModelPage(1);
   }, [evOnly, modelQuery]);
@@ -152,6 +178,20 @@ function Business() {
   useEffect(() => {
     if (modelPage > modelPageCount) setModelPage(modelPageCount);
   }, [modelPage, modelPageCount]);
+
+  useEffect(() => {
+    if (!isEnquiryOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape" && !submitting) setIsEnquiryOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isEnquiryOpen, submitting]);
 
   useEffect(() => {
     const requestedModelId = searchParams.get("model");
@@ -201,6 +241,28 @@ function Business() {
   const removeModel = (modelName) => {
     setLines((current) => current.filter((line) => line.modelName !== modelName));
     setError("");
+  };
+
+  const openEnquiry = () => {
+    if (lines.length === 0) {
+      document.getElementById("business-fleet-builder")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return;
+    }
+    setError("");
+    setIsEnquiryOpen(true);
+  };
+
+  const editFleet = () => {
+    setIsEnquiryOpen(false);
+    requestAnimationFrame(() => {
+      document.getElementById("business-fleet-builder")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   };
 
   const validate = () => {
@@ -421,92 +483,23 @@ function Business() {
                   </div>
                 )}
 
-                {visibleModels.map((model) => {
-                  const selectedLine = lines.find((line) => line.modelName === model.name);
-                  const isSelected = Boolean(selectedLine);
-                  return (
-                    <article
-                      key={model.id}
-                      className={`flex min-h-[320px] flex-col overflow-hidden rounded-[18px] border bg-white p-4 transition ${
-                        isSelected
-                          ? "border-[#332d36] shadow-[0_6px_18px_rgba(32,28,35,0.10)]"
-                          : "border-[#e5e3e6] shadow-[0_3px_7px_rgba(32,28,35,0.05)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(32,28,35,0.09)]"
-                      }`}
-                    >
-                      <Link
-                        to={`/business/vehicles/${encodeURIComponent(model.id)}`}
-                        className="group block"
-                        aria-label={`View ${model.name} business vehicle details`}
-                      >
-                        <div className="flex h-[150px] items-center justify-center overflow-hidden rounded-[14px] bg-[#f7f7f7] p-3">
-                          <img
-                            src={model.image}
-                            alt={model.name}
-                            className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]"
-                          />
-                        </div>
-                        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.08em] text-[#8a858c]">
-                          {model.brandName}
-                        </p>
-                        <div className="mt-1 flex items-start justify-between gap-3">
-                          <h3 className="text-[17px] font-black leading-6 text-[#262326]">{model.name}</h3>
-                          <span className={`mt-1 size-2 shrink-0 rounded-full ${model.available > 0 ? "bg-[#2da56b]" : "bg-[#b8b4ba]"}`} title={model.available > 0 ? "Currently available" : "Availability on request"} />
-                        </div>
-                      </Link>
-                      <p className="mt-3 text-[12px] text-[#777179]">
-                        {model.dailyRate > 0 ? (
-                          <>Indicative from <strong className="text-[15px] text-[#262326]">₹{model.dailyRate.toLocaleString("en-IN")}/day</strong></>
-                        ) : (
-                          "Pricing included in your quotation"
-                        )}
-                      </p>
-
-                      <div className="mt-auto border-t border-[#eceaec] pt-4">
-                        {isSelected ? (
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center rounded-[10px] bg-[#f3f2f4] p-1">
-                              <button
-                                type="button"
-                                onClick={() => changeModelQuantity(model.name, -1)}
-                                className="flex size-9 items-center justify-center rounded-[8px] text-[#625d65] transition hover:bg-white"
-                                aria-label={`Decrease ${model.name} quantity`}
-                              >
-                                <Minus className="size-4" aria-hidden="true" />
-                              </button>
-                              <span className="min-w-10 text-center text-[14px] font-black" aria-label={`${selectedLine.quantity} vehicles`}>
-                                {selectedLine.quantity}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => changeModelQuantity(model.name, 1)}
-                                className="flex size-9 items-center justify-center rounded-[8px] text-[#625d65] transition hover:bg-white"
-                                aria-label={`Increase ${model.name} quantity`}
-                              >
-                                <Plus className="size-4" aria-hidden="true" />
-                              </button>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeModel(model.name)}
-                              className="inline-flex min-h-10 items-center gap-1.5 rounded-[9px] px-3 text-[12px] font-bold text-[#b42318] transition hover:bg-[#fff2f1]"
-                            >
-                              <Trash2 className="size-4" aria-hidden="true" />
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => selectModel(model.name)}
-                            className="min-h-11 w-full rounded-full border border-[#312d32] text-[13px] font-black text-[#312d32] transition hover:bg-[#312d32] hover:text-white"
-                          >
-                            Select
-                          </button>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
+                {catalog !== undefined && visibleBusinessCards.length > 0 && (
+                  <Cards
+                    cards={visibleBusinessCards}
+                    variant="business"
+                    selectedPlanType="daily"
+                    getSelectedQuantity={(card) =>
+                      lines.find((line) => line.modelName === card.vehicleName)?.quantity || 0
+                    }
+                    onSelect={(card) => selectModel(card.vehicleName)}
+                    onIncrease={(card) => changeModelQuantity(card.vehicleName, 1)}
+                    onDecrease={(card) => changeModelQuantity(card.vehicleName, -1)}
+                    onRemove={(card) => removeModel(card.vehicleName)}
+                    getDetailsPath={(card) =>
+                      `/business/vehicles/${encodeURIComponent(card.id)}`
+                    }
+                  />
+                )}
               </div>
 
               <div className="flex flex-col gap-4 border-t border-[#e7e4e8] px-4 py-5 sm:px-6 md:flex-row md:items-center md:justify-between">
@@ -548,7 +541,7 @@ function Business() {
                 <button
                   type="button"
                   disabled={lines.length === 0}
-                  onClick={() => document.getElementById("business-enquiry")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  onClick={openEnquiry}
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#252127] px-6 text-[14px] font-black text-white transition hover:bg-black disabled:cursor-not-allowed disabled:bg-[#aaa6ac]"
                 >
                   Continue enquiry
@@ -586,20 +579,43 @@ function Business() {
           </div>
         </section>
 
-        <section id="business-enquiry" className="px-5 py-16 sm:px-8 md:py-24">
-          <div className="mx-auto max-w-[1180px]">
+        {isEnquiryOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-[#17131f]/60 p-0 backdrop-blur-[3px] sm:items-center sm:p-5"
+            onMouseDown={() => !submitting && setIsEnquiryOpen(false)}
+          >
+            <section
+              id="business-enquiry"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="business-enquiry-title"
+              className="relative max-h-[94dvh] w-full max-w-[960px] overflow-y-auto rounded-t-[26px] bg-white shadow-[0_28px_90px_rgba(20,14,27,0.30)] sm:max-h-[90dvh] sm:rounded-[26px]"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e4e8] bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#6a5294]">Fleet enquiry</p>
+                  <h2 id="business-enquiry-title" className="mt-1 text-[20px] font-black sm:text-[23px]">
+                    Tell us what your business needs
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => !submitting && setIsEnquiryOpen(false)}
+                  aria-label="Close fleet enquiry"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-full border border-[#dedbe0] bg-white text-[#474149] hover:bg-[#f6f5f7]"
+                >
+                  <X className="size-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="px-5 py-6 sm:px-7 sm:py-7">
             <div className="max-w-[720px]">
-              <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6a5294]">
-                Fleet enquiry
-              </p>
-              <h2 className="mt-3 text-[34px] font-black tracking-[-0.04em] sm:text-[44px]">
-                Tell us what your business needs.
-              </h2>
-              <p className="mt-4 text-[16px] leading-7 text-[#716c75]">
+              <p className="text-[14px] leading-6 text-[#716c75]">
                 This goes directly to the BLive commercial team. We will review
                 availability and send a quotation before asking for KYB documents.
               </p>
-              <div className="mt-7 space-y-4 rounded-[18px] bg-[#f7f6f8] p-5">
+              <div className="mt-5 grid gap-3 rounded-[18px] bg-[#f7f6f8] p-4 sm:grid-cols-3">
                 {[
                   [<Users key="users" className="size-[18px]" aria-hidden="true" />, "No account needed", "Submit the requirement first."],
                   [<ShieldCheck key="shield" className="size-[18px]" aria-hidden="true" />, "KYB comes later", "Verification starts only after acceptance."],
@@ -618,7 +634,7 @@ function Business() {
               </div>
             </div>
 
-            <div className="mt-10 overflow-hidden rounded-[24px] border border-[#e0dde3] bg-white shadow-[0_20px_60px_rgba(32,24,43,0.09)]">
+            <div className="mt-6 overflow-hidden rounded-[22px] border border-[#e0dde3] bg-white">
               {submitted ? (
                 <div className="flex min-h-[620px] flex-col items-center justify-center px-6 py-14 text-center sm:px-12">
                   <span className="flex size-16 items-center justify-center rounded-full bg-[#edf8f1] text-[#208653]">
@@ -792,7 +808,7 @@ function Business() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => document.getElementById("business-fleet-builder")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                          onClick={editFleet}
                           className="shrink-0 rounded-full border border-[#d8d4da] bg-white px-4 py-2 text-[12px] font-bold text-[#423d44]"
                         >
                           Edit fleet
@@ -804,7 +820,7 @@ function Business() {
                           <p className="text-[13px] font-bold">No vehicles selected yet</p>
                           <button
                             type="button"
-                            onClick={() => document.getElementById("business-fleet-builder")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                            onClick={editFleet}
                             className="mt-3 text-[12px] font-black text-[#5b3b8e]"
                           >
                             Choose vehicle models
@@ -882,8 +898,10 @@ function Business() {
                 </form>
               )}
             </div>
+              </div>
+            </section>
           </div>
-        </section>
+        )}
 
         <section className="border-y border-[#ece9ee] bg-[#fbfafc] px-5 py-16 sm:px-8 md:py-24">
           <div className="mx-auto max-w-[1180px]">
