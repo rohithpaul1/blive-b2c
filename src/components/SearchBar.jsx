@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDays,
   Building2,
@@ -35,11 +35,13 @@ const SUBSCRIPTION_DURATIONS = [1, 3, 6, 12];
 const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
   const [showLocation, setShowLocation] = useState(false);
   const [showDatepicker, setShowDatepicker] = useState(false);
+  const [desktopExpanded, setDesktopExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileStep, setMobileStep] = useState("where");
   const [mobileLocationQuery, setMobileLocationQuery] = useState("");
   const [mobileCalendarMonth, setMobileCalendarMonth] = useState(() => startOfMonth(new Date()));
   const [mobileDateStage, setMobileDateStage] = useState("pickup");
+  const searchContainerRef = useRef(null);
   const navigate = useNavigate();
   const {
     selectedPickup,
@@ -70,6 +72,39 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       document.body.style.overflow = previousOverflow;
     };
   }, [mobileOpen, selectedPickup?.date]);
+
+  useEffect(() => {
+    if (!onSearchPage || !desktopExpanded) return undefined;
+
+    const closeDesktopSearch = () => {
+      setDesktopExpanded(false);
+      setShowLocation(false);
+      setShowDatepicker(false);
+    };
+    const handlePointerDown = (event) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        closeDesktopSearch();
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") closeDesktopSearch();
+    };
+    const handleScroll = () => {
+      if (window.scrollY > 24) closeDesktopSearch();
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [desktopExpanded, onSearchPage]);
 
   const selectedSearchPlan = () =>
     isSubscription
@@ -131,6 +166,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     const tabIndex = Math.max(0, planTypes.indexOf(planType));
     sessionStorage.setItem("selectedTabIndex", tabIndex.toString());
     setMobileOpen(false);
+    setDesktopExpanded(false);
+    setShowLocation(false);
+    setShowDatepicker(false);
 
     if (onSearchPage) {
       onSearchTrigger?.(planType, tabIndex);
@@ -147,6 +185,12 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         : { dropoff: inputDate(selectedDropoff?.date) }),
     });
     navigate(`/search?${params.toString()}`);
+  };
+
+  const openDesktopSearch = (section) => {
+    setDesktopExpanded(true);
+    setShowLocation(section === "location");
+    setShowDatepicker(section === "dates");
   };
 
   const updatePickupDate = (date) => {
@@ -316,11 +360,12 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
 
   return (
     <div
+      ref={searchContainerRef}
       className={`z-40 w-full ${
         onSearchPage
-          ? "relative mt-[10px]"
-          : "absolute left-1/2 top-[88px] w-[calc(100%_-_32px)] -translate-x-1/2 md:bottom-0 md:top-auto md:w-[calc(100%_-_40px)] md:translate-y-1/2"
-      } max-w-[1160px]`}
+          ? "relative max-w-[700px]"
+          : "absolute left-1/2 top-[88px] w-[calc(100%_-_32px)] max-w-[1160px] -translate-x-1/2 md:bottom-0 md:top-auto md:w-[calc(100%_-_40px)] md:translate-y-1/2"
+      }`}
     >
       <button
         type="button"
@@ -345,14 +390,99 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         </span>
       </button>
 
-      <div className="hidden rounded-[22px] border border-[#dedbe2] bg-white p-[18px] shadow-[0_16px_44px_rgba(16,24,40,0.16)] md:block">
+      {onSearchPage && !desktopExpanded && (
+        <div className="hidden min-h-[54px] w-full items-center rounded-full border border-[#dedce1] bg-white p-[5px] pl-[8px] shadow-[0_5px_18px_rgba(24,18,32,0.12)] transition-shadow hover:shadow-[0_7px_22px_rgba(24,18,32,0.16)] md:flex">
+          <button
+            type="button"
+            onClick={() => openDesktopSearch("location")}
+            className="flex min-w-0 flex-1 items-center gap-[8px] rounded-full px-[10px] py-[8px] text-left hover:bg-[#f7f6f8]"
+          >
+            <MapPin className="size-[17px] shrink-0 text-[#351a75]" aria-hidden="true" />
+            <span className="truncate text-[13px] font-bold text-[#29262b]">
+              {selectedLocation.split(",")[0]}
+            </span>
+          </button>
+          <span className="h-[26px] w-px shrink-0 bg-[#e4e1e6]" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => openDesktopSearch("dates")}
+            className="min-w-0 flex-1 rounded-full px-[12px] py-[8px] text-left hover:bg-[#f7f6f8]"
+          >
+            <span className="block truncate text-[13px] font-bold text-[#29262b]">
+              {isSubscription
+                ? `Starts ${formattedDate(selectedPickup?.date, false)}`
+                : searchSummary}
+            </span>
+          </button>
+          <span className="h-[26px] w-px shrink-0 bg-[#e4e1e6]" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => openDesktopSearch("mode")}
+            className="hidden min-w-0 flex-1 rounded-full px-[12px] py-[8px] text-left hover:bg-[#f7f6f8] lg:block"
+          >
+            <span className="block truncate text-[13px] font-medium text-[#656068]">
+              {isSubscription
+                ? `${subscriptionDuration} ${Number(subscriptionDuration) === 1 ? "month" : "months"}`
+                : "Fixed rental"}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleRentNow}
+            className="flex size-[44px] shrink-0 items-center justify-center rounded-full bg-[#351a75] text-white transition-colors hover:bg-[#2c155f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#351a75]"
+            aria-label="Search vehicles"
+          >
+            <Search className="size-[18px]" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
+      {onSearchPage && desktopExpanded && (
+        <button
+          type="button"
+          className="fixed inset-0 top-[68px] z-40 hidden cursor-default bg-black/20 backdrop-blur-[1px] md:block"
+          onClick={() => {
+            setDesktopExpanded(false);
+            setShowLocation(false);
+            setShowDatepicker(false);
+          }}
+          aria-label="Close search"
+        />
+      )}
+
+      <div
+        className={`${
+          onSearchPage
+            ? desktopExpanded
+              ? "fixed left-1/2 top-[78px] z-[51] block w-[min(1160px,calc(100vw-40px))] -translate-x-1/2"
+              : "hidden"
+            : "hidden md:block"
+        }`}
+      >
+      <div className="rounded-[22px] border border-[#dedbe2] bg-white p-[18px] shadow-[0_16px_44px_rgba(16,24,40,0.16)]">
         <div className="flex items-center justify-between gap-[16px]">
           {modeSwitch()}
-          <p className="text-[12px] text-[#716c75]">
-            {isSubscription
-              ? "Start when you want. Continue for as long as you need."
-              : "Choose your pickup and return dates."}
-          </p>
+          <div className="flex items-center gap-[12px]">
+            <p className="text-[12px] text-[#716c75]">
+              {isSubscription
+                ? "Choose a start date and how long you expect to ride."
+                : "Choose your pickup and return dates."}
+            </p>
+            {onSearchPage && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDesktopExpanded(false);
+                  setShowLocation(false);
+                  setShowDatepicker(false);
+                }}
+                className="flex size-[38px] shrink-0 items-center justify-center rounded-full border border-[#e2dfe4] text-[#504b52] transition-colors hover:bg-[#f5f3f6]"
+                aria-label="Collapse search"
+              >
+                <X className="size-[18px]" aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className={`mt-[16px] grid gap-[10px] ${isSubscription ? "grid-cols-[1.5fr_1fr_1fr_auto]" : "grid-cols-[1.5fr_1fr_1fr_auto]"}`}>
@@ -461,6 +591,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         selectedDropoff={selectedDropoff}
         setSelectedDropoff={setSelectedDropoff}
       />
+      </div>
 
       {mobileOpen &&
         createPortal(

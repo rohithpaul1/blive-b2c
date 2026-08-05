@@ -43,15 +43,28 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
           expanded ? "bg-white header-shadow" : "h-[72px] bg-white/95"
         }`}
       >
-        <div className="flex min-h-[48px] w-full items-center justify-between self-start">
+        <div
+          className={`min-h-[48px] w-full items-center self-start ${
+            onSearchPage
+              ? "grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-[12px] md:grid-cols-[auto_minmax(280px,700px)_auto] md:gap-x-[24px]"
+              : "flex justify-between"
+          }`}
+        >
           <img
             onClick={() => navigate(isBusinessWebsite ? "/business" : "/home")}
-            className="h-[34px] w-auto cursor-pointer"
+            className={`h-[34px] w-auto cursor-pointer ${
+              onSearchPage ? "col-start-1 row-start-1" : ""
+            }`}
             src="/images/BliveLogo.svg"
             alt="BLive"
           />
+          {onSearchPage && (
+            <div className="col-span-3 row-start-2 mt-[8px] flex w-full justify-self-center md:col-span-1 md:col-start-2 md:row-start-1 md:mt-0">
+              <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} />
+            </div>
+          )}
           {isBusinessWebsite ? (
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end" : ""}`}>
               <button
                 type="button"
                 onClick={() => navigate("/home")}
@@ -69,7 +82,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
               </button>
             </div>
           ) : token ? (
-            <div className="flex items-center gap-x-1.5 md:gap-x-3">
+            <div className={`flex items-center gap-x-1.5 md:gap-x-3 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end" : ""}`}>
               <button
                 type="button"
                 onClick={() => navigate("/business")}
@@ -215,7 +228,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end" : ""}`}>
               <button
                 type="button"
                 onClick={() => navigate("/business")}
@@ -232,9 +245,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
             </div>
           )}
         </div>
-        {onSearchPage ? (
-          <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} />
-        ) : (
+        {!onSearchPage &&
           expanded && (
             <div className="mt-[6px] flex h-[46px] w-full items-center border-t border-[#ededed]">
               <button
@@ -249,8 +260,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
                 <p className="font-medium text-[#222222]">Back</p>
               </button>
             </div>
-          )
-        )}
+          )}
       </nav>
     </>
   );

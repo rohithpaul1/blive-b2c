@@ -433,7 +433,7 @@ const SearchPage = () => {
         expanded={true}
         onSearchTrigger={handleSearchTrigger}
       />
-      <main className="px-[16px] pb-[72px] pt-[158px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[244px]">
+      <main className="px-[16px] pb-[72px] pt-[158px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[108px]">
         {isLoading ? (
           <Loader />
         ) : (
