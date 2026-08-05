@@ -24,11 +24,16 @@ const rupees = (value) =>
 
 const readableDate = (value) => {
   if (!value) return "To be scheduled";
+  const parsed =
+    typeof value === "number" || /^\d+$/.test(String(value))
+      ? new Date(Number(value))
+      : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "To be scheduled";
   return new Intl.DateTimeFormat("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(parsed);
 };
 
 const transactionLabel = {
@@ -38,16 +43,26 @@ const transactionLabel = {
   release: "Hold released",
   refund: "Refund",
   adjustment: "Balance adjustment",
+  fixed_rental: "Fixed rental payment",
+  subscription: "Subscription payment",
+  wallet_topup: "Money added",
+  wallet_hold: "Amount held",
+  wallet_release: "Hold released",
+  wallet_refund: "Refund credited",
+  wallet_adjustment: "Balance adjustment",
+  deposit: "Security deposit",
 };
 
 const Wallet = () => {
   const { isAuthenticated } = useUser();
   const navigate = useNavigate();
   const wallet = useQuery("b2c/wallet:summary", isAuthenticated ? {} : "skip");
+  const finance = useQuery("b2c/finance:history", isAuthenticated ? {} : "skip");
   const addMoney = useMutation("b2c/wallet:topUp");
   const [amount, setAmount] = useState(1000);
   const [customAmount, setCustomAmount] = useState("");
   const [adding, setAdding] = useState(false);
+  const [historyView, setHistoryView] = useState("transactions");
 
   const chosenAmount = useMemo(
     () => Number(customAmount || amount || 0),
@@ -84,14 +99,30 @@ const Wallet = () => {
       <Navbar onSearchPage={false} expanded={true} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-[148px] sm:px-6 lg:px-8">
         <div className="mb-6">
-          <p className="text-sm font-medium text-[#6d6d72]">Subscription wallet</p>
+          <p className="text-sm font-medium text-[#6d6d72]">Wallet and payments</p>
           <h1 className="mt-1 text-[28px] font-bold tracking-[-0.02em] sm:text-[34px]">
-            Your wallet
+            Your money
           </h1>
           <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#6d6d72] sm:text-base">
-            Keep enough balance for your next renewal. We will show you exactly what is due before money is charged.
+            Recharge subscriptions, review fixed-rental payments, and keep every receipt and refund in one place.
           </p>
         </div>
+
+        {finance?.summary && (
+          <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              ["Fixed rentals paid", finance.summary.fixedRentalPaid],
+              ["Subscriptions paid", finance.summary.subscriptionPaid],
+              ["Refunds", finance.summary.refunds],
+              ["Outstanding", finance.summary.outstanding],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl border border-[#e8e8eb] bg-white p-4 sm:p-5">
+                <p className="text-xs font-medium text-[#77777d]">{label}</p>
+                <p className="mt-2 text-lg font-bold tracking-[-0.02em] sm:text-xl">{rupees(value)}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {wallet === undefined ? (
           <div className="flex min-h-[360px] items-center justify-center rounded-3xl border border-[#e8e8eb] bg-white">
@@ -99,7 +130,7 @@ const Wallet = () => {
           </div>
         ) : (
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
-            <section className="overflow-hidden rounded-3xl bg-[#271254] text-white shadow-[0_18px_50px_rgba(39,18,84,0.16)]">
+            <section className="min-w-0 overflow-hidden rounded-3xl bg-[#271254] text-white shadow-[0_18px_50px_rgba(39,18,84,0.16)]">
               <div className="p-6 sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -144,7 +175,7 @@ const Wallet = () => {
                     </div>
                   </div>
                 ) : (
-                  <p className="mt-8 max-w-[520px] text-sm leading-6 text-white/70">
+                  <p className="mt-8 max-w-[520px] break-words text-sm leading-6 text-white/70">
                     Your wallet becomes active when a subscription rental starts.
                   </p>
                 )}
@@ -161,7 +192,7 @@ const Wallet = () => {
               </div>
             </section>
 
-            <aside className="rounded-3xl border border-[#e8e8eb] bg-white p-5 sm:p-6">
+            <aside className="min-w-0 rounded-3xl border border-[#e8e8eb] bg-white p-5 sm:p-6">
               <h2 className="text-xl font-bold">Add money</h2>
               <p className="mt-1 text-sm leading-5 text-[#6d6d72]">
                 Choose an amount or enter your own.
@@ -213,22 +244,31 @@ const Wallet = () => {
               </div>
             </aside>
 
-            <section className="rounded-3xl border border-[#e8e8eb] bg-white lg:col-span-2">
+            <section className="min-w-0 overflow-hidden rounded-3xl border border-[#e8e8eb] bg-white lg:col-span-2">
               <div className="flex items-center justify-between border-b border-[#ededf0] px-5 py-5 sm:px-6">
                 <div>
-                  <h2 className="text-xl font-bold">Recent activity</h2>
-                  <p className="mt-1 text-sm text-[#77777d]">Your latest wallet credits and charges</p>
+                  <h2 className="text-xl font-bold">Payment history</h2>
+                  <p className="mt-1 text-sm text-[#77777d]">Wallet activity, rental payments, deposits, refunds, and receipts</p>
                 </div>
               </div>
-              {wallet.transactions.length === 0 ? (
+              <div className="flex gap-1 border-b border-[#ededf0] px-5 pt-3 sm:px-6">
+                {[{ value: "transactions", label: "Transactions" }, { value: "receipts", label: "Receipts" }].map((item) => (
+                  <button key={item.value} type="button" onClick={() => setHistoryView(item.value)} className={`border-b-2 px-3 py-3 text-sm font-semibold ${historyView === item.value ? "border-[#351a75] text-[#351a75]" : "border-transparent text-[#77777d]"}`}>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              {historyView === "transactions" && (finance === undefined ? (
+                <div className="flex min-h-[180px] items-center justify-center"><Loader /></div>
+              ) : (finance?.transactions ?? []).length === 0 ? (
                 <div className="px-6 py-12 text-center">
-                  <p className="font-semibold">No wallet activity yet</p>
-                  <p className="mt-1 text-sm text-[#77777d]">Top-ups and renewal payments will appear here.</p>
+                  <p className="font-semibold">No payment activity yet</p>
+                  <p className="mt-1 text-sm text-[#77777d]">Rental payments, wallet top-ups, charges, and refunds will appear here.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-[#ededf0]">
-                  {wallet.transactions.map((transaction) => {
-                    const incoming = transaction.amount >= 0;
+                  {finance.transactions.map((transaction) => {
+                    const incoming = transaction.direction === "in";
                     return (
                       <div key={transaction.id} className="flex items-center gap-4 px-5 py-4 sm:px-6">
                         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${incoming ? "bg-[#eaf8ef] text-[#19733b]" : "bg-[#fff0ef] text-[#a1322d]"}`}>
@@ -239,24 +279,36 @@ const Wallet = () => {
                             {transaction.note || transactionLabel[transaction.type] || "Wallet activity"}
                           </p>
                           <p className="mt-0.5 text-xs text-[#77777d] sm:text-sm">
-                            {readableDate(transaction.createdAt)}
+                            {readableDate(transaction.createdAtMs)}
+                            {transaction.bookingNumber ? ` · ${transaction.bookingNumber}` : ""}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className={`text-sm font-bold sm:text-base ${incoming ? "text-[#19733b]" : "text-[#a1322d]"}`}>
-                            {incoming ? "+" : "−"}{rupees(Math.abs(transaction.amount))}
+                            {incoming ? "+" : "−"}{rupees(transaction.amount)}
                           </p>
-                          {transaction.balanceAfter != null && (
-                            <p className="mt-0.5 text-xs text-[#77777d]">
-                              {rupees(transaction.balanceAfter)} balance
-                            </p>
-                          )}
+                          {transaction.reference && <p className="mt-0.5 max-w-[180px] truncate text-xs text-[#77777d]">{transaction.reference}</p>}
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              )}
+              ))}
+              {historyView === "receipts" && (finance === undefined ? (
+                <div className="flex min-h-[180px] items-center justify-center"><Loader /></div>
+              ) : (finance?.receipts ?? []).length === 0 ? (
+                <div className="px-6 py-12 text-center"><p className="font-semibold">No receipts yet</p><p className="mt-1 text-sm text-[#77777d]">A receipt appears here after your first rental payment.</p></div>
+              ) : (
+                <div className="divide-y divide-[#ededf0]">
+                  {finance.receipts.map((receipt) => (
+                    <div key={receipt.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-6">
+                      <div><p className="text-sm font-semibold">{receipt.number}</p><p className="mt-1 text-xs text-[#77777d]">{receipt.bookingNumber} · {readableDate(receipt.periodStart)} to {readableDate(receipt.periodEnd)}</p></div>
+                      <div className="sm:text-right"><p className="text-xs font-semibold capitalize text-[#5f5f64]">{receipt.status}</p>{receipt.outstanding > 0 && <p className="mt-1 text-xs text-[#a26316]">{rupees(receipt.outstanding)} due</p>}</div>
+                      <p className="text-sm font-bold sm:min-w-[120px] sm:text-right">{rupees(receipt.paid)} / {rupees(receipt.total)}</p>
+                    </div>
+                  ))}
+                </div>
+              ))}
               {wallet.activeSubscription && (
                 <button
                   type="button"

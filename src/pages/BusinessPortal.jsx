@@ -41,6 +41,7 @@ const NAVIGATION = [
   { id: "home", label: "Overview", icon: LayoutDashboard },
   { id: "fleet", label: "Live fleet", icon: MapPinned },
   { id: "bookings", label: "Rentals", icon: CalendarDays },
+  { id: "payments", label: "Payments", icon: ReceiptText },
   { id: "documents", label: "Documents", icon: FileText },
   { id: "support", label: "Support", icon: LifeBuoy },
   { id: "account", label: "Account", icon: UserCog },
@@ -639,6 +640,52 @@ function DocumentsView({ documents }) {
   );
 }
 
+function FinanceView({ finance }) {
+  if (finance === undefined) return <LoadingPanel />;
+  const summary = finance?.summary ?? {};
+  return (
+    <div className="space-y-7">
+      <SectionHeader
+        eyebrow="Finance"
+        title="Payments & invoices"
+        description="See what has been paid, what is outstanding, and the status of every business invoice."
+      />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard icon={IndianRupee} label="Paid" value={formatMoney(summary.totalPaid)} detail="Across issued invoices" tone="green" />
+        <MetricCard icon={Clock3} label="Outstanding" value={formatMoney(summary.outstanding)} detail="Awaiting payment" tone="amber" />
+        <MetricCard icon={AlertCircle} label="Overdue" value={formatMoney(summary.overdue)} detail="Past the due date" tone={summary.overdue > 0 ? "amber" : "neutral"} />
+        <MetricCard icon={CheckCircle2} label="Collection rate" value={`${summary.collectionRate ?? 0}%`} detail="Paid versus invoiced" tone="purple" />
+      </div>
+
+      <section className="overflow-hidden rounded-[20px] border border-[#e2dfe4] bg-white">
+        <div className="border-b border-[#ece9ee] px-5 py-5 sm:px-6">
+          <h2 className="text-[16px] font-black">Invoices</h2>
+          <p className="mt-1 text-[11px] text-[#817b84]">Amounts, due dates, and payment status in one place.</p>
+        </div>
+        {finance.invoices.length ? (
+          <div className="divide-y divide-[#ece9ee]">
+            {finance.invoices.map((invoice) => (
+              <article key={invoice.id} className="grid gap-4 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-6">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2"><p className="text-[13px] font-black">{invoice.number}</p><StatusBadge value={invoice.status} /></div>
+                  <p className="mt-1 text-[10px] text-[#858087]">{invoice.contractNumber} · {formatDate(invoice.periodStart)} – {formatDate(invoice.periodEnd)}</p>
+                </div>
+                <div className="sm:text-right"><p className="text-[10px] text-[#858087]">Due {formatDate(invoice.dueDate)}</p><p className="mt-1 text-[12px] font-extrabold">{formatMoney(invoice.paidAmount)} paid</p></div>
+                <div className="sm:min-w-[130px] sm:text-right"><p className="text-[15px] font-black">{formatMoney(invoice.total)}</p>{invoice.outstanding > 0 && <p className="mt-1 text-[10px] font-bold text-[#9b6a17]">{formatMoney(invoice.outstanding)} outstanding</p>}</div>
+              </article>
+            ))}
+          </div>
+        ) : <EmptyState icon={ReceiptText} title="No invoices yet" description="Invoices created for your contracts will appear here." />}
+      </section>
+
+      <section className="overflow-hidden rounded-[20px] border border-[#e2dfe4] bg-white">
+        <div className="border-b border-[#ece9ee] px-5 py-5 sm:px-6"><h2 className="text-[16px] font-black">Payment history</h2><p className="mt-1 text-[11px] text-[#817b84]">Confirmed, pending, and failed payment attempts.</p></div>
+        {finance.transactions.length ? <div className="divide-y divide-[#ece9ee]">{finance.transactions.map((payment) => <article key={payment.id} className="flex items-center gap-4 px-5 py-4 sm:px-6"><span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-[#f1edf5] text-[#624685]"><IndianRupee className="size-4" /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="truncate text-[12px] font-black">{payment.invoiceNumber}</p><StatusBadge value={payment.status} /></div><p className="mt-1 truncate text-[10px] text-[#858087]">{titleCase(payment.method)} · {payment.reference || payment.contractNumber} · {new Date(payment.paidAtMs).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div><p className="text-[14px] font-black">{formatMoney(payment.amount)}</p></article>)}</div> : <EmptyState icon={IndianRupee} title="No payments recorded" description="Payments against your invoices will appear here after they are recorded." />}
+      </section>
+    </div>
+  );
+}
+
 function SupportView({ tickets, fleet }) {
   const createTicket = useMutation("b2bPortal:createSupportTicket");
   const [formOpen, setFormOpen] = useState(false);
@@ -782,6 +829,7 @@ function BusinessPortal() {
   const requests = useQuery("b2bPortal:requests", ready ? {} : "skip");
   const fleet = useQuery("b2bPortal:fleet", ready ? {} : "skip");
   const documents = useQuery("b2bPortal:documents", ready ? {} : "skip");
+  const finance = useQuery("b2bPortal:finance", ready ? {} : "skip");
   const tickets = useQuery("b2bPortal:support", ready ? {} : "skip");
   const catalog = useQuery("b2c/catalog:list", ready ? {} : "skip");
   const initialSection = NAVIGATION.some((item) => item.id === searchParams.get("section")) ? searchParams.get("section") : "home";
@@ -847,6 +895,7 @@ function BusinessPortal() {
           {active === "home" && <HomeView overview={overview} onNavigate={selectSection} onRequest={() => openRequest()} />}
           {active === "fleet" && <FleetView fleet={fleet} />}
           {active === "bookings" && <BookingsView bookings={bookings} requests={requests} onRequest={openRequest} onRebook={rebook} />}
+          {active === "payments" && <FinanceView finance={finance} />}
           {active === "documents" && <DocumentsView documents={documents} />}
           {active === "support" && <SupportView tickets={tickets} fleet={fleet} />}
           {active === "account" && <AccountView session={session} onSignOut={logout} onSupport={() => selectSection("support")} />}
