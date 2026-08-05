@@ -36,6 +36,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
   const [showLocation, setShowLocation] = useState(false);
   const [showDatepicker, setShowDatepicker] = useState(false);
   const [desktopExpanded, setDesktopExpanded] = useState(false);
+  const [desktopDateStage, setDesktopDateStage] = useState("pickup");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileStep, setMobileStep] = useState("where");
   const [mobileLocationQuery, setMobileLocationQuery] = useState("");
@@ -191,6 +192,13 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     setDesktopExpanded(true);
     setShowLocation(section === "location");
     setShowDatepicker(section === "dates");
+    if (section === "dates") setDesktopDateStage("pickup");
+  };
+
+  const openDesktopDatepicker = (stage) => {
+    setDesktopDateStage(stage);
+    setShowDatepicker(true);
+    setShowLocation(false);
   };
 
   const updatePickupDate = (date) => {
@@ -508,10 +516,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           <button
             id="pickup-btn"
             type="button"
-            onClick={() => {
-              setShowDatepicker((open) => !open);
-              setShowLocation(false);
-            }}
+            onClick={() => openDesktopDatepicker("pickup")}
             className={desktopFieldClass}
           >
             <CalendarDays className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
@@ -549,10 +554,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             <button
               id="dropoff-btn"
               type="button"
-              onClick={() => {
-                setShowDatepicker((open) => !open);
-                setShowLocation(false);
-              }}
+              onClick={() => openDesktopDatepicker("dropoff")}
               className={desktopFieldClass}
             >
               <CalendarDays className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
@@ -590,6 +592,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         setSelectedPickup={setSelectedPickup}
         selectedDropoff={selectedDropoff}
         setSelectedDropoff={setSelectedDropoff}
+        selectionStage={desktopDateStage}
+        setSelectionStage={setDesktopDateStage}
       />
       </div>
 

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useContext } from "react";
-import { addMonths, format, startOfMonth } from "date-fns";
+import { addMonths, format, isBefore, startOfDay, startOfMonth } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import {
@@ -10,7 +10,16 @@ import {
 
 const times = ["9 AM", "10 AM", "11 AM", "12 PM", "2 PM", "3 PM"];
 
-export default function DateTimePicker({ showDatepicker, setShowDatepicker, selectedPickup, setSelectedPickup, selectedDropoff, setSelectedDropoff }) {
+export default function DateTimePicker({
+  showDatepicker,
+  setShowDatepicker,
+  selectedPickup,
+  setSelectedPickup,
+  selectedDropoff,
+  setSelectedDropoff,
+  selectionStage = "pickup",
+  setSelectionStage,
+}) {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
   const [pickupDate, setPickupDate] = useState(selectedPickup.date || null);
   const [dropoffDate, setDropoffDate] = useState(selectedDropoff.date || null);
@@ -53,34 +62,30 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
       handlePickupDateChange(date);
       return;
     }
-    if (!pickupDate || (pickupDate && dropoffDate)) {
+    if (selectionStage === "pickup" || !pickupDate) {
       setPickupDate(date);
       setSelectedPickup(prev => ({ ...prev, date }));
-      sessionStorage.setItem('selectedPickupDate', date);
+      sessionStorage.setItem('selectedPickupDate', date.toISOString());
       setDropoffDate(null);
       setSelectedDropoff(() => ({}));
       sessionStorage.removeItem('selectedDropoffDate');
-      
-      // Check if we should auto-adjust dropoff date for weekly/monthly plans
-      handlePickupDateChange(date);
-    } else if (pickupDate && !dropoffDate) {
+      setSelectionStage?.("dropoff");
+    } else {
       if (date >= pickupDate) {
         setDropoffDate(date);
         setSelectedDropoff(prev => ({ ...prev, date }));
-        sessionStorage.setItem('selectedDropoffDate', date);
+        sessionStorage.setItem('selectedDropoffDate', date.toISOString());
         
         // Auto-detect plan type based on the complete date range
         autoAdjustPlanTypeFromDates(pickupDate, date);
       } else {
         setPickupDate(date);
         setSelectedPickup(prev => ({ ...prev, date }));
-        sessionStorage.setItem('selectedPickupDate', date);
+        sessionStorage.setItem('selectedPickupDate', date.toISOString());
         setDropoffDate(null);
         setSelectedDropoff(() => ({}));
         sessionStorage.removeItem('selectedDropoffDate');
-        
-        // Check if we should auto-adjust dropoff date for weekly/monthly plans
-        handlePickupDateChange(date);
+        setSelectionStage?.("dropoff");
       }
     }
   };
@@ -150,13 +155,16 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
             const isSelected = pickupDate && format(day, "yyyy-MM-dd") === format(pickupDate, "yyyy-MM-dd");
             const inRange = pickupDate && dropoffDate && day >= pickupDate && day <= dropoffDate;
             const isEnd = dropoffDate && format(day, "yyyy-MM-dd") === format(dropoffDate, "yyyy-MM-dd");
+            const isPast = isBefore(startOfDay(day), startOfDay(new Date()));
 
             return (
               <button
                 key={i}
+                type="button"
                 onClick={() => handleDateClick(day)}
+                disabled={isPast}
                 className={`relative min-h-[40px] cursor-pointer rounded-[8px] p-2 text-sm transition-colors aspect-square
-                  ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[#2A244E29]" : "bg-[#F1F2F447] hover:bg-gray-200"}
+                  ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[#2A244E29]" : isPast ? "cursor-not-allowed bg-transparent text-[#c7c4c9]" : "bg-[#F1F2F447] hover:bg-gray-200"}
                 `}
               >
                 {day.getDate()}
@@ -178,13 +186,51 @@ export default function DateTimePicker({ showDatepicker, setShowDatepicker, sele
         <button aria-label="Previous month" className="flex size-[44px] cursor-pointer items-center justify-center rounded-full hover:bg-[#f5f3f6]" onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}>
           <ChevronLeft />
         </button>
-        <span className="font-semibold text-[18px] font-bold text-[#222222]">
-          {isSubscription ? "Choose subscription start" : "Select dates"}
+        <span className="text-[18px] font-bold text-[#222222]">
+          {isSubscription
+            ? "Choose subscription start"
+            : selectionStage === "pickup"
+              ? "Choose pickup date"
+              : "Choose return date"}
         </span>
         <button aria-label="Next month" className="flex size-[44px] cursor-pointer items-center justify-center rounded-full hover:bg-[#f5f3f6]" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
           <ChevronRight />
         </button>
       </div>
+
+      {!isSubscription && (
+        <div className="mb-[20px] grid grid-cols-2 rounded-[14px] bg-[#f1eff3] p-[4px]">
+          <button
+            type="button"
+            onClick={() => setSelectionStage?.("pickup")}
+            className={`min-h-[48px] rounded-[11px] px-[14px] text-left transition-colors ${
+              selectionStage === "pickup"
+                ? "bg-white text-[#29252f] shadow-sm"
+                : "text-[#6f6973]"
+            }`}
+          >
+            <span className="block text-[11px] font-bold uppercase tracking-[0.08em]">Pickup</span>
+            <span className="mt-[2px] block text-[13px] font-medium">
+              {pickupDate ? format(pickupDate, "d MMM") : "Select date"}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => pickupDate && setSelectionStage?.("dropoff")}
+            disabled={!pickupDate}
+            className={`min-h-[48px] rounded-[11px] px-[14px] text-left transition-colors ${
+              selectionStage === "dropoff"
+                ? "bg-white text-[#29252f] shadow-sm"
+                : "text-[#6f6973]"
+            } disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            <span className="block text-[11px] font-bold uppercase tracking-[0.08em]">Return</span>
+            <span className="mt-[2px] block text-[13px] font-medium">
+              {dropoffDate ? format(dropoffDate, "d MMM") : "Select date"}
+            </span>
+          </button>
+        </div>
+      )}
 
       {isSubscription && (
         <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#e6e2ee] bg-[#faf9fc] px-[16px] py-[12px]">
