@@ -89,6 +89,38 @@ export async function resolveConvex(method, path, data) {
     return { handled: true, result: ok(booking) };
   }
 
-  // not migrated yet — let the caller fall back to mocks / REST
+  // ---- customer management: profile (userProfiles) ----
+  if (method === "GET" && p.startsWith("/user-onboarding/user-information/")) {
+    const profile = await client.query("b2c/auth:currentProfile", {});
+    return { handled: true, result: ok(profile) };
+  }
+  if (method === "POST" && p === "/user-onboarding/update-user") {
+    const profile = await client.mutation("b2c/auth:completeProfile", {
+      firstName: String(data?.firstName ?? "").trim(),
+      lastName: String(data?.lastName ?? "").trim(),
+      ...(data?.email ? { email: String(data.email).trim() } : {}),
+    });
+    return { handled: true, result: ok(profile, "Profile updated") };
+  }
+
+  // ---- customer management: e-KYC documents (read) ----
+  if (method === "GET" && p.startsWith("/e-kyc/get-documents")) {
+    const docs = await client.query("b2c/auth:getDocuments", {});
+    return { handled: true, result: ok(docs) };
+  }
+
+  // ---- booking management: cancel ----
+  if (method === "POST" && p.startsWith("/vehicle-plan/cancel-booking/")) {
+    const id = decodeURIComponent(p.slice("/vehicle-plan/cancel-booking/".length));
+    const booking = await client.mutation("b2c/booking:cancel", {
+      id,
+      reason: data?.cancelationReason ?? data?.reason ?? undefined,
+    });
+    return { handled: true, result: ok(booking, "Booking cancelled") };
+  }
+
+  // not migrated yet — let the caller fall back to mocks / REST.
+  // Still on the REST fallback: document/image UPLOADS (multipart → need Convex
+  // file storage), notifications, environmental-stats, change-dates.
   return { handled: false };
 }
