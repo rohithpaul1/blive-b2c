@@ -215,11 +215,13 @@ const SearchPage = () => {
         batteryType: model.batteryType || "charging",
         batteryCapacity: model.batteryCapacity || 0,
         perDayKmLimit: model.perDayKmLimit || 0,
+        perKmCharge: model.perKmCharge ?? null,
         currentMileage: model.currentMileage || 0,
         vehicleSpeed: model.vehicleSpeed || "standard",
         engineType: model.engineType || "ev",
         vehicleCategory: model.vehicleCategory || "two-wheeler",
         b2cDeposit: model.b2cDeposit,
+        onboardingFee: (configuredPlan?.onboardingFee ?? plan.onboardingFee) ?? 0,
         isAvailable: availableVehiclesCount > 0,
         nextAvailableDate:
           availableVehiclesCount > 0 ? "Available Now" : "30th Aug, 10am",

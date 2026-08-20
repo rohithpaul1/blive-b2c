@@ -484,6 +484,20 @@ const Cards = ({
                   </span>
                 </div>
 
+                {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0) && (
+                  <div className="mt-[10px] flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[11px] text-[#6b6b6b]">
+                    {Number(card.perKmCharge) > 0 && (
+                      <span>+₹{card.perKmCharge}/km beyond limit</span>
+                    )}
+                    {Number(card.perKmCharge) > 0 && Number(card.onboardingFee) > 0 && (
+                      <span className="text-[#d4d4d4]">·</span>
+                    )}
+                    {Number(card.onboardingFee) > 0 && (
+                      <span>₹{card.onboardingFee} one-time onboarding fee</span>
+                    )}
+                  </div>
+                )}
+
                 {isBusiness ? (
                   selectedQuantity > 0 ? (
                     <div className="mt-[16px] flex h-[46px] items-center gap-[10px]">

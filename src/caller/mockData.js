@@ -78,6 +78,7 @@ function mkVehicle(id, brand, modelName, manufacturer, daily, weeklyPerDay, mont
       batteryType: 'lithium-ion',
       batteryCapacity: 3,
       perDayKmLimit: 80,
+      perKmCharge: 6,
       currentMileage: 1200,
       vehicleSpeed: 'standard',
       engineType: 'ev',
@@ -87,6 +88,7 @@ function mkVehicle(id, brand, modelName, manufacturer, daily, weeklyPerDay, mont
     plan: {
       id: `plan_${id}`,
       name: 'Standard Plan',
+      onboardingFee: 499,
       enterDailyPlanPrice: daily,
       enterWeeklyPlanPrice: weeklyPerDay * 7,
       enterMonthlyPlanPrice: monthlyPrice,
@@ -194,6 +196,9 @@ function calcPricing(body = {}) {
       gst_amount,
       security_deposit,
       subtotal,
+      included_km_per_day: v.model.perDayKmLimit,
+      extra_km_charge: v.model.perKmCharge,
+      onboarding_fee: v.plan.onboardingFee,
     },
     vehicleModelId: v.model.id,
     ratePlan,
@@ -272,7 +277,7 @@ function route(method, rawPath, body) {
 
   // coupons / new-user
   if (M === 'GET' && path.startsWith('/vehicle-plan/check-new-user'))
-    return ok({ newUser: false });
+    return ok({ newUser: true });
   if (M === 'GET' && path.startsWith('/vehicle-plan/available-coupons'))
     return ok(COUPONS);
 

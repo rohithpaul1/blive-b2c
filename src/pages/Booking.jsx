@@ -110,6 +110,32 @@ const Booking = () => {
     Number(selectedProduct?.subscriptionDuration ?? subscriptionDuration) || 1
   );
 
+  // First-booking detection — the one-time onboarding fee applies to new users only.
+  const [isNewUser, setIsNewUser] = useState(false);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        if (!userData?.id) return;
+        const res = await getAPI(`/vehicle-plan/check-new-user?userId=${userData.id}`);
+        if (active && res?.success && res?.data) setIsNewUser(Boolean(res.data.newUser));
+      } catch {
+        /* non-fatal: default to not charging the onboarding fee */
+      }
+    })();
+    return () => { active = false; };
+  }, [userData?.id]);
+
+  // Extra-km rate (informational) + one-time onboarding fee. Read from the pricing
+  // breakdown when the backend provides it, else from the vehicle model / plan.
+  const _pb = selectedProduct?.calculationData?.payment_breakdown || {};
+  const _model = selectedProduct?.model || selectedProduct?.vehicleModel || {};
+  const _plan = selectedProduct?.plan || {};
+  const includedKmPerDay = _pb.included_km_per_day ?? _model.perDayKmLimit ?? null;
+  const extraKmCharge = _pb.extra_km_charge ?? _model.perKmCharge ?? null;
+  const onboardingFee = Number(_pb.onboarding_fee ?? _plan.onboardingFee ?? 0) || 0;
+  const showOnboardingFee = isNewUser && onboardingFee > 0;
+
   const navigate = useNavigate();
 
 
@@ -188,10 +214,11 @@ const Booking = () => {
 
 
   const calculateTotal = () => {
+    const oneTime = showOnboardingFee ? onboardingFee : 0;
     // If we have dynamic calculation data, use it
     if (selectedProduct?.calculationData?.payment_breakdown) {
       const breakdown = selectedProduct.calculationData.payment_breakdown;
-      return breakdown.final_amount.toFixed(2);
+      return (Number(breakdown.final_amount ?? 0) + oneTime).toFixed(2);
     }
 
     // Fallback to manual calculation
@@ -201,7 +228,7 @@ const Booking = () => {
       (addOns?.newHelmet ? addOns?.newHelmetPrice : 0);
     const taxes = taxCharges || 0;
     const discount = appliedPromocode?.discountAmount || 0;
-    const total = basePrice + addOnsTotal + taxes - discount;
+    const total = basePrice + addOnsTotal + taxes - discount + oneTime;
 
     return total.toFixed(2); // always 2 decimal places
   };
@@ -217,6 +244,35 @@ const Booking = () => {
 
   const formattedCouponSavings = () =>
     couponSavings().toLocaleString("en-IN", { maximumFractionDigits: 2 });
+
+  // Extra-km (informational, billed on return) + one-time onboarding fee lines,
+  // shared across the subscription / one-off / fallback price breakdowns.
+  const renderExtraCharges = () => (
+    <>
+      {extraKmCharge != null && Number(extraKmCharge) > 0 && (
+        <div className="flex items-start justify-between">
+          <p className="text-[14px] text-[#3A3A3A]">Extra kilometres</p>
+          <p className="text-[14px] font-medium text-[#3A3A3A] text-right">
+            ₹{formattedAmount(extraKmCharge)}/km
+            <span className="block text-[11px] font-normal text-[#717171]">
+              {includedKmPerDay ? `beyond ${includedKmPerDay} km/day · ` : ""}billed on return
+            </span>
+          </p>
+        </div>
+      )}
+      {showOnboardingFee && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-x-[4px]">
+            <p className="text-[14px] text-[#3A3A3A]">Onboarding fee</p>
+            <span className="text-[11px] text-[#717171]">one-time</span>
+          </div>
+          <p className="text-[#3A3A3A] text-[14px] font-medium">
+            ₹{formattedAmount(onboardingFee)}
+          </p>
+        </div>
+      )}
+    </>
+  );
 
   const formattedAmount = (value) => {
     const amount = Number(value ?? 0);
@@ -1551,6 +1607,7 @@ const Booking = () => {
                               </p>
                             </div>
                           )}
+                          {renderExtraCharges()}
                         </>
                       ) : selectedProduct?.calculationData?.payment_breakdown ? (
                         <>
@@ -1670,6 +1727,7 @@ const Booking = () => {
                               </p>
                             </div>
                           )}
+                          {renderExtraCharges()}
                         </>
                       ) : (
                         /* Fallback to manual calculation */
