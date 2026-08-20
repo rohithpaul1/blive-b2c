@@ -448,59 +448,71 @@ const Cards = ({
                   </div>
                 )}
 
-                <div className="mt-[18px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[12px] text-[#373737]">
-                  <div className="flex flex-col items-center gap-[5px] border-r border-[#e5e5e5]">
+                <div className="mt-[18px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[13px] text-center text-[#373737]">
+                  <div className="flex flex-col items-center gap-[4px] border-r border-[#e5e5e5]">
                     <img className="size-[18px]" src="/images/speedometer-01.png" alt="" />
-                    <span className="text-[11px] font-medium">{card.range} km</span>
+                    <span className="text-[13px] font-bold leading-none text-[#262626]">
+                      {card.range ? `${card.range} km` : "—"}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-[0.03em] text-[#8a8a8a]">Range</span>
                   </div>
-                  <div className="flex flex-col items-center gap-[5px] border-r border-[#e5e5e5]">
+                  <div className="flex flex-col items-center gap-[4px] border-r border-[#e5e5e5]">
                     <img className="size-[18px]" src="/images/bi_stopwatch.png" alt="" />
-                    <span className="text-[11px] font-medium">{card.topSpeed} km/h</span>
+                    <span className="text-[13px] font-bold leading-none text-[#262626]">
+                      {card.topSpeed ? `${card.topSpeed} km/h` : "—"}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-[0.03em] text-[#8a8a8a]">Top speed</span>
                   </div>
-                  <div className="flex flex-col items-center gap-[5px]">
+                  <div className="flex flex-col items-center gap-[4px]">
                     <img
                       className="size-[18px]"
                       src="/images/mdi_battery-charging-outline.png"
                       alt=""
                     />
-                    <span className="text-[11px] font-medium">{card.chargeTime} hr</span>
+                    <span className="text-[13px] font-bold leading-none text-[#262626]">
+                      {Number(card.chargeTime) > 0 ? `${card.chargeTime} hr` : "—"}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-[0.03em] text-[#8a8a8a]">Charge time</span>
                   </div>
                 </div>
 
                 <div className="mt-[16px] grid min-h-[36px] grid-cols-2 items-start gap-[16px] text-[12px] leading-[1.35] text-[#626262]">
-                  <span className="flex items-start gap-[5px]">
-                    <span className="text-[#351a75]">✓</span>
-                    {dailyIncludedKm > 0
-                      ? isSubscription
-                        ? `${dailyIncludedKm} km/day included`
-                        : isBusiness
-                        ? `${dailyIncludedKm} km/day included`
-                        : `${includedKm} km included`
-                      : "Usage allowance shown at checkout"}
-                  </span>
+                  <div className="flex flex-col gap-[6px]">
+                    <span className="flex items-start gap-[5px]">
+                      <span className="text-[#351a75]">✓</span>
+                      <span>
+                        {dailyIncludedKm > 0
+                          ? isSubscription
+                            ? `${dailyIncludedKm} km/day included`
+                            : isBusiness
+                            ? `${dailyIncludedKm} km/day included`
+                            : `${includedKm} km included`
+                          : "Usage allowance shown at checkout"}
+                      </span>
+                    </span>
+                    {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0) && (
+                      <span className="flex items-start gap-[5px] text-[11px] text-[#8a8a8a]">
+                        {/* invisible tick (matched to the 12px tick above) keeps this line flush */}
+                        <span className="invisible text-[12px]" aria-hidden="true">✓</span>
+                        <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">
+                          {Number(card.perKmCharge) > 0 && (
+                            <span>+₹{card.perKmCharge}/km beyond limit</span>
+                          )}
+                          {Number(card.perKmCharge) > 0 && Number(card.onboardingFee) > 0 && (
+                            <span className="text-[#d4d4d4]">·</span>
+                          )}
+                          {Number(card.onboardingFee) > 0 && (
+                            <span>₹{card.onboardingFee} one-time onboarding fee</span>
+                          )}
+                        </span>
+                      </span>
+                    )}
+                  </div>
                   <span className="flex items-start justify-end gap-[5px] text-right">
                     <span className="text-[#351a75]">✓</span>
                     No fuel costs
                   </span>
                 </div>
-
-                {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0) && (
-                  <div className="mt-[8px] flex items-start gap-[5px] text-[11px] leading-[1.35] text-[#8a8a8a]">
-                    {/* invisible tick keeps this line's text flush with "…km included" above */}
-                    <span className="invisible text-[12px]" aria-hidden="true">✓</span>
-                    <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px]">
-                      {Number(card.perKmCharge) > 0 && (
-                        <span>+₹{card.perKmCharge}/km beyond limit</span>
-                      )}
-                      {Number(card.perKmCharge) > 0 && Number(card.onboardingFee) > 0 && (
-                        <span className="text-[#d4d4d4]">·</span>
-                      )}
-                      {Number(card.onboardingFee) > 0 && (
-                        <span>₹{card.onboardingFee} one-time onboarding fee</span>
-                      )}
-                    </span>
-                  </div>
-                )}
 
                 {isBusiness ? (
                   selectedQuantity > 0 ? (
