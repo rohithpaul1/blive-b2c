@@ -136,6 +136,15 @@ const Booking = () => {
   const onboardingFee = Number(_pb.onboarding_fee ?? _plan.onboardingFee ?? 0) || 0;
   const showOnboardingFee = isNewUser && onboardingFee > 0;
 
+  // Opening wallet balance requirement (a gate, not a charge added to the total).
+  // The rider must hold at least this balance to start; if short, they must top
+  // up. Sourced from the pricing breakdown, else the plan.
+  const openingWalletBalance = Number(_pb.opening_wallet_balance ?? _plan.openingWalletBalance ?? 0) || 0;
+  const walletAvailable = Number(_pb.opening_wallet_available ?? 0) || 0;
+  const openingWalletTopUp =
+    Number(_pb.opening_wallet_top_up ?? Math.max(0, openingWalletBalance - walletAvailable)) || 0;
+  const showOpeningWallet = openingWalletBalance > 0;
+
   const navigate = useNavigate();
 
 
@@ -268,6 +277,22 @@ const Booking = () => {
           </div>
           <p className="text-[#3A3A3A] text-[14px] font-medium">
             ₹{formattedAmount(onboardingFee)}
+          </p>
+        </div>
+      )}
+      {showOpeningWallet && (
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-x-[4px]">
+            <p className="text-[14px] text-[#3A3A3A]">Wallet balance to start</p>
+            <span className="text-[11px] text-[#717171]">required</span>
+          </div>
+          <p className="text-[#3A3A3A] text-[14px] font-medium text-right">
+            ₹{formattedAmount(openingWalletBalance)}
+            {openingWalletTopUp > 0 && (
+              <span className="block text-[11px] font-normal text-[#717171]">
+                add ₹{formattedAmount(openingWalletTopUp)} to your wallet
+              </span>
+            )}
           </p>
         </div>
       )}

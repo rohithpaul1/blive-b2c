@@ -109,6 +109,50 @@ export async function resolveConvex(method, path, data) {
     return { handled: true, result: ok(docs) };
   }
 
+  // ---- customer management: e-KYC document UPLOAD (multipart → Convex file storage) ----
+  // BookingDetails.jsx posts a FormData: `files` (one or more), a parallel
+  // `documentTypes[]` list, plus `aadhaarNumber` / `email` / `fullName`. We push
+  // each file to Convex storage (generateUploadUrl → POST bytes → storageId) and
+  // then persist them onto the customer's KYC fields (pending review) in one
+  // saveDocuments mutation. Result: the doc shows up in the admin "Needs eKYC
+  // review" queue for approval.
+  if (method === "POST" && p.startsWith("/e-kyc/upload-documents")) {
+    const isFormData =
+      typeof FormData !== "undefined" && data instanceof FormData;
+    const files = isFormData ? data.getAll("files") : [];
+    const types = isFormData
+      ? data.getAll("documentTypes[]").length
+        ? data.getAll("documentTypes[]")
+        : data.getAll("documentTypes")
+      : [];
+    const aadhaarNumber = isFormData ? data.get("aadhaarNumber") : undefined;
+    const email = isFormData ? data.get("email") : undefined;
+    const fullName = isFormData ? data.get("fullName") : undefined;
+
+    const documents = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file || typeof file === "string") continue;
+      const uploadUrl = await client.mutation("b2c/kyc:generateUploadUrl", {});
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const { storageId } = await res.json();
+      documents.push({ type: String(types[i] ?? "document"), storageId });
+    }
+
+    const saved = await client.mutation("b2c/kyc:saveDocuments", {
+      documents,
+      ...(aadhaarNumber ? { aadhaarNumber: String(aadhaarNumber) } : {}),
+      ...(fullName ? { fullName: String(fullName) } : {}),
+      ...(email ? { email: String(email) } : {}),
+    });
+    return { handled: true, result: ok(saved, "Documents uploaded") };
+  }
+
   // ---- booking management: cancel ----
   if (method === "POST" && p.startsWith("/vehicle-plan/cancel-booking/")) {
     const id = decodeURIComponent(p.slice("/vehicle-plan/cancel-booking/".length));
@@ -120,7 +164,7 @@ export async function resolveConvex(method, path, data) {
   }
 
   // not migrated yet — let the caller fall back to mocks / REST.
-  // Still on the REST fallback: document/image UPLOADS (multipart → need Convex
-  // file storage), notifications, environmental-stats, change-dates.
+  // Still on the REST fallback: profile-image upload, notifications,
+  // environmental-stats, change-dates.
   return { handled: false };
 }

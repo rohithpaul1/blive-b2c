@@ -490,7 +490,7 @@ const Cards = ({
                           : "Usage allowance shown at checkout"}
                       </span>
                     </span>
-                    {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0) && (
+                    {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0 || Number(card.openingWalletBalance) > 0) && (
                       <span className="flex items-start gap-[5px] text-[11px] text-[#8a8a8a]">
                         {/* invisible tick (matched to the 12px tick above) keeps this line flush */}
                         <span className="invisible text-[12px]" aria-hidden="true">✓</span>
@@ -503,6 +503,12 @@ const Cards = ({
                           )}
                           {Number(card.onboardingFee) > 0 && (
                             <span>₹{card.onboardingFee} one-time onboarding fee</span>
+                          )}
+                          {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0) && Number(card.openingWalletBalance) > 0 && (
+                            <span className="text-[#d4d4d4]">·</span>
+                          )}
+                          {Number(card.openingWalletBalance) > 0 && (
+                            <span>₹{card.openingWalletBalance} min wallet balance to start</span>
                           )}
                         </span>
                       </span>

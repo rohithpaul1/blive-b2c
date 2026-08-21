@@ -222,6 +222,7 @@ const SearchPage = () => {
         vehicleCategory: model.vehicleCategory || "two-wheeler",
         b2cDeposit: model.b2cDeposit,
         onboardingFee: (configuredPlan?.onboardingFee ?? plan.onboardingFee) ?? 0,
+        openingWalletBalance: (configuredPlan?.openingWalletBalance ?? plan.openingWalletBalance) ?? 0,
         isAvailable: availableVehiclesCount > 0,
         nextAvailableDate:
           availableVehiclesCount > 0 ? "Available Now" : "30th Aug, 10am",
