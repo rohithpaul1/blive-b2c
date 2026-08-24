@@ -386,12 +386,20 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       >
         <Search className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[14px] font-bold text-[#262626]">
-            {selectedLocation}
-          </span>
-          <span className="block truncate text-[12px] text-[#686868]">
-            {isSubscription ? "Subscription" : "Fixed rental"} · {searchSummary}
-          </span>
+          {onSearchPage ? (
+            <>
+              <span className="block truncate text-[14px] font-bold text-[#262626]">
+                {selectedLocation}
+              </span>
+              <span className="block truncate text-[12px] text-[#686868]">
+                {isSubscription ? "Subscription" : "Fixed rental"} · {searchSummary}
+              </span>
+            </>
+          ) : (
+            <span className="block truncate text-[15px] font-bold text-[#262626]">
+              Start your search
+            </span>
+          )}
         </span>
         <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#e1dce7] bg-[#f8f6fa] text-[#351a75]">
           <SlidersHorizontal className="size-[18px]" aria-hidden="true" />

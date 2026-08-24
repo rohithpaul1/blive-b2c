@@ -36,7 +36,7 @@ const NewUserPage = ({ setShowNewUserPage, setShowLoginPage, onSuccess }) => {
     }
 
     return (
-        <div className="relative w-[664px] h-[490px] rounded-[16px] login-shadow bg-white overflow-hidden flex flex-col">
+        <div className="relative w-full md:w-[664px] h-auto md:h-[490px] rounded-t-[24px] md:rounded-[16px] login-shadow bg-white overflow-hidden flex flex-col">
             {sender && <SpanLoader />}
             {/* Header */}
             <div className="py-[24px] flex items-center header-shadow px-[32px]">

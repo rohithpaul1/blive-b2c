@@ -73,7 +73,7 @@ const Login = () => {
   };
 
   return (
-    <div className="fixed z-50 w-screen h-screen top-0 left-0 bg-black/50 flex items-center justify-center">
+    <div className="fixed z-50 w-screen h-screen top-0 left-0 bg-black/50 flex items-end md:items-center justify-center">
       {showNewUserPage ? (
         <NewUserPage
           onSuccess={updateUserData}
@@ -92,8 +92,8 @@ const Login = () => {
           simulationCode={SIMULATE_OTP ? "123456" : null}
         />
       ) : (
-        <div className="flex w-[1000px] max-h-[90%] rounded-[16px] overflow-hidden login-shadow bg-white">
-          <div className="flex flex-col w-[460px] bg-[#F7F7F7] h-full pt-[50px] px-[52px] gap-y-[30px]">
+        <div className="flex self-end md:self-center w-full md:w-[1000px] md:max-w-none max-h-[92%] rounded-t-[24px] md:rounded-[16px] overflow-hidden login-shadow bg-white">
+          <div className="hidden md:flex flex-col w-[460px] bg-[#F7F7F7] h-full pt-[50px] px-[52px] gap-y-[30px]">
             <div className="flex gap-x-[15px] items-start">
               <div className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center flex-shrink-0 text-xl">
                 🛵
@@ -155,7 +155,7 @@ const Login = () => {
               alt="Scooter Image"
             />
           </div>
-          <div className="relative flex flex-1 flex-col">
+          <div className="relative flex flex-1 flex-col pb-[30px] md:pb-0">
             <div className="py-[24px] px-[32px] flex items-center justify-between header-shadow w-full">
               <div className="flex flex-col">
                 <p className="text-[24px] font-bold text-[#212121]">
