@@ -39,7 +39,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
     <>
       {showLoginPage && !isBusinessWebsite && <Login />}
       <nav
-        className={`fixed top-0 z-30 flex w-full flex-col items-center justify-center px-[clamp(20px,4vw,64px)] py-[10px] ${
+        className={`fixed top-0 z-[45] flex w-full flex-col items-center justify-center px-[clamp(20px,4vw,64px)] py-[10px] ${
           expanded ? "bg-white header-shadow" : "h-[72px] bg-white/95"
         }`}
       >

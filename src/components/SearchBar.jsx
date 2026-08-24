@@ -372,7 +372,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       className={`z-40 w-full ${
         onSearchPage
           ? "relative max-w-[700px]"
-          : "absolute left-1/2 top-[88px] w-[calc(100%_-_32px)] max-w-[1160px] -translate-x-1/2 md:bottom-0 md:top-auto md:w-[calc(100%_-_40px)] md:translate-y-1/2"
+          : "absolute left-1/2 bottom-0 w-[calc(100%_-_32px)] max-w-[1160px] -translate-x-1/2 translate-y-1/2 md:w-[calc(100%_-_40px)]"
       }`}
     >
       <button

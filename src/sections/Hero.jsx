@@ -3,7 +3,7 @@ import SearchBar from "../components/SearchBar";
 
 const Hero = () => {
   return (
-    <div id="hero" className="relative h-[78dvh] min-h-[560px] w-full md:h-[100dvh]">
+    <div id="hero" className="relative h-[42dvh] min-h-[320px] w-full md:h-[100dvh] md:min-h-[560px]">
       <div className="relative h-full w-full md:h-[90dvh]">
         <div className="absolute w-full h-full hero-gradient z-20" />
         <video
