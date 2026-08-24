@@ -94,6 +94,16 @@ function mkVehicle(id, brand, modelName, manufacturer, daily, weeklyPerDay, mont
       enterWeeklyPlanPrice: weeklyPerDay * 7,
       enterMonthlyPlanPrice: monthlyPrice,
     },
+    // Subscription catalog — SearchPage drops any vehicle without
+    // rentalPlans.subscription[planType], so this is what makes vehicles
+    // show up in the Subscription flow. Fixed rentals fall back to `plan`.
+    rentalPlans: {
+      subscription: {
+        daily:   { id: `sub_${id}_d`, name: 'Subscription', price: daily,           onboardingFee: 499, openingWalletBalance: 1000 },
+        weekly:  { id: `sub_${id}_w`, name: 'Subscription', price: weeklyPerDay * 7, onboardingFee: 499, openingWalletBalance: 1000 },
+        monthly: { id: `sub_${id}_m`, name: 'Subscription', price: monthlyPrice,     onboardingFee: 499, openingWalletBalance: 1000 },
+      },
+    },
   };
 }
 
