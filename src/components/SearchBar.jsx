@@ -20,6 +20,7 @@ import Datepicker from "./Datepicker";
 import LocationDropdown from "./LocationDropdown";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import { RENTAL_MODES, startingPeriodLabel } from "../utils/subscription";
+import { getHubs } from "../lib/hubs";
 
 const LOCATIONS = [
   { name: "HSR Layout, Bengaluru", detail: "Popular pickup hub" },
@@ -63,6 +64,31 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     autoAdjustPlanTypeFromDates,
   } = useContext(SearchBarContext);
   const isSubscription = rentalMode === RENTAL_MODES.subscription;
+
+  // Default the pickup location to the first hub the backend actually has.
+  // Deliberately scoped to this component (not the app-root SearchBarContext
+  // provider) so it only ever fires on a page that actually renders a
+  // search bar — Home, SearchPage — instead of on every route regardless of
+  // whether it needs a location at all. Checks sessionStorage directly
+  // rather than the context's selectedLocation so it can't race the
+  // context's own mount effect (which restores a stored pick from the same
+  // key): only fills in a default when there truly isn't one yet, never
+  // overrides an explicit user choice (selectLocation below always writes
+  // that same key first).
+  useEffect(() => {
+    if (sessionStorage.getItem("selectedLocation")) return undefined;
+    let cancelled = false;
+    getHubs()
+      .then((hubs) => {
+        if (cancelled) return;
+        const firstHubName = hubs?.[0]?.name;
+        if (firstHubName) setSelectedLocation(firstHubName);
+      })
+      .catch(() => {
+        // Leave the "Choose pickup location" hint showing.
+      });
+    return () => { cancelled = true; };
+  }, [setSelectedLocation]);
 
   useEffect(() => {
     if (!mobileOpen) return undefined;
@@ -233,14 +259,15 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     if (isSubscription) dropoff.setMonth(dropoff.getMonth() + 1);
     else dropoff.setDate(dropoff.getDate() + 1);
     setSubscriptionDuration(1);
-    setSelectedLocation("HSR Layout, Bengaluru");
+    // No hardcoded fallback city — clear back to the hint text instead.
+    setSelectedLocation(null);
     setSelectedPickup({ date: pickup, time: "10 AM" });
     setSelectedDropoff({ date: dropoff, time: "10 AM" });
     setMobileLocationQuery("");
     setMobileCalendarMonth(startOfMonth(pickup));
     setMobileDateStage("pickup");
     setMobileStep("where");
-    sessionStorage.setItem("selectedLocation", "HSR Layout, Bengaluru");
+    sessionStorage.removeItem("selectedLocation");
     sessionStorage.setItem("selectedPickupDate", pickup.toISOString());
     sessionStorage.setItem("selectedDropoffDate", dropoff.toISOString());
   };
@@ -387,7 +414,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         <Search className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[14px] font-bold text-[#262626]">
-            {selectedLocation}
+            {selectedLocation || "Choose pickup location"}
           </span>
           <span className="block truncate text-[12px] text-[#686868]">
             {isSubscription ? "Subscription" : "Fixed rental"} · {searchSummary}
@@ -407,7 +434,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           >
             <MapPin className="size-[17px] shrink-0 text-[#351a75]" aria-hidden="true" />
             <span className="truncate text-[13px] font-bold text-[#29262b]">
-              {selectedLocation.split(",")[0]}
+              {selectedLocation ? selectedLocation.split(",")[0] : "Choose location"}
             </span>
           </button>
           <span className="h-[26px] w-px shrink-0 bg-[#e4e1e6]" aria-hidden="true" />
@@ -507,7 +534,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             <span className="min-w-0 flex-1">
               <span className="block text-[11px] font-bold text-[#4c4750]">Pickup location</span>
               <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
-                {selectedLocation}
+                {selectedLocation || "Choose pickup location"}
               </span>
             </span>
             <ChevronDown className="size-[17px] shrink-0 text-[#6f6973]" aria-hidden="true" />
@@ -638,7 +665,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                     className="flex min-h-[74px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
                   >
                     <span className="text-[15px] font-medium text-[#777179]">Where</span>
-                    <span className="truncate text-[15px] font-bold text-[#252126]">{selectedLocation}</span>
+                    <span className="truncate text-[15px] font-bold text-[#252126]">{selectedLocation || "Choose pickup location"}</span>
                   </button>
                 ) : (
                   <div className="p-[20px]">

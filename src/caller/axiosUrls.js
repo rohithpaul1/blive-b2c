@@ -6,23 +6,19 @@ const handleResponseError = (error) => {
     if (error.response) {
         const { status, data } = error.response;
         if (status === 401) {
-            // Clear authentication data with correct keys
-            localStorage.removeItem('token');
-            localStorage.removeItem('userData');
-            sessionStorage.removeItem('token');
-            sessionStorage.removeItem('userData');
-            
-            // Don't show error message for auth errors - just clear and let app handle login redirect
-            console.log('🔍 401 Authentication error - session cleared');
-            
-            // Trigger a page refresh to update authentication state
-            setTimeout(() => {
-                window.location.reload();
-            }, 100);
-            
-            // Throw with auth error flag to handle in components
-            throw Object.assign(new Error('Authentication required'), { statusCode: 401, isAuthError: true });
-        } else if (status === 403) {  
+            // Every call in this file goes through the shared `axios`
+            // instance from axiosConfig.js, so its response interceptor has
+            // ALREADY run by the time an error lands here: it tried a
+            // silent refresh, and — only if that also failed — already
+            // called clearAuthState() and redirected to '/'. Redoing either
+            // of those here used to race a second clearAuthState() and a
+            // second window.location.reload() against that redirect,
+            // effectively double-booting the app on every session expiry
+            // (this is what caused the extra hubs/catalogue calls right
+            // after a 401 — they were the app reloading itself twice, not
+            // something firing while logged out). Just propagate the flag.
+            throw Object.assign(new Error(error.message || 'Authentication required'), { statusCode: 401, isAuthError: true });
+        } else if (status === 403) {
             throw Object.assign(new Error(`${data.message || 'Access forbidden'}`), { statusCode: 403 });
         } else if (status === 404 && !data.message) {
             throw new Error(`Resource not found`);
@@ -92,6 +88,18 @@ const putAPI = async (path, data = null) => {
     }
 };
 
+const patchAPI = async (path, data = null) => {
+    const cx = await resolveConvex('PATCH', path, data);
+    if (cx.handled) return cx.result;
+    if (USE_MOCKS) return resolveMock('PATCH', path, data);
+    try {
+        const response = await axios.patch(path, data);
+        return response.data;
+    } catch (error) {
+        handleResponseError(error);
+    }
+};
+
 const blobFetchURL = async (path) => {
     try {
         const response = await axios.get(path, { responseType: 'blob' });
@@ -101,4 +109,17 @@ const blobFetchURL = async (path) => {
     }
 }
 
-export { getAPI, postAPI, postAPIMedia, putAPI, blobFetchURL };
+// POST variant of blobFetchURL — for endpoints (e.g. generate-invoice) that
+// return a binary body from a POST. Goes through the shared axios instance
+// so it picks up the same auth/tenant/CSRF headers as every other call
+// instead of a call site building its own fetch() with duplicated headers.
+const postAPIBlob = async (path, data = {}) => {
+    try {
+        const response = await axios.post(path, data, { responseType: 'blob' });
+        return response.data;
+    } catch (error) {
+        handleResponseError(error);
+    }
+}
+
+export { getAPI, postAPI, postAPIMedia, putAPI, patchAPI, blobFetchURL, postAPIBlob };

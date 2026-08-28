@@ -6,13 +6,33 @@ import CancellationBar from '../components/CancellationBar';
 import CancelPage from '../components/CancelPage';
 import ModifyDates from '../components/ModifyDates';
 import UploadCard from '../components/UploadCard';
-import { getAPI, postAPIMedia } from "../caller/axiosUrls";
-import { API_BASE_URL } from "../config/env";
+import { getAPI, postAPIMedia, postAPIBlob } from "../caller/axiosUrls";
+import { getHubs } from "../lib/hubs";
+import { getVehicleModelsByHubIds } from "../lib/vehicleModels";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import { useUser } from "../contexts/UserContext";
 import Login from "../components/Login";
 import { startingPeriodLabel } from "../utils/subscription";
+
+const CHARGED_BY_TO_PLAN_TYPE = {
+    PER_DAY: "daily",
+    PER_WEEK: "weekly",
+    PER_MONTH: "monthly",
+};
+
+// Same status → tab mapping as MyBookings.jsx (see its comment) — reused
+// here so getDisplayStatus below (already written for the old literal
+// status strings) doesn't need touching at all.
+const ORDER_STATUS_FOR_BOOKING = (booking) => {
+    if (booking.status === "CANCELLED") return "cancelled-booking";
+    const now = Date.now();
+    const pickup = new Date(booking.pickupDateTime).getTime();
+    const dropoff = new Date(booking.dropoffDateTime).getTime();
+    if (now < pickup) return "upcoming-booking";
+    if (now <= dropoff) return "ongoing-booking";
+    return "completed-booking";
+};
 
 const BookingDetails = () => {
     const [openMenu, setOpenMenu] = useState(false);
@@ -90,43 +110,22 @@ const BookingDetails = () => {
             console.log("🔍 Generating invoice for subscription ID:", subscriptionId);
             console.log("🔍 API URL:", `/vehicle-plan/generate-invoice/${subscriptionId}`);
 
-            // Make a direct fetch request to handle PDF response
-            const response = await fetch(`${API_BASE_URL}/vehicle-plan/generate-invoice/${subscriptionId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Add auth header if needed
-                },
-                body: JSON.stringify({})
-            });
+            // Goes through the shared axios client (auth/tenant/CSRF headers
+            // attached by its interceptor) instead of a standalone fetch().
+            const pdfBlob = await postAPIBlob(`/vehicle-plan/generate-invoice/${subscriptionId}`, {});
+            console.log("🔍 PDF blob size:", pdfBlob.size);
 
-            console.log("🔍 Response status:", response.status);
-            console.log("🔍 Response headers:", response.headers);
+            // Create download link
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `receipt-${subscriptionId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
 
-            if (response.ok) {
-                console.log("🔍 PDF response received, creating download...");
-                
-                // Get the PDF blob directly from the response
-                const pdfBlob = await response.blob();
-                console.log("🔍 PDF blob size:", pdfBlob.size);
-                
-                // Create download link
-                const url = window.URL.createObjectURL(pdfBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `receipt-${subscriptionId}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-
-                toast.success("Receipt downloaded successfully!", { id: 'receipt-toast' });
-            } else {
-                console.log("🔍 API returned error status:", response.status);
-                const errorText = await response.text();
-                console.log("🔍 Error response:", errorText);
-                toast.error("Failed to generate receipt", { id: 'receipt-toast' });
-            }
+            toast.success("Receipt downloaded successfully!", { id: 'receipt-toast' });
         } catch (error) {
             console.error("🔍 Error generating receipt:", error);
             toast.error(error.message || "Failed to generate receipt", { id: 'receipt-toast' });
@@ -245,14 +244,51 @@ const BookingDetails = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             console.log('🔍 Fetching booking details for ID:', bid);
-            const response = await getAPI(`/vehicle-plan/booking/${bid}`);
-            
-            if (response.status === 'success') {
-                setBookingData(response.data);
+            const apiData = await getAPI(`/bookings/${bid}`);
+
+            if (apiData?.id) {
+                // /bookings/{id} returns raw hubId/vehicleModelId only — no
+                // embedded hub or vehicle objects. Enrich it here with the
+                // same field names transformBookingData below already
+                // expects (from the old, richer endpoint), rather than
+                // rewriting that function's structure.
+                const [hubs, vehicleModelsById] = await Promise.all([
+                    getHubs(),
+                    getVehicleModelsByHubIds([apiData.hubId]),
+                ]);
+                const hub = hubs.find((h) => h.id === apiData.hubId);
+                const vehicleModel = vehicleModelsById.get(apiData.vehicleModelId);
+
+                apiData.hub = hub
+                    ? {
+                        name: hub.name,
+                        address: hub.address || hub.location,
+                        image: null, // no hub image field on this endpoint
+                        contactNumber: hub.contactPhone,
+                        contactEmail: hub.contactEmail,
+                        latitude: hub.warehouseLocation?.lat ?? null,
+                        longitude: hub.warehouseLocation?.lng ?? null,
+                    }
+                    : null;
+                apiData.vehicleModel = vehicleModel
+                    ? { modelName: vehicleModel.name, manufacturer: vehicleModel.vehicleType, imageUrl: vehicleModel.modelImages?.[0] }
+                    : null;
+                apiData.pickUpDate = apiData.pickupDateTime;
+                apiData.dropOffDate = apiData.dropoffDateTime;
+                apiData.bookingId = apiData.bookingNumber;
+                apiData.isHomeDelivery = apiData.wantsDoorstepDelivery;
+                apiData.dropoffLocation = apiData.pickupLocation;
+                apiData.orderStatus = ORDER_STATUS_FOR_BOOKING(apiData);
+                apiData.planType = CHARGED_BY_TO_PLAN_TYPE[apiData.chargedBy] || "daily";
+                apiData.rentalMode = apiData.rentalTerm === "SUBSCRIPTION" ? "subscription" : "fixed";
+                apiData.lastPaymentAt = apiData.paymentStatus === "PAID" ? (apiData.paymentMeta?.processedAt || apiData.updatedAt) : null;
+                apiData.lastPaymentAmount = apiData.paymentMeta?.amount ?? apiData.pricingSnapshot?.totalAmount ?? apiData.bookingAmount;
+
+                setBookingData(apiData);
             } else {
-                setError(response.message || 'Failed to fetch booking details');
+                setError('Failed to fetch booking details');
             }
         } catch (err) {
             console.error('Error fetching booking details:', err);
@@ -345,9 +381,9 @@ const BookingDetails = () => {
             refundAmount: apiData.lastPaymentAmount || "0",
             savedAmount: null, // Calculate if you have discount info
             paymentMethodImg: "/images/google-pay.png", // Default payment method image
-            paymentMethodName: "Razorpay", // Always show Razorpay
+            paymentMethodName: apiData.paymentMeta?.method === "SIMULATED" ? "Simulated Payment" : "Razorpay",
             paymentMethodDetails: "Online Payment",
-            specialRequest: "",
+            specialRequest: apiData.specialRequest || "",
             // Additional API data for reference
             originalData: apiData
         };

@@ -25,6 +25,22 @@ export const API_BASE_URL = (
 export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
 /**
+ * Base origin of the master/tenant-resolution service (e.g.
+ * https://evolve-api.dev.blive.co.in — no path, no trailing slash). Used
+ * once per tab on bootstrap to resolve the tenant id and logo/name for the
+ * current hostname via GET {MASTER_SERVICE_URL}/masterService/api/tenant/
+ * resolve/by-website-domain?domain=<hostname> — see
+ * src/contexts/TenantConfigContext.jsx.
+ *
+ * Deliberately no hardcoded fallback — if unset, tenant resolution is
+ * skipped (logged, not thrown) and the app renders with BLive's own default
+ * branding rather than guessing a tenant.
+ */
+export const MASTER_SERVICE_URL = (import.meta.env.VITE_MASTER_SERVICE_URL || '')
+  .trim()
+  .replace(/\/+$/, '');
+
+/**
  * Convex deployment URL (shared with the admin). When set, mapped B2C endpoints
  * route to Convex via src/caller/convexClient.js; unmapped ones fall back to the
  * mock layer or REST. e.g. https://clever-wildcat-573.convex.cloud

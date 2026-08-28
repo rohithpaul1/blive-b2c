@@ -17,9 +17,10 @@ const SearchBarProvider = ({ children }) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return { date: tomorrow, time: "10 AM" };
   });
-  const [selectedLocation, setSelectedLocation] = useState(
-    "HSR Layout, Bengaluru"
-  );
+  // No hardcoded default city — null until the user actually picks a real
+  // hub or grants location access. Consumers show a hint ("Choose pickup
+  // location") in place of a specific address until then.
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [currentPlanType, setCurrentPlanType] = useState(
@@ -314,9 +315,10 @@ const SearchBarProvider = ({ children }) => {
       (error) => {
         console.log("Location permission denied or error:", error.message);
         setLocationPermissionGranted(false);
-        // Fall back to default location
-        setSelectedLocation("HSR Layout, Bengaluru");
-        sessionStorage.setItem("selectedLocation", "HSR Layout, Bengaluru");
+        // No hardcoded fallback city — leave it unset so the hint text shows
+        // and the user picks a real one from the dropdown instead.
+        setSelectedLocation(null);
+        sessionStorage.removeItem("selectedLocation");
       },
       {
         enableHighAccuracy: true,
@@ -384,12 +386,18 @@ const SearchBarProvider = ({ children }) => {
       }
     }
 
-    // Check if we have a stored location, if not try to get current location
+    // Restore an explicit pickup-location pick, if the user made one.
+    // Deliberately NOT this provider's job to *default* one from the hubs
+    // API when there isn't a stored pick — this provider is mounted once at
+    // the app root for every route (main.jsx), so a network call made here
+    // fires on the very first page a visitor lands on regardless of whether
+    // that page even shows a search bar (e.g. a deep link straight to
+    // /profile). SearchBar.jsx — the component that actually needs a
+    // default location — resolves that itself, only on the pages that
+    // render it. Geolocation ("Near me" in the mobile sheet) is still
+    // available on demand via getUserLocation().
     if (selectedLocation) {
       setSelectedLocation(selectedLocation);
-    } else {
-      // Try to get user's current location
-      getUserLocation();
     }
   }, []);
 

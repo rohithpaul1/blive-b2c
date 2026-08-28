@@ -6,9 +6,26 @@ import Navbar from "../sections/Navbar";
 import Loader from "../components/Loader";
 import BookingCard from "../components/BookingCard";
 import { getAPI } from "../caller/axiosUrls";
+import { getHubs } from "../lib/hubs";
+import { getVehicleModelsByHubIds } from "../lib/vehicleModels";
 import { useUser } from "../contexts/UserContext";
 import Login from "../components/Login";
 import toast from "react-hot-toast";
+
+const CHARGED_BY_TO_PLAN_TYPE = {
+    PER_DAY: "daily",
+    PER_WEEK: "weekly",
+    PER_MONTH: "monthly",
+};
+
+// Tab name -> bookings bucket, in the priority order used to pick a default
+// tab once /bookings/mine has actually loaded (see fetchBookingHistory).
+const TAB_BUCKETS = [
+    ["Ongoing", "activeBooking"],
+    ["Upcoming", "upcomingBooking"],
+    ["Past", "completedBooking"],
+    ["Cancelled", "cancelledBooking"],
+];
 
 
 const MyBookings = () => {
@@ -34,60 +51,83 @@ const MyBookings = () => {
         }
     }, [wallet?.showInHeader]);
 
-    // Transform API data to component format
-    const transformBookingData = (booking) => {
-        const pickupDate = new Date(booking.pickUpDate);
-        const dropoffDate = new Date(booking.dropOffDate);
-        
+    // Transform one /bookings/mine item to the shape BookingCard.jsx expects.
+    // This endpoint returns raw vehicleModelId/hubId only — no embedded
+    // vehicle or hub objects at all — so real names/images/coordinates come
+    // from cross-referencing those ids against /catalogue/vehicle-models
+    // and the shared hub list (both resolved once in fetchBookingHistory
+    // below, passed in here rather than re-fetched per booking).
+    const transformBookingData = (booking, { vehicleModelsById, hubsById }) => {
+        const pickupDate = new Date(booking.pickupDateTime);
+        const dropoffDate = new Date(booking.dropoffDateTime);
+        const vehicleModel = vehicleModelsById.get(booking.vehicleModelId);
+        const hub = hubsById.get(booking.hubId);
+        const isSubscription = booking.rentalTerm === "SUBSCRIPTION";
+        const pricing = booking.pricingSnapshot || {};
+
         return {
             id: booking.id,
-            vehicleName: booking.vehicleModel.modelName,
-            manufacturer: booking.vehicleModel.manufacturer,
-            brandLogo: booking.vehicleModel.brand?.logo || "/images/Scooter.png",
-            imgUrl: "/images/Scooter (3).png", // Default image
-            dropoffLocation: booking.isHomeDelivery ? 
-                (booking.dropOffAddress || "Home Delivery") : 
-                (booking.hub?.name || "Default Hub"),
-            pickup: { 
-                date: pickupDate.toISOString().split('T')[0], 
+            vehicleName: vehicleModel?.name || booking.bookingNumber,
+            manufacturer: vehicleModel?.vehicleType || "",
+            brandLogo: vehicleModel?.modelImages?.[0] || null,
+            imgUrl: vehicleModel?.modelImages?.[0] || "/images/Scooter (3).png",
+            dropoffLocation: booking.wantsDoorstepDelivery
+                ? "Home Delivery"
+                : (hub?.name || booking.pickupLocation || "Default Hub"),
+            pickup: {
+                date: pickupDate.toISOString().split('T')[0],
                 time: pickupDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
             },
-            dropoff: { 
-                date: dropoffDate.toISOString().split('T')[0], 
+            dropoff: {
+                date: dropoffDate.toISOString().split('T')[0],
                 time: dropoffDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
             },
             cancelled: {
                 date: booking.updatedAt ? new Date(booking.updatedAt).toISOString().split('T')[0] : pickupDate.toISOString().split('T')[0],
                 time: booking.updatedAt ? new Date(booking.updatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : pickupDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
             },
-            price: parseFloat(booking.lastPaymentAmount),
-            orderStatus: booking.orderStatus,
-            planType: booking.planType,
-            vehicleModel: booking.vehicleModel,
-            plan: booking.plan,
-            rentalMode: booking.rentalMode || "fixed",
-            subscription: booking.subscription || null,
-            hub: booking.hub,
-            isHomeDelivery: booking.isHomeDelivery,
-            promoCodeId: booking.promoCodeId,
+            price: pricing.totalAmount ?? booking.bookingAmount ?? 0,
+            orderStatus: booking.status,
+            planType: CHARGED_BY_TO_PLAN_TYPE[booking.chargedBy] || "daily",
+            rentalMode: isSubscription ? "subscription" : "fixed",
+            // No recurring-billing echo on this endpoint (next charge date,
+            // renewal amount) — subscription bookings show the same total
+            // as fixed ones until BE adds that.
+            subscription: isSubscription
+                ? { recurringCharge: pricing.totalAmount ?? booking.bookingAmount ?? 0, nextBillingAt: null, commitmentDuration: 1 }
+                : null,
+            hub: hub
+                ? { name: hub.name, latitude: hub.warehouseLocation?.lat ?? null, longitude: hub.warehouseLocation?.lng ?? null }
+                : null,
+            isHomeDelivery: booking.wantsDoorstepDelivery,
             createdAt: booking.createdAt,
-            validTill: booking.validTill
         };
     };
 
-    // Fetch booking history
-    const fetchBookingHistory = async () => {
-        // Don't attempt to fetch if not authenticated
-        if (!isAuthenticated) {
-            console.log('🔍 Not authenticated, skipping API call');
-            setLoading(false);
-            setError(null);
-            return;
-        }
+    // Which tab (Ongoing/Upcoming/Past/Cancelled) a booking belongs in.
+    // The API doesn't group these server-side any more — derived
+    // client-side from status + dates. Only CANCELLED and CONFIRMED have
+    // been observed so far; worth confirming the full status enum with BE
+    // if other values (e.g. a distinct COMPLETED) turn out to exist.
+    const bucketForBooking = (booking) => {
+        if (booking.status === "CANCELLED") return "cancelledBooking";
+        const now = Date.now();
+        const pickup = new Date(booking.pickupDateTime).getTime();
+        const dropoff = new Date(booking.dropoffDateTime).getTime();
+        if (now < pickup) return "upcomingBooking";
+        if (now <= dropoff) return "activeBooking";
+        return "completedBooking";
+    };
 
-        // Don't fetch if no user data
-        if (!userData?.id) {
-            console.log('🔍 No user ID found, skipping API call');
+    // Fetch booking history. `isCancelled` lets the triggering effect (see
+    // below) disown a stale in-flight call — React's dev-only StrictMode
+    // double-invokes this effect on mount, which without this guard fired
+    // two overlapping /bookings/mine requests and let whichever one settled
+    // last clobber the other's state.
+    const fetchBookingHistory = async (isCancelled = () => false) => {
+        // Don't attempt to fetch if not authenticated
+        if (!isAuthenticated || !userData?.id) {
+            console.log('🔍 Not authenticated, skipping API call');
             setLoading(false);
             setError(null);
             return;
@@ -96,26 +136,49 @@ const MyBookings = () => {
         try {
             setLoading(true);
             setError(null);
-            
-            console.log('🔍 Fetching booking history for user:', userData.id);
-            const response = await getAPI(`/vehicle-plan/booking-history?userId=${userData.id}`);
-            
-            if (response.status === 'success') {
-                console.log("Booking history fetched:", response.data);
-                
-                const transformedBookings = {
-                    upcomingBooking: response.data.upcomingBooking?.map(transformBookingData) || [],
-                    activeBooking: response.data.activeBooking?.map(transformBookingData) || [],
-                    completedBooking: response.data.completedBooking?.map(transformBookingData) || [],
-                    cancelledBooking: response.data.cancelledBooking?.map(transformBookingData) || []
-                };
-                
-                setBookings(transformedBookings);
-                console.log("Transformed bookings:", transformedBookings);
-            } else {
-                setError(response.message || 'Failed to fetch booking history');
+
+            const rawBookings = await getAPI(`/bookings/mine?customerId=${userData.id}`);
+            const list = Array.isArray(rawBookings) ? rawBookings : [];
+
+            const [hubs, vehicleModelsById] = await Promise.all([
+                getHubs(),
+                getVehicleModelsByHubIds(list.map((b) => b.hubId)),
+            ]);
+            if (isCancelled()) return;
+            const hubsById = new Map(hubs.map((hub) => [hub.id, hub]));
+
+            const transformedBookings = {
+                upcomingBooking: [],
+                activeBooking: [],
+                completedBooking: [],
+                cancelledBooking: [],
+            };
+            list.forEach((booking) => {
+                const bucket = bucketForBooking(booking);
+                transformedBookings[bucket].push(transformBookingData(booking, { vehicleModelsById, hubsById }));
+            });
+
+            if (isCancelled()) return;
+            setBookings(transformedBookings);
+            console.log("Transformed bookings:", transformedBookings);
+
+            // Land the user on whichever tab actually has something to show
+            // instead of always defaulting to "Upcoming" — a booking whose
+            // pickup has already passed (today's date, say) lands in
+            // activeBooking/"Ongoing", and with nothing upcoming the page
+            // would otherwise show "No upcoming bookings yet" even though
+            // the fetch above just found a real, current booking. Only runs
+            // once (guarded by the same ref the wallet-driven switch below
+            // uses) so it never fights a tab the user already clicked.
+            if (!selectedActiveRental.current) {
+                const firstNonEmptyTab = TAB_BUCKETS.find(
+                    ([, bucket]) => transformedBookings[bucket].length > 0
+                );
+                if (firstNonEmptyTab) setTab(firstNonEmptyTab[0]);
+                selectedActiveRental.current = true;
             }
         } catch (error) {
+            if (isCancelled()) return;
             console.error('Error fetching booking history:', error);
             // Check if it's an authentication error
             if (error.statusCode === 401 || error.isAuthError) {
@@ -127,16 +190,17 @@ const MyBookings = () => {
                 setError('Failed to load booking history. Please try again.');
             }
         } finally {
-            setLoading(false);
+            if (!isCancelled()) setLoading(false);
         }
     };
 
     useEffect(() => {
         console.log('🔍 MyBookings useEffect triggered:', { isAuthenticated, userData: !!userData, loading });
-        
+        let cancelled = false;
+
         // Only try to fetch if authenticated and not loading
         if (isAuthenticated && userData) {
-            fetchBookingHistory();
+            fetchBookingHistory(() => cancelled);
         } else {
             // Clear any previous data when not authenticated
             setBookings({
@@ -148,6 +212,8 @@ const MyBookings = () => {
             setError(null);
             setLoading(false);
         }
+
+        return () => { cancelled = true; };
     }, [isAuthenticated, userData]);
 
     // Fetch notifications count when MyBookings page loads
@@ -266,7 +332,7 @@ const MyBookings = () => {
                             <p className="font-bold text-[22px] text-[#3A3A3A]">Error loading bookings</p>
                             <p className="mt-[8px] font-medium text-[14px] text-[#969696]">{error}</p>
                             <button 
-                                onClick={fetchBookingHistory}
+                                onClick={() => fetchBookingHistory()}
                                 className="mt-4 min-h-11 rounded-full bg-[#351a75] px-6 py-2 font-semibold text-white hover:bg-[#2c155f]"
                             >
                                 Retry

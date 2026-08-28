@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Navbar from '../sections/Navbar';
 import { UserContext } from '../contexts/UserContext';
 import ProfilePhotoCropper from '../components/ProfilePhotoCropper';
@@ -7,13 +7,48 @@ import toast from 'react-hot-toast';
 import Login from '../components/Login';
 import Loader from '../components/Loader';
 
+// GET /customers/me's ekycStatus values, humanized for display. Falls back
+// to a title-cased version of whatever the backend sends for any value not
+// listed here, so a new status added server-side doesn't render as "".
+const EKYC_STATUS_LABELS = {
+    NEED_EKYC: 'e-KYC pending',
+    PENDING: 'Under review',
+    VERIFIED: 'Verified',
+    REJECTED: 'Rejected — resubmission needed',
+};
+
+const formatEkycStatus = (status) => {
+    if (!status) return 'Not started';
+    return EKYC_STATUS_LABELS[status] || status
+        .toLowerCase()
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
+const formatFullName = (userData) => {
+    const name = [userData?.firstName, userData?.lastName].filter(Boolean).join(' ');
+    return name || '_';
+};
+
 const Profile = () => {
-    const { userData, setUserData, isAuthenticated, loading } = useContext(UserContext);
+    const { userData, setUserData, isAuthenticated, loading, refreshUserData } = useContext(UserContext);
     const [showImageChange, setShowImageChange] = useState(false);
     const [changeImage, setChangeImage] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [croppedImage, setCroppedImage] = useState(null);
     const [uploading, setUploading] = useState(false);
+
+    // userData is whatever was true at login (or at this tab's last full
+    // reload) — refetch on every visit to this page so wallet balance,
+    // eKYC status, and name/email are never stale.
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        refreshUserData().catch((error) => {
+            console.error('Failed to refresh profile:', error);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated]);
 
     // Show loading if user data is still loading
     if (loading) {
@@ -277,10 +312,10 @@ const Profile = () => {
                             </div>
                             <div className='flex flex-col'>
                                 <p className='font-bold text-[24px] text-[#FDFDFD]'>
-                                    {userData?.firstName || ''} {userData?.lastName || ''}
+                                    {formatFullName(userData)}
                                 </p>
                                 <p className='font-medium text-[18px] text-[#FDFDFD]'>
-                                    +91 {userData?.phoneNumber || ''}
+                                    {userData?.phoneNumber || ''}
                                 </p>
                             </div>
                         </div>
@@ -292,13 +327,25 @@ const Profile = () => {
                             <div className='flex items-center h-[72px] px-[16px]'>
                                 <p className='font-bold text-[14px] w-[200px] text-[#3A3A3A]'>Full Name</p>
                                 <p className='font-medium text-[14px] w-[200px] text-[#3A3A3A]'>
-                                    {userData?.firstName || ''} {userData?.lastName || ''}
+                                    {formatFullName(userData)}
                                 </p>
                             </div>
                             <div className='flex items-center h-[72px] px-[16px]'>
                                 <p className='font-bold text-[14px] w-[200px] text-[#3A3A3A]'>Phone Number</p>
                                 <p className='font-medium text-[14px] w-[200px] text-[#3A3A3A]'>
-                                    +91 {userData?.phoneNumber || ''}
+                                    {userData?.phoneNumber || ''}
+                                </p>
+                            </div>
+                            <div className='flex items-center h-[72px] px-[16px]'>
+                                <p className='font-bold text-[14px] w-[200px] text-[#3A3A3A]'>Email</p>
+                                <p className='font-medium text-[14px] w-[200px] text-[#3A3A3A]'>
+                                    {userData?.email || 'Not added'}
+                                </p>
+                            </div>
+                            <div className='flex items-center h-[72px] px-[16px]'>
+                                <p className='font-bold text-[14px] w-[200px] text-[#3A3A3A]'>e-KYC Status</p>
+                                <p className='font-medium text-[14px] w-[200px] text-[#3A3A3A]'>
+                                    {formatEkycStatus(userData?.ekycStatus)}
                                 </p>
                             </div>
                         </div>

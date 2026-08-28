@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import { ProductContext } from "../contexts/ProductContext";
 import { UserContext } from "../contexts/UserContext";
@@ -8,7 +8,7 @@ import NewUserPage from "./NewUserPage";
 import toast from "react-hot-toast";
 import SpanLoader from "./SpanLoader";
 import { useNavigate } from "react-router-dom";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { postAPI } from "../caller/axiosUrls";
 import { SIMULATE_OTP } from "../config/env";
 
 const Login = () => {
@@ -20,9 +20,7 @@ const Login = () => {
 
   const { setShowLoginPage } = useContext(LoginPageContext);
   const { selectedProduct } = useContext(ProductContext);
-  const { userData, isAuthenticated } = useContext(UserContext);
-  const { signIn } = useAuthActions();
-  const [awaitingProfile, setAwaitingProfile] = useState(false);
+  const { loginWithSession } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -36,7 +34,7 @@ const Login = () => {
     else setSender(true);
 
     try {
-      await signIn("phone", { phone: `${selectedCountryCode}${phoneNumber}` });
+      await postAPI("/auth/send-otp", { phone: `${selectedCountryCode}${phoneNumber}` });
       toast.success("OTP sent successfully!");
       setIsOTPSent(true);
     } catch (error) {
@@ -46,21 +44,20 @@ const Login = () => {
     }
   };
 
-  const onVerifiedOTP = async () => {
+  // Unlike the old Convex flow (sign in, then wait for a reactive profile
+  // query to catch up), verify-otp returns the token pair + customer
+  // synchronously in one response — no separate wait step needed.
+  const onVerifiedOTP = (result) => {
     setIsOTPSent(false);
-    setAwaitingProfile(true);
-  };
-
-  useEffect(() => {
-    if (!awaitingProfile || !isAuthenticated || !userData) return;
-    setAwaitingProfile(false);
-    if (userData.currentState === "basic-profile-pending") {
+    if (!result) return;
+    loginWithSession(result);
+    if (result.isNewCustomer) {
       setShowNewUserPage(true);
       return;
     }
     setShowLoginPage(false);
     if (selectedProduct) navigate("/booking");
-  }, [awaitingProfile, isAuthenticated, navigate, selectedProduct, setShowLoginPage, userData]);
+  };
 
   const updateUserData = () => {
     setShowNewUserPage(false);

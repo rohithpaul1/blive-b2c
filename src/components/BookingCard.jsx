@@ -1,10 +1,23 @@
 import toast from "react-hot-toast";
-import { useState } from "react";
-import { API_BASE_URL } from "../config/env";
+import { useEffect, useRef, useState } from "react";
+import { postAPIBlob } from "../caller/axiosUrls";
 import { renewalCadenceLabel, startingPeriodLabel } from "../utils/subscription";
 
 const BookingCard = ({ item, tab, onClick }) => {
     const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        if (!showMenu) return undefined;
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [showMenu]);
     const isSubscription = item.rentalMode === "subscription";
     const commitmentDuration = Number(item.subscription?.commitmentDuration || 1);
     const startingPeriod = startingPeriodLabel(item.planType, commitmentDuration);
@@ -49,36 +62,21 @@ const BookingCard = ({ item, tab, onClick }) => {
             setIsDownloadingInvoice(true);
             toast.loading("Generating invoice...", { id: 'invoice-toast' });
 
-            // Make a direct fetch request to handle PDF response
-            const response = await fetch(`${API_BASE_URL}/vehicle-plan/generate-invoice/${subscriptionId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({})
-            });
+            // Goes through the shared axios client (auth/tenant/CSRF headers
+            // attached by its interceptor) instead of a standalone fetch().
+            const pdfBlob = await postAPIBlob(`/vehicle-plan/generate-invoice/${subscriptionId}`, {});
 
-            if (response.ok) {
-                // Get the PDF blob directly from the response
-                const pdfBlob = await response.blob();
-                
-                // Create download link
-                const url = window.URL.createObjectURL(pdfBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `receipt-${subscriptionId}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
+            // Create download link
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `receipt-${subscriptionId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
 
-                toast.success("Receipt downloaded successfully!", { id: 'invoice-toast' });
-            } else {
-                const errorText = await response.text();
-                console.error("Error response:", errorText);
-                toast.error("Failed to generate receipt", { id: 'invoice-toast' });
-            }
+            toast.success("Receipt downloaded successfully!", { id: 'invoice-toast' });
         } catch (error) {
             console.error("Error generating receipt:", error);
             toast.error(error.message || "Failed to generate receipt", { id: 'invoice-toast' });
@@ -189,7 +187,30 @@ const BookingCard = ({ item, tab, onClick }) => {
                             </p>
                         )}
                     </div>
-                    <img src="/images/MenuDot.png" alt="Menu Dot" className="w-[24px] h-[24px]" />
+                    <div ref={menuRef} className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setShowMenu((open) => !open)}
+                            className="flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-full hover:bg-gray-100"
+                            aria-label="Booking options"
+                        >
+                            <img src="/images/MenuDot.png" alt="" className="w-[24px] h-[24px]" />
+                        </button>
+                        {showMenu && (
+                            <div className="absolute right-0 top-full z-10 mt-[4px] w-[160px] overflow-hidden rounded-[12px] border border-[#EDEDED] bg-white shadow-lg">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowMenu(false);
+                                        if (onClick) onClick(item);
+                                    }}
+                                    className="flex w-full cursor-pointer items-center px-[16px] py-[12px] text-left text-[13px] font-medium text-[#222222] hover:bg-[#f7f6f8]"
+                                >
+                                    View Details
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className="mt-[8px] flex items-center gap-x-[24px] px-[8px] sm:px-[16px]">
                     {tab === "Past" && <div className="flex items-center gap-x-[8px]">

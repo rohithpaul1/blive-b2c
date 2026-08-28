@@ -1,15 +1,35 @@
 import { useState, useRef, useEffect } from "react";
+import { getHubs } from "../lib/hubs";
 
-const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation, locationPermissionGranted, getUserLocation }) => {
-    const [locations] = useState([
-        "HSR Layout, Bengaluru",
-        "Jayanagar, Bengaluru",
-        "Koramangala, Bengaluru",
-        "Indiranagar, Bengaluru",
-        "Whitefield, Bengaluru",
-        "Electronic City, Bengaluru"
-    ]);
+// Fallback shown while /catalogue/hubs is loading (or if it fails) so the
+// dropdown never looks empty/broken.
+const DEFAULT_LOCATIONS = [
+    "HSR Layout, Bengaluru",
+    "Jayanagar, Bengaluru",
+    "Koramangala, Bengaluru",
+    "Indiranagar, Bengaluru",
+    "Whitefield, Bengaluru",
+    "Electronic City, Bengaluru"
+];
+
+const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation }) => {
+    const [locations, setLocations] = useState(DEFAULT_LOCATIONS);
     const locationRef = useRef(null);
+
+    // Real hub names from the B2C backend — just the name, nothing else.
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const hubs = await getHubs();
+                const names = hubs.map((hub) => hub.name).filter(Boolean);
+                if (!cancelled && names.length > 0) setLocations(names);
+            } catch (error) {
+                console.warn("[LocationDropdown] failed to load hubs, keeping default list:", error);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -40,23 +60,6 @@ const LocationDropdown = ({ setSelectedLocation, setShowLocation, showLocation, 
 
     return (
         <div ref={locationRef} className="absolute left-0 mt-[16px] max-h-[392px] w-[min(432px,calc(100vw-48px))] overflow-y-auto rounded-[20px] bg-white py-[12px] calender-shadow">
-            {/* Get Current Location Option */}
-            {!locationPermissionGranted && (
-                <button 
-                    onClick={() => {
-                        getUserLocation();
-                        setShowLocation(false);
-                    }} 
-                    className="flex min-h-[56px] w-full cursor-pointer items-center gap-x-[10px] overflow-hidden truncate border-b border-gray-100 px-[24px] hover:bg-[#f7f4fb]"
-                >
-                    <img className="w-[24px] aspect-square" src="/images/Location.png" alt="Location Icon" />
-                    <div className="flex flex-col items-start">
-                        <p className="font-medium text-[#222222]">Get Current Location</p>
-                        <p className="text-[12px] text-[#666]">Allow location access</p>
-                    </div>
-                </button>
-            )}
-            
             {/* Location Options */}
             {locations.map((location, i) => (
                 <button onClick={() => {

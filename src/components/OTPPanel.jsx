@@ -3,16 +3,15 @@ import { LoginPageContext } from "../contexts/LoginPageContext";
 import OTPInput from "./OTPInput";
 import toast from "react-hot-toast";
 import SpanLoader from "./SpanLoader";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { postAPI } from "../caller/axiosUrls";
 
 const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent, phoneNumber, title, onSuccess, simulationCode = null }) => {
-  const [timeLeft, setTimeLeft] = useState(90); 
-  const [hasError, setHasError] = useState(false); 
+  const [timeLeft, setTimeLeft] = useState(90);
+  const [hasError, setHasError] = useState(false);
   const [otp, setOtp] = useState('');
   const [sender, setSender] = useState(false);
 
   const { setShowLoginPage } = useContext(LoginPageContext);
-  const { signIn } = useAuthActions();
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -45,15 +44,16 @@ const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent
     
     try {
       setHasError(false);
+      let result = null;
       if (isLogin) {
-        const result = await signIn("phone", {
+        // Response: { accessToken, refreshToken, isNewCustomer, customer }
+        result = await postAPI("/auth/verify-otp", {
           phone: `${selectedCountryCode}${phoneNumber}`,
-          code: otp,
+          otp,
         });
-        if (!result.signingIn) throw new Error("The verification code could not be confirmed");
       }
       toast.success("OTP verified successfully!");
-      onSuccess();
+      onSuccess(result);
     } catch (error) {
       setHasError(true);
       toast.error(error.message || "Something went wrong. Please try again.");

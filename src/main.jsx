@@ -10,6 +10,7 @@ import { ProductProvider } from './contexts/ProductContext.jsx';
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { CONVEX_URL } from './config/env.js';
 import { convexClient } from './caller/convexReactClient.js';
+import { TenantConfigProvider } from './contexts/TenantConfigContext.jsx';
 
 // Self-host the dotLottie WebAssembly runtime so no CDN (unpkg/jsdelivr) is
 // contacted at runtime. The .wasm is served from /public.
@@ -21,16 +22,18 @@ if (!CONVEX_URL) {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ConvexAuthProvider client={convexClient}>
-      <LoginPageProvider>
-        <SearchBarProvider>
-          <ProductProvider>
-            <UserProvider>
-              <App />
-            </UserProvider>
-          </ProductProvider>
-        </SearchBarProvider>
-      </LoginPageProvider>
-    </ConvexAuthProvider>
+    <TenantConfigProvider>
+      <ConvexAuthProvider client={convexClient}>
+        <LoginPageProvider>
+          <SearchBarProvider>
+            <ProductProvider>
+              <UserProvider>
+                <App />
+              </UserProvider>
+            </ProductProvider>
+          </SearchBarProvider>
+        </LoginPageProvider>
+      </ConvexAuthProvider>
+    </TenantConfigProvider>
   </StrictMode>,
 )

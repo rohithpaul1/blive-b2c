@@ -7,26 +7,20 @@ import Loader from "../components/Loader";
 import SortDropdown from "../components/SortDropdown";
 import FilterPage from "../components/FilterPage";
 import { ProductContext } from "../contexts/ProductContext";
-import { getAPI } from "../caller/axiosUrls";
 import WhyBlive from "../sections/WhyBlive";
 import Customers from "../sections/Customers";
 import Footer from "../sections/Footer";
-import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
-
-const VEHICLE_IMAGES = {
-  Ather: "/images/Scooter (1).png",
-  Ola: "/images/Scooter (3).png",
-  TVS: "/images/Scooter (2).png",
-  Revolt: "/images/Scooter.png",
-  Ampere: "/images/Scooter (2).png",
-  Pure: "/images/Scooter.png",
-};
+import { RENTAL_MODES } from "../utils/subscription";
+import { getDefaultHubId, rangeToBucket, searchVehicles, transformSearchResult } from "../lib/catalogueSearch";
+import { getVehicleOems } from "../lib/vehicleOem";
 
 const SearchPage = () => {
-  // Pagination state
+  // Pagination — /catalogue/search has no page/limit params, it returns
+  // everything for the hub in one shot, so this pages the full result set
+  // client-side instead of asking the server for one page at a time.
   const [selectedPage, setSelectedPage] = useState(1);
-  const [maxPages, setMaxPages] = useState(1);
   const [itemsPerPage] = useState(12);
+  const [hubId, setHubId] = useState(null);
 
   // Filtering and sorting state
   const [sortOption, setSortOption] = useState("Lowest Price");
@@ -51,15 +45,22 @@ const SearchPage = () => {
     ranges: [],
   });
 
+  // null minPrice/maxPrice means "the user hasn't applied a price filter" —
+  // deliberately not seeded with concrete numbers (e.g. 0/1000), otherwise
+  // fetchVehicles below can't tell "no filter yet" apart from "the user
+  // applied exactly this range" and would send minPrice/maxPrice on every
+  // search, including the very first unfiltered one from Home.
   const [selectedFilters, setSelectedFilters] = useState({
-    minPrice: 0,
-    maxPrice: 1000,
+    minPrice: null,
+    maxPrice: null,
     selectedBrand: null,
     selectedRange: null,
   });
 
   const {
     selectedLocation,
+    selectedPickup,
+    selectedDropoff,
     adjustDropoffDateForPlan,
     updateCurrentPlanType,
     rentalMode,
@@ -77,82 +78,111 @@ const SearchPage = () => {
     []
   );
 
-  // Fetch vehicles from API with pagination and filters
-  const fetchVehicles = useCallback(
-    async (page = 1, filters = {}) => {
-      try {
-        setIsLoading(true);
+  // Resolve a default hub once on mount — /catalogue/search is scoped to
+  // one hub per call, no hub-picker UI exists yet (see conversation).
+  useEffect(() => {
+    getDefaultHubId()
+      .then(setHubId)
+      .catch((err) => console.error("Error resolving default hub:", err));
+  }, []);
 
-        // Build query parameters
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: itemsPerPage.toString(),
-          ...filters,
-        });
+  // "Brand" pills come from the real GET /catalogue/vehicle-oem list — a
+  // tenant-wide OEM directory, not something guessed from vehicle names —
+  // fetched once (it doesn't depend on hub/dates/term at all).
+  useEffect(() => {
+    getVehicleOems()
+      .then((oems) => {
+        setFilterData((prev) => ({
+          ...prev,
+          brands: oems.map((oem) => ({ id: oem.id, name: oem.name, logoUrl: oem.logoUrl })),
+        }));
+      })
+      .catch((err) => console.error("Error fetching vehicle OEMs:", err));
+  }, []);
 
-        const response = await getAPI(
-          `/vehicle-plan/vehicle-model-with-plan?${params}`
-        );
+  // Base (unfiltered by price/range) fetch, used only to compute
+  // FilterPage's brand/range facet counts. Deliberately independent of
+  // selectedFilters — those counts should describe the whole catalogue for
+  // these hub/dates/term, not whatever price/range filter is currently
+  // applied (otherwise applying one filter would make every OTHER facet's
+  // count look wrong, e.g. drop to 0 once the list itself is filtered down
+  // to just that bucket).
+  useEffect(() => {
+    if (!hubId) return undefined;
+    let cancelled = false;
+    searchVehicles({
+      hubId,
+      isSubscription,
+      planType: selectedPlanType,
+      pickup: selectedPickup,
+      dropoff: selectedDropoff,
+    })
+      .then((results) => {
+        if (!cancelled) updateFilterData(results);
+      })
+      .catch((err) => console.error("Error fetching filter facet data:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [hubId, isSubscription, selectedPlanType, selectedPickup, selectedDropoff]);
 
-        if (response.status === "success" && response.data?.data) {
-          setVehicles(response.data.data);
+  // Fetch the actual displayed/paginated vehicle list from /catalogue/search
+  // — server-side filtered by FilterPage's price range, range-bucket pill,
+  // and brand pill (confirmed query params: minPrice, maxPrice, rangeBuckets,
+  // oemIds) so filtering applies across the whole catalogue instead of just
+  // whatever page of results was already fetched. No page/limit params on
+  // this endpoint — it returns everything matching in one shot, paged
+  // client-side below instead.
+  const fetchVehicles = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const results = await searchVehicles({
+        hubId,
+        isSubscription,
+        planType: selectedPlanType,
+        pickup: selectedPickup,
+        dropoff: selectedDropoff,
+        minPrice: selectedFilters.minPrice,
+        maxPrice: selectedFilters.maxPrice,
+        rangeBucket: rangeToBucket(selectedFilters.selectedRange),
+        oemId: selectedFilters.selectedBrand?.id,
+      });
+      setVehicles(results);
+    } catch (err) {
+      console.error("Error fetching vehicles:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    hubId,
+    isSubscription,
+    selectedPlanType,
+    selectedPickup,
+    selectedDropoff,
+    selectedFilters.minPrice,
+    selectedFilters.maxPrice,
+    selectedFilters.selectedRange,
+    selectedFilters.selectedBrand,
+  ]);
 
-          // Update pagination info
-          if (response.data.pagination) {
-            setMaxPages(response.data.pagination.totalPages);
-          }
-
-          // Update filter data with real API data
-          updateFilterData(response.data.data);
-        } else {
-          throw new Error("Failed to fetch vehicles");
-        }
-      } catch (err) {
-        console.error("Error fetching vehicles:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [itemsPerPage]
-  );
-
-  // Update filter data based on API response
+  // Update the "Range" pill counts from a base (unfiltered) fetch. Brand
+  // pills are NOT computed here any more — see the getVehicleOems effect
+  // above — this endpoint's response has no OEM id on each result to count
+  // by, only a vehicle-model name, which isn't a reliable way to attribute
+  // a result back to one of the real OEMs above.
   const updateFilterData = (vehicleData) => {
-    // Extract unique brands
-    const brandMap = new Map();
     const rangeMap = new Map();
 
-    vehicleData.forEach((vehicle) => {
-      const { brand, model } = vehicle;
-
-      // Count brands
-      if (brandMap.has(brand.name)) {
-        brandMap.set(brand.name, brandMap.get(brand.name) + 1);
-      } else {
-        brandMap.set(brand.name, 1);
-      }
-
-      // Count ranges
-      const range = model.range || 0;
+    vehicleData.forEach((item) => {
+      const range = item.rangePerCharge || 0;
       let rangeKey;
       if (range <= 40) rangeKey = "0-40";
       else if (range <= 80) rangeKey = "40-80";
       else if (range <= 120) rangeKey = "80-120";
       else rangeKey = "120+";
 
-      if (rangeMap.has(rangeKey)) {
-        rangeMap.set(rangeKey, rangeMap.get(rangeKey) + 1);
-      } else {
-        rangeMap.set(rangeKey, 1);
-      }
+      rangeMap.set(rangeKey, (rangeMap.get(rangeKey) || 0) + 1);
     });
-
-    // Convert to arrays
-    const brands = Array.from(brandMap.entries()).map(([name, qty]) => ({
-      img: `/images/${name}.png`,
-      name,
-      qty,
-    }));
 
     const ranges = [
       { from: 0, to: 40, qty: rangeMap.get("0-40") || 0 },
@@ -161,99 +191,35 @@ const SearchPage = () => {
       { from: 120, qty: rangeMap.get("120+") || 0 },
     ];
 
-    setFilterData((prev) => ({
-      ...prev,
-      brands,
-      ranges,
-    }));
+    setFilterData((prev) => ({ ...prev, ranges }));
   };
 
-  // Transform API data to match Cards component format with plan type
-  const transformVehicleData = (vehicleData, planType) => {
-    return vehicleData.map((vehicle) => {
-      const { model, plan, brand, availableVehiclesCount } = vehicle;
-      const configuredPlan = rentalPlanFor(vehicle, rentalMode, planType);
-
-      if (isSubscription && !configuredPlan) return null;
-
-      // Get price based on selected plan type
-      let price;
-      let actualPrice = null;
-
-      switch (planType) {
-        case "daily":
-          price = configuredPlan?.price ?? plan.enterDailyPlanPrice;
-          break;
-        case "weekly":
-          price = configuredPlan?.price ?? plan.enterWeeklyPlanPrice;
-          actualPrice = plan.enterDailyPlanPrice * 7;
-          break;
-        case "monthly":
-          price = configuredPlan?.price ?? plan.enterMonthlyPlanPrice;
-          actualPrice = plan.enterDailyPlanPrice * 30;
-          break;
-        default:
-          price = plan.enterDailyPlanPrice;
-      }
-
-      return {
-        id: model.id,
-        vehicleName: model.modelName,
-        manufacturer: model.manufacturer,
-        brandName: brand.name,
-        imgUrl:
-          model.imageUrl ||
-          model.image ||
-          VEHICLE_IMAGES[brand.name] ||
-          "/images/Scooter.png",
-        brandLogoUrl: brand.brandLogo || `/images/${brand.name}.png`,
-        price: price,
-        actualPrice: actualPrice,
-        range: model.range || 0,
-        topSpeed: model.speed || 0,
-        chargeTime: model.batteryChargingTime || 0,
-        batteryType: model.batteryType || "charging",
-        batteryCapacity: model.batteryCapacity || 0,
-        perDayKmLimit: model.perDayKmLimit || 0,
-        perKmCharge: model.perKmCharge ?? null,
-        currentMileage: model.currentMileage || 0,
-        vehicleSpeed: model.vehicleSpeed || "standard",
-        engineType: model.engineType || "ev",
-        vehicleCategory: model.vehicleCategory || "two-wheeler",
-        b2cDeposit: model.b2cDeposit,
-        onboardingFee: (configuredPlan?.onboardingFee ?? plan.onboardingFee) ?? 0,
-        isAvailable: availableVehiclesCount > 0,
-        nextAvailableDate:
-          availableVehiclesCount > 0 ? "Available Now" : "30th Aug, 10am",
-        availableCount: availableVehiclesCount,
-        planId: configuredPlan?.id ?? plan.id,
-        planName: configuredPlan?.name ?? plan.name,
-        usageModel: isSubscription ? "payg" : "one_off",
-        rentalMode,
-        billingPolicy: configuredPlan?.billingPolicy ?? null,
-      };
-    }).filter(Boolean);
-  };
+  // Transform API data to match Cards component format. Search already
+  // returns the ONE plan tier matching the requested dates/howLong, so
+  // there's no per-tab plan lookup needed here any more (see
+  // transformSearchResult's comment for field-by-field detail).
+  const transformVehicleData = (vehicleData) =>
+    (vehicleData || []).map((item) => transformSearchResult(item, { isSubscription, rentalMode }));
 
   // Apply client-side filtering and sorting
   const filteredAndSortedVehicles = useMemo(() => {
-    let transformedVehicles = transformVehicleData(vehicles, selectedPlanType);
+    let transformedVehicles = transformVehicleData(vehicles);
 
-    // Apply price range filter
-    if (selectedFilters.minPrice > 0 || selectedFilters.maxPrice < 1000) {
+    // Apply price range filter — only once the user has actually applied
+    // one; null here (see selectedFilters' initial state) must NOT get
+    // coerced into a 0 lower/upper bound, which would filter out every
+    // real vehicle (price <= null -> price <= 0).
+    if (selectedFilters.minPrice != null || selectedFilters.maxPrice != null) {
+      const min = selectedFilters.minPrice ?? 0;
+      const max = selectedFilters.maxPrice ?? Infinity;
       transformedVehicles = transformedVehicles.filter(
-        (vehicle) =>
-          vehicle.price >= selectedFilters.minPrice &&
-          vehicle.price <= selectedFilters.maxPrice
+        (vehicle) => vehicle.price >= min && vehicle.price <= max
       );
     }
 
-    // Apply brand filter
-    if (selectedFilters.selectedBrand) {
-      transformedVehicles = transformedVehicles.filter(
-        (vehicle) => vehicle.brandName === selectedFilters.selectedBrand.name
-      );
-    }
+    // Brand is filtered server-side now (oemIds, see fetchVehicles) — this
+    // endpoint's response has no OEM id per result to re-check client-side
+    // against selectedFilters.selectedBrand, unlike price/range above.
 
     // Apply range filter
     if (selectedFilters.selectedRange) {
@@ -301,6 +267,15 @@ const SearchPage = () => {
     return transformedVehicles;
   }, [vehicles, selectedPlanType, selectedFilters, sortOption, rentalMode]);
 
+  // /catalogue/search has no page/limit params — this pages the already
+  // client-side-filtered/sorted list instead of asking the server for one
+  // page at a time (which the old endpoint used to do).
+  const maxPages = Math.max(1, Math.ceil(filteredAndSortedVehicles.length / itemsPerPage));
+  const pagedVehicles = useMemo(
+    () => filteredAndSortedVehicles.slice((selectedPage - 1) * itemsPerPage, selectedPage * itemsPerPage),
+    [filteredAndSortedVehicles, selectedPage, itemsPerPage]
+  );
+
   // Handle page change
   const handlePageChange = (page) => {
     setSelectedPage(page);
@@ -333,8 +308,8 @@ const SearchPage = () => {
     setSelectedPage(1); // Reset to first page
     setFromCatalogSelection(false); // Mark as not from catalog selection
 
-    // Fetch new vehicles with the updated plan type
-    fetchVehicles(1);
+    // No manual fetchVehicles() call needed — the effect below already
+    // re-fetches whenever selectedPlanType changes.
   };
 
   // Load selected plan type from sessionStorage on mount
@@ -376,10 +351,12 @@ const SearchPage = () => {
     );
   }, [selectedPlanType]);
 
-  // Fetch vehicles on component mount
+  // Fetch vehicles whenever the actual search parameters change — page
+  // changes don't refetch (see pagedVehicles above), fetchVehicles' own
+  // useCallback deps are what decide when this really needs to run.
   useEffect(() => {
-    fetchVehicles(selectedPage);
-  }, [selectedPage, fetchVehicles]);
+    fetchVehicles();
+  }, [fetchVehicles]);
 
   // Clear selected product on mount
   useEffect(() => {
@@ -446,7 +423,7 @@ const SearchPage = () => {
               </span>
               <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
                 <h1 className="text-[24px] font-bold text-[#1f1f1f]">
-                  {filteredAndSortedVehicles?.length} vehicles available in {selectedLocation}
+                  {filteredAndSortedVehicles?.length} vehicles available{selectedLocation ? ` in ${selectedLocation}` : ""}
                 </h1>
                 <p className="text-[14px] text-[#6b6b6b]">
                   {isSubscription
@@ -516,7 +493,7 @@ const SearchPage = () => {
             </div>
             <div className="mt-[30px] grid w-full grid-cols-1 gap-[20px] sm:grid-cols-2 xl:grid-cols-3 xl:gap-[28px]">
               <Cards
-                cards={filteredAndSortedVehicles}
+                cards={pagedVehicles}
                 selectedPlanType={selectedPlanType}
               />
             </div>

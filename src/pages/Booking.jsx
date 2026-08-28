@@ -16,14 +16,14 @@ import DateChangeModal from "../components/DateChangeModal";
 import HubDropdown from "../components/HubDropdown";
 import TermsAndConditionsModal from "../components/TermsAndConditionsModal";
 import { getAPI, postAPI } from "../caller/axiosUrls";
-import { RAZORPAY_KEY_ID, SIMULATE_PAYMENT } from "../config/env";
+import { getHubs } from "../lib/hubs";
+import { HOW_LONG_FOR_PLAN_TYPE } from "../lib/catalogueSearch";
 import {
   RENTAL_MODES,
   planUnit,
   renewalCadenceLabel,
   startingPeriodLabel,
 } from "../utils/subscription";
-// Razorpay will be loaded dynamically via script tag
 
 const Booking = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +61,7 @@ const Booking = () => {
   const [showDateChangeModal, setShowDateChangeModal] = useState(false);
 
   const { token, loading, userData } = useContext(UserContext);
-  const { selectedProduct, setSelectedProduct } = useContext(ProductContext);
+  const { selectedProduct } = useContext(ProductContext);
 
   // Debug sessionStorage on component mount
   useEffect(() => {
@@ -325,349 +325,106 @@ const Booking = () => {
   };
 
   // Handle date change from modal
-  const handleDateChange = async (newDates) => {
-    try {
-      setIsLoading(true);
+  const handleDateChange = (newDates) => {
+    // Update dates in SearchBarContext (preserve original times)
+    const newPickupDate = new Date(newDates.pickupDate);
+    const newDropoffDate = new Date(newDates.dropoffDate);
 
-      // Update dates in SearchBarContext (preserve original times)
-      const newPickupDate = new Date(newDates.pickupDate);
-      const newDropoffDate = new Date(newDates.dropoffDate);
+    // Preserve the original times from selectedPickup and selectedDropoff
+    const updatedPickup = {
+      date: newPickupDate,
+      time: selectedPickup?.time || "10 AM", // Keep original time
+    };
 
-      // Preserve the original times from selectedPickup and selectedDropoff
-      const updatedPickup = {
-        date: newPickupDate,
-        time: selectedPickup?.time || "10 AM", // Keep original time
-      };
+    const updatedDropoff = {
+      date: newDropoffDate,
+      time: selectedDropoff?.time || "10 AM", // Keep original time
+    };
 
-      const updatedDropoff = {
-        date: newDropoffDate,
-        time: selectedDropoff?.time || "10 AM", // Keep original time
-      };
+    // Update context
+    setSelectedPickup(updatedPickup);
+    setSelectedDropoff(updatedDropoff);
 
-      // Update context
-      setSelectedPickup(updatedPickup);
-      setSelectedDropoff(updatedDropoff);
+    // Update sessionStorage
+    sessionStorage.setItem("selectedPickupDate", newPickupDate.toISOString());
+    sessionStorage.setItem(
+      "selectedDropoffDate",
+      newDropoffDate.toISOString()
+    );
 
-      // Update sessionStorage
-      sessionStorage.setItem("selectedPickupDate", newPickupDate.toISOString());
-      sessionStorage.setItem(
-        "selectedDropoffDate",
-        newDropoffDate.toISOString()
-      );
-
-      // Recalculate pricing with new dates - pass the updated dates directly
-      console.log("Recalculating pricing with new dates:", {
-        pickup: updatedPickup,
-        dropoff: updatedDropoff,
-        isHomeDelivery: requiredDoorstepDelivery,
-      });
-
-      // Call the dynamic calculation API with updated dates
-      await recalculatePricingWithNewDates(
-        requiredDoorstepDelivery,
-        updatedPickup,
-        updatedDropoff
-      );
-
-      toast.success("Dates updated and pricing recalculated!");
-    } catch (error) {
-      console.error("Error updating dates:", error);
-      toast.error("Failed to update dates. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    // No live re-pricing call here — the real backend has no per-date
+    // repricing endpoint (the old /vehicle-plan/dynamic-calculation this
+    // used to call doesn't exist on it). calculateTotal()'s fallback below
+    // already recomputes from the new day count (via the countDays effect),
+    // it just can't fetch a fresh server-side quote for the new dates.
+    toast.success("Dates updated");
   };
 
-  // Handle Razorpay payment
-  const handlePayment = async () => {
+  // POST /bookings/checkout — the real B2C backend creates the booking
+  // directly from this one call (no separate order/verify round-trip like
+  // the old Razorpay flow this replaced; that hit /vehicle-plan/handle-payment
+  // and /vehicle-plan/verify-payment, neither of which exist on this backend).
+  // Real payment collection isn't wired up on this endpoint yet — see the
+  // comment on SIMULATE_PAYMENT in config/env.js — so a successful call here
+  // is the booking.
+  const handleCheckout = async () => {
     if (!canProceedToPayment()) {
       toast.error("Please complete all required fields");
       return;
     }
 
-    try {
-      setIsLoading(true);
+    const pickupHub = hubLocations.find((hub) => hub.id === selectedHubId);
 
-      const paymentData = {
-        userId: userData?.id,
-        amount: parseFloat(calculateTotal()), // Amount in rupees
-        vehicleModelId: selectedProduct?.id,
-        planId: selectedProduct?.planId,
-        // Send complete instants so the selected local clock survives storage
-        // and renders identically in booking history and admin operations.
-        pickupDate: formatDateTimeForAPI(
-          selectedPickup?.date || new Date(),
-          selectedPickup?.time
-        ),
-        dropoffDate: formatDateTimeForAPI(
+    const checkoutData = {
+      hubId: selectedHubId ? selectedHubId.toString() : null,
+      vehicleModelId: selectedProduct?.id,
+      planId: selectedProduct?.planId,
+      rentalTerm: isSubscription ? "SUBSCRIPTION" : "FIXED_TERM",
+      pickupDateTime: formatDateTimeForAPI(
+        selectedPickup?.date || new Date(),
+        selectedPickup?.time
+      ),
+      // SUBSCRIPTION bookings are open-ended (howLong below), not a fixed
+      // return date.
+      ...(!isSubscription && {
+        dropoffDateTime: formatDateTimeForAPI(
           selectedDropoff?.date || new Date(),
           selectedDropoff?.time
         ),
-        ratePlan: (() => {
-          // Try multiple sources for plan type
-          const planTypeFromProduct = selectedProduct?.selectedPlanType || "";
-          const planTypeFromStorage =
-            sessionStorage.getItem("selectedPlanType") || "";
+      }),
+      ...(isSubscription && {
+        howLong:
+          HOW_LONG_FOR_PLAN_TYPE[
+            selectedProduct?.selectedPlanType || currentPlanType
+          ] || "1 month",
+      }),
+      fullName: fullName.trim(),
+      phoneNumber: `${selectedCountryCode}${phoneNumber}`,
+      email: email.trim() || undefined,
+      wantsDoorstepDelivery: Boolean(requiredDoorstepDelivery),
+      pickupLocation: requiredDoorstepDelivery
+        ? `${addressLine1.trim()}, ${addressLine2.trim()}${
+            landmark.trim() ? `, ${landmark.trim()}` : ""
+          }`
+        : pickupHub?.hubName || "Default Hub",
+      specialRequest: specialRequests.trim() || undefined,
+      termsAccepted: acceptedTnC,
+    };
 
-          // Prioritize sessionStorage if it's a valid plan type
-          const validPlanTypes = ["daily", "weekly", "monthly"];
-          let planType = "";
+    console.log("Checkout data:", checkoutData);
 
-          if (validPlanTypes.includes(planTypeFromStorage.toLowerCase())) {
-            planType = planTypeFromStorage;
-          } else if (
-            validPlanTypes.includes(planTypeFromProduct.toLowerCase())
-          ) {
-            planType = planTypeFromProduct;
-          } else {
-            planType = "daily"; // fallback
-          }
+    try {
+      setIsLoading(true);
+      const booking = await postAPI("/bookings/checkout", checkoutData);
+      console.log("Checkout response:", booking);
 
-          const planLower = planType.toLowerCase();
-
-          console.log("Rate Plan Debug:", {
-            planTypeFromProduct,
-            planTypeFromStorage,
-            finalPlanType: planType,
-            planLower,
-            validPlanTypes,
-          });
-
-          return planLower;
-        })(),
-        promoCodeId: appliedPromocode?.couponId || null,
-        hubId: selectedHubId ? selectedHubId.toString() : null,
-        isHomeDelivery: Boolean(requiredDoorstepDelivery),
-        dropoffLocation: requiredDoorstepDelivery
-          ? `${addressLine1}, ${addressLine2}`
-          : (selectedHubId
-              ? hubLocations.find((hub) => hub.id === selectedHubId)?.hubName
-              : null) || "Default Hub",
-        dropoffAddress: requiredDoorstepDelivery
-          ? `${addressLine1.trim()}, ${addressLine2.trim()}${
-              landmark.trim() ? `, ${landmark.trim()}` : ""
-            }`
-          : null,
-        specialRequests: specialRequests.trim() || null,
-        usageModel: isSubscription ? "payg" : "one_off",
-        durationUnits: isSubscription ? commitmentDuration : undefined,
-        gstPaid:
-          selectedProduct?.calculationData?.payment_breakdown?.gst_amount || 0,
-      };
-
-      console.log("Payment data:", paymentData);
-      console.log("Selected hub info:", {
-        selectedHubId,
-        hubLocations,
-        selectedHub: hubLocations.find((hub) => hub.id === selectedHubId),
+      toast.success("Booking confirmed!");
+      navigate("/my-bookings", {
+        state: { showSuccessMessage: true, bookingId: booking?.id },
       });
-
-      // Call handle-payment API
-      const response = await postAPI(
-        "/vehicle-plan/handle-payment",
-        paymentData
-      );
-
-      if (response.status === "success") {
-        // Debug: Check what key we're getting
-        // Prefer the key the backend returns; fall back to the build-time env var.
-        const razorpayKey = response.data.razorpayKey || RAZORPAY_KEY_ID;
-
-        // Ensure we have a valid key
-        if (
-          !razorpayKey ||
-          razorpayKey === "undefined" ||
-          razorpayKey === "null"
-        ) {
-          throw new Error(
-            "Razorpay key not found. Please check environment variables."
-          );
-        }
-
-        // Initialize Razorpay with the response data
-        const options = {
-          key: razorpayKey, // Get from environment or API response
-
-          amount: Number(response.data.amount ?? paymentData.amount) * 100,
-          currency: "INR",
-          name: "Blive EV Rental",
-          description: `Payment for ${selectedProduct?.vehicleName} rental`,
-          order_id: response.data.orderId,
-          handler: async (paymentResponse) => {
-            console.log("Payment successful:", paymentResponse);
-            console.log("Payment response keys:", Object.keys(paymentResponse));
-            console.log(
-              "Full payment response:",
-              JSON.stringify(paymentResponse, null, 2)
-            );
-
-            try {
-              // Extract the correct payment data from Razorpay response
-              const razorpayOrderId =
-                paymentResponse.razorpay_order_id ||
-                response.data.razorpayOrder.id;
-              const razorpayPaymentId = paymentResponse.razorpay_payment_id;
-              const razorpaySignature = paymentResponse.razorpay_signature;
-
-              console.log("Extracted payment data:", {
-                razorpayOrderId,
-                razorpayPaymentId,
-                razorpaySignature,
-                fromResponse: response.data.razorpayOrder.id,
-                allPaymentResponseKeys: Object.keys(paymentResponse),
-                paymentResponseValues: Object.values(paymentResponse),
-              });
-
-              // Check if signature is missing and provide fallback
-              if (!razorpaySignature) {
-                console.warn(
-                  "Razorpay signature is missing from payment response"
-                );
-                console.log(
-                  "Available keys in payment response:",
-                  Object.keys(paymentResponse)
-                );
-
-                // Try alternative key names
-                const alternativeSignature =
-                  paymentResponse.signature ||
-                  paymentResponse.razorpaySignature ||
-                  paymentResponse.payment_signature;
-
-                if (alternativeSignature) {
-                  console.log(
-                    "Found signature with alternative key:",
-                    alternativeSignature
-                  );
-                } else {
-                  console.error("No signature found in payment response");
-                }
-              }
-
-              // Use alternative signature if primary is missing
-              const finalSignature =
-                razorpaySignature ||
-                paymentResponse.signature ||
-                paymentResponse.razorpaySignature ||
-                paymentResponse.payment_signature ||
-                "no_signature_provided";
-
-              // Call verify-payment API
-              const verifyData = {
-                razorpayOrderId: String(razorpayOrderId),
-                razorpayPaymentId: String(razorpayPaymentId),
-                razorpaySignature: String(finalSignature),
-                userId: String(userData?.id),
-                amount: Number(paymentData.amount),
-                isHomeDelivery: Boolean(requiredDoorstepDelivery),
-              };
-
-              console.log("Verifying payment:", verifyData);
-              console.log("Data types:", {
-                razorpayOrderId: typeof verifyData.razorpayOrderId,
-                razorpayPaymentId: typeof verifyData.razorpayPaymentId,
-                razorpaySignature: typeof verifyData.razorpaySignature,
-                userId: typeof verifyData.userId,
-                amount: typeof verifyData.amount,
-                isHomeDelivery: typeof verifyData.isHomeDelivery,
-              });
-
-              const verifyResponse = await postAPI(
-                "/vehicle-plan/verify-payment",
-                verifyData
-              );
-
-              if (verifyResponse.status === "success") {
-                console.log(
-                  "Payment verification successful:",
-                  verifyResponse.data
-                );
-                toast.success(
-                  "Payment verified and booking created successfully!"
-                );
-
-                // Show loading state before navigation
-                setIsLoading(true);
-
-                // Small delay to show loading state, then navigate
-                setTimeout(() => {
-                  navigate("/my-bookings", {
-                    state: {
-                      paymentId: paymentResponse.razorpay_payment_id,
-                      orderId: paymentResponse.razorpay_order_id,
-                      bookingData: paymentData,
-                      razorpayOrder: verifyResponse.data.razorpayOrder,
-                      paymentSummary: verifyResponse.data.paymentSummary,
-                      verificationData: verifyResponse.data,
-                      showSuccessMessage: true,
-                    },
-                  });
-                }, 1500); // 1.5 second delay to show loading
-              } else {
-                throw new Error(
-                  verifyResponse.message || "Payment verification failed"
-                );
-              }
-            } catch (error) {
-              console.error("Payment verification error:", error);
-              toast.error(
-                error.message ||
-                  "Payment verification failed. Please contact support."
-              );
-            }
-          },
-          prefill: {
-            name: fullName,
-            email,
-            contact: `${selectedCountryCode}${phoneNumber}`,
-          },
-          theme: {
-            color: "#000000",
-          },
-          modal: {
-            ondismiss: () => {
-              toast.error("Payment cancelled");
-            },
-          },
-        };
-
-        console.log("Razorpay Options:", options);
-
-        // Simulated payment: skip the real Razorpay modal and simulate a
-        // successful payment by invoking the same handler the widget calls.
-        if (SIMULATE_PAYMENT) {
-          await options.handler({
-            razorpay_order_id: response.data.orderId,
-            razorpay_payment_id: "pay_dummy_" + Date.now(),
-            razorpay_signature: "dummy_signature",
-          });
-          return;
-        }
-
-        // Load Razorpay script dynamically if not already loaded
-        if (!window.Razorpay) {
-          const script = document.createElement("script");
-          script.src = "https://checkout.razorpay.com/v1/checkout.js";
-          script.onload = () => {
-            const razorpay = new window.Razorpay(options);
-            razorpay.open();
-          };
-          script.onerror = () => {
-            throw new Error("Failed to load Razorpay script");
-          };
-          document.body.appendChild(script);
-        } else {
-          const razorpay = new window.Razorpay(options);
-          razorpay.open();
-        }
-      } else {
-        throw new Error(response.message || "Failed to initialize payment");
-      }
     } catch (error) {
-      console.error("Payment error:", error);
-      toast.error(
-        error.message || "Payment initialization failed. Please try again."
-      );
+      console.error("Checkout error:", error);
+      toast.error(error.message || "Checkout failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -716,254 +473,35 @@ const Booking = () => {
     return dateObj.toISOString();
   };
 
-  // Function to recalculate pricing with new dates
-  const recalculatePricingWithNewDates = async (
-    isHomeDelivery,
-    newPickup,
-    newDropoff
-  ) => {
-    console.log("recalculatePricingWithNewDates called with:", {
-      isHomeDelivery,
-      newPickup,
-      newDropoff,
-      selectedProduct,
-    });
-
-    if (!selectedProduct?.id || !selectedProduct?.planId) {
-      console.log("Missing product data for recalculation:", {
-        hasId: !!selectedProduct?.id,
-        hasPlanId: !!selectedProduct?.planId,
-        selectedProduct,
-      });
-      return;
-    }
-
-    try {
-      // Format dates for API using the new dates passed as parameters
-      const pickupDate = formatDateTimeForAPI(newPickup?.date, newPickup?.time);
-      const dropoffDate = formatDateTimeForAPI(
-        newDropoff?.date,
-        newDropoff?.time
-      );
-
-      if (!pickupDate || !dropoffDate) {
-        toast.error("Please select pickup and dropoff dates");
-        return;
-      }
-
-      // Determine rate plan with better logic
-      let ratePlan = "daily"; // default
-
-      if (selectedProduct?.selectedPlanType) {
-        ratePlan = selectedProduct.selectedPlanType;
-      } else if (selectedProduct?.planName) {
-        // Fallback: determine from plan name
-        const planName = selectedProduct.planName.toLowerCase();
-        if (planName.includes("weekly")) {
-          ratePlan = "weekly";
-        } else if (planName.includes("monthly")) {
-          ratePlan = "monthly";
-        }
-      }
-
-      const requestData = {
-        vehicleModelId: selectedProduct?.id,
-        pickupDate,
-        dropoffDate,
-        planId: selectedProduct?.planId,
-        ratePlan: ratePlan.toLowerCase(),
-        isHomeDelivery,
-        hubId: selectedHubId ? selectedHubId.toString() : undefined,
-        usageModel: isSubscription ? "payg" : "one_off",
-        durationUnits: isSubscription ? commitmentDuration : undefined,
-      };
-
-      // Include promo code if applied
-      if (appliedPromocode?.couponId) {
-        requestData.promoCodeId = appliedPromocode.couponId;
-      }
-
-      console.log("Recalculating pricing with new dates:", requestData);
-
-      const response = await postAPI(
-        "/vehicle-plan/dynamic-calculation",
-        requestData
-      );
-
-      if (response.status === "success") {
-        console.log("Recalculation response:", response.data);
-
-        if (appliedPromocode?.couponId && !response.data.applied_coupon) {
-          setAppliedPromocode(null);
-          toast.error("This coupon is not valid for the updated booking");
-          return;
-        }
-
-        // Update the selected product with new calculation data
-        const updatedProduct = {
-          ...selectedProduct,
-          calculationData: response.data,
-        };
-
-        setSelectedProduct(updatedProduct);
-        sessionStorage.setItem(
-          "selectedProduct",
-          JSON.stringify(updatedProduct)
-        );
-
-        console.log("✅ Pricing recalculated successfully with new dates");
-      } else {
-        console.error("Recalculation failed:", response);
-        toast.error("Failed to recalculate pricing. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error recalculating pricing:", error);
-      toast.error("Failed to recalculate pricing. Please try again.");
-    }
-  };
-
-  // Function to recalculate pricing when doorstep delivery is toggled
-  const recalculatePricing = async (isHomeDelivery) => {
-    console.log("recalculatePricing called with:", {
-      isHomeDelivery,
-      selectedProduct,
-    });
-
-    if (!selectedProduct?.id || !selectedProduct?.planId) {
-      console.log("Missing product data for recalculation:", {
-        hasId: !!selectedProduct?.id,
-        hasPlanId: !!selectedProduct?.planId,
-        selectedProduct,
-      });
-      return;
-    }
-
-    try {
-      // Format dates for API
-      const pickupDate = formatDateTimeForAPI(
-        selectedPickup?.date,
-        selectedPickup?.time
-      );
-      const dropoffDate = formatDateTimeForAPI(
-        selectedDropoff?.date,
-        selectedDropoff?.time
-      );
-
-      if (!pickupDate || !dropoffDate) {
-        toast.error("Please select pickup and dropoff dates");
-        return;
-      }
-
-      // Determine rate plan with better logic
-      let ratePlan = "daily"; // default
-
-      if (selectedProduct?.selectedPlanType) {
-        ratePlan = selectedProduct.selectedPlanType;
-      } else if (selectedProduct?.planName) {
-        // Fallback: determine from plan name
-        const planName = selectedProduct.planName.toLowerCase();
-        if (planName.includes("weekly")) {
-          ratePlan = "weekly";
-        } else if (planName.includes("monthly")) {
-          ratePlan = "monthly";
-        }
-      }
-
-      console.log("Rate plan determination:", {
-        selectedPlanType: selectedProduct?.selectedPlanType,
-        planName: selectedProduct?.planName,
-        finalRatePlan: ratePlan,
-      });
-
-      const requestData = {
-        vehicleModelId: selectedProduct.id,
-        pickupDate: pickupDate,
-        dropoffDate: dropoffDate,
-        planId: selectedProduct.planId,
-        ratePlan: ratePlan,
-        isHomeDelivery: isHomeDelivery,
-        hubId: selectedHubId ? selectedHubId.toString() : undefined,
-        usageModel: isSubscription ? "payg" : "one_off",
-        durationUnits: isSubscription ? commitmentDuration : undefined,
-      };
-
-      // Add coupon ID if a coupon is applied
-      if (appliedPromocode?.couponId) {
-        requestData.promoCodeId = appliedPromocode.couponId;
-      }
-
-      console.log("Recalculating pricing with:", requestData);
-
-      const response = await postAPI(
-        "/vehicle-plan/dynamic-calculation",
-        requestData
-      );
-
-      if (response.status === "success") {
-        console.log("Recalculation response:", response.data);
-
-        if (appliedPromocode?.couponId && !response.data.applied_coupon) {
-          setAppliedPromocode(null);
-          toast.error("This coupon is not valid for this booking");
-          return;
-        }
-
-        // Update the selected product with new calculation data
-        const updatedProduct = {
-          ...selectedProduct,
-          calculationData: response.data,
-        };
-
-        setSelectedProduct(updatedProduct);
-        sessionStorage.setItem(
-          "selectedProduct",
-          JSON.stringify(updatedProduct)
-        );
-
-        toast.success(
-          `Pricing updated for ${
-            isHomeDelivery ? "with" : "without"
-          } doorstep delivery`
-        );
-      } else {
-        throw new Error(response.message || "Failed to recalculate pricing");
-      }
-    } catch (error) {
-      console.error("Recalculation error:", error);
-      toast.error(
-        error.message || "Failed to recalculate pricing. Please try again."
-      );
-    }
-  };
-
-
-
-  // Fetch hub locations from API
+  // Fetch hub locations from API — /catalogue/hubs on the new B2C backend.
+  // Its response is a plain array (no {status,data} wrapper like the old
+  // endpoint), and its field names differ from what the rest of this page
+  // expects (name not hubName, contactPhone not contactNumber, no flat
+  // latitude/longitude — it's warehouseLocation.{lat,lng}, no image field
+  // at all). Normalized once here so every consumer below (and
+  // HubDropdown/BookingCard/BookingDetails elsewhere) keeps working
+  // unchanged instead of every read site needing its own fallback.
   const fetchHubLocations = async () => {
     try {
       setHubsLoading(true);
-      const response = await getAPI("/vehicle-plan/all-hubs");
+      const rawHubs = await getHubs();
 
-      if (response.status === "success") {
-        console.log("Hub locations fetched:", response.data);
-        console.log(
-          "Hub data structure:",
-          JSON.stringify(response.data, null, 2)
-        );
+      const hubs = rawHubs.map((hub) => ({
+        ...hub,
+        hubName: hub.name,
+        contactNumber: hub.contactPhone,
+        latitude: hub.warehouseLocation?.lat ?? null,
+        longitude: hub.warehouseLocation?.lng ?? null,
+        image: "/images/Hub.jpg",
+      }));
 
-        const hubs = response.data || [];
-        setHubLocations(hubs);
+      console.log("Hub locations fetched:", hubs);
+      setHubLocations(hubs);
 
-        console.log("Processed hubs:", hubs);
-
-        // Set default hub if available and none selected
-        if (hubs.length > 0 && selectedHubId === null) {
-          setSelectedHubId(hubs[0].id);
-          console.log("Set default hub:", hubs[0]);
-        }
-      } else {
-        console.error("Failed to fetch hub locations:", response.message);
-        toast.error("Failed to load hub locations");
+      // Set default hub if available and none selected
+      if (hubs.length > 0 && selectedHubId === null) {
+        setSelectedHubId(hubs[0].id);
+        console.log("Set default hub:", hubs[0]);
       }
     } catch (error) {
       console.error("Error fetching hub locations:", error);
@@ -999,40 +537,11 @@ const Booking = () => {
     fetchHubLocations();
   }, []);
 
-  // Call dynamic calculation API if calculation data is missing
-  useEffect(() => {
-    console.log("Booking useEffect triggered:", {
-      selectedProduct: !!selectedProduct,
-      hasCalculationData: !!selectedProduct?.calculationData,
-      selectedPickup: !!selectedPickup,
-      selectedDropoff: !!selectedDropoff,
-      requiredDoorstepDelivery,
-    });
-
-    if (
-      selectedProduct &&
-      !selectedProduct.calculationData &&
-      selectedPickup &&
-      selectedDropoff
-    ) {
-      console.log("Missing calculation data, calling API...");
-      recalculatePricing(requiredDoorstepDelivery);
-    }
-  }, [
-    selectedProduct,
-    selectedPickup,
-    selectedDropoff,
-    requiredDoorstepDelivery,
-  ]);
-
-  // Recalculate pricing when coupon is applied or removed
-  useEffect(() => {
-    if (selectedProduct?.calculationData && selectedPickup && selectedDropoff) {
-      console.log("Coupon applied/removed, recalculating pricing...");
-      recalculatePricing(requiredDoorstepDelivery);
-    }
-  }, [appliedPromocode]);
-
+  // Note: selectedProduct.calculationData is never populated any more (the
+  // /vehicle-plan/dynamic-calculation endpoint the old auto-recalculation
+  // effects here used to call doesn't exist on the real backend), so the
+  // "Fallback to manual calculation" branch below in the render — and in
+  // calculateTotal() — is always what's shown. See handleCheckout's comment.
 
   return (
     <>
@@ -1154,11 +663,7 @@ const Booking = () => {
                   <ToggleButton
                     id="doorstepDelivery"
                     defaultChecked={requiredDoorstepDelivery}
-                    onChange={(isEnabled) => {
-                      setRequiredDoorstepDelivery(isEnabled);
-                      // Recalculate pricing with new home delivery setting
-                      recalculatePricing(isEnabled);
-                    }}
+                    onChange={(isEnabled) => setRequiredDoorstepDelivery(isEnabled)}
                     disabled={false}
                   />
                   <p>
@@ -1811,7 +1316,7 @@ const Booking = () => {
                     </div>
                   </div>
                   <button
-                    onClick={handlePayment}
+                    onClick={handleCheckout}
                     className={`mt-[24px] h-[48px] w-full rounded-[24px] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors ${
                       canProceedToPayment()
                         ? "bg-[#351a75] cursor-pointer hover:bg-[#2c155f]"

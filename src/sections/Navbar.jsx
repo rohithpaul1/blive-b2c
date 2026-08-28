@@ -3,6 +3,7 @@ import ProfileDropdown from "../components/ProfileDropdown";
 import { useContext, useState } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { LoginPageContext } from "../contexts/LoginPageContext";
+import { useTenantConfig } from "../contexts/TenantConfigContext";
 import Login from "../components/Login";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "convex/react";
@@ -26,6 +27,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
     markAllNotificationsAsSeen,
   } = useContext(UserContext);
   const { showLoginPage, setShowLoginPage } = useContext(LoginPageContext);
+  const { branding } = useTenantConfig();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,8 +57,8 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
             className={`h-[34px] w-auto cursor-pointer ${
               onSearchPage ? "col-start-1 row-start-1" : ""
             }`}
-            src="/images/BliveLogo.svg"
-            alt="BLive"
+            src={branding.logoUrl}
+            alt={branding.appTitle}
           />
           {onSearchPage && (
             <div className="col-span-3 row-start-2 mt-[8px] flex w-full justify-self-center md:col-span-1 md:col-start-2 md:row-start-1 md:mt-0">

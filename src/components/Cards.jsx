@@ -4,8 +4,6 @@ import { ProductContext } from "../contexts/ProductContext";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import { UserContext } from "../contexts/UserContext";
 import { SearchBarContext } from "../contexts/SearchBarContext";
-import { postAPI } from "../caller/axiosUrls";
-import { toast } from "react-hot-toast";
 import {
   RENTAL_MODES,
   planUnit,
@@ -150,113 +148,6 @@ const Cards = ({
     return { dailyRate, total: dailyRate * rentalDays, unit: "day" };
   };
 
-  // Helper function to format date and time for API
-  const formatDateTimeForAPI = (date, time) => {
-    if (!date) return null;
-
-    // Parse time string (e.g., "10 AM", "2 PM")
-    const parseTime = (timeStr) => {
-      const [time, modifier] = timeStr.split(" ");
-      let [hours, minutes] = time.split(":");
-      if (!minutes) minutes = "00";
-
-      hours = parseInt(hours, 10);
-      if (modifier.toUpperCase() === "PM" && hours < 12) {
-        hours += 12;
-      }
-      if (modifier.toUpperCase() === "AM" && hours === 12) {
-        hours = 0;
-      }
-
-      return `${hours.toString().padStart(2, "0")}:${minutes}`;
-    };
-
-    // Treat the selected clock as local time, then send the corresponding
-    // instant. Appending `Z` to the wall-clock value shifts Indian selections
-    // by +5:30 when they are displayed again after checkout.
-    const dateObj = new Date(date);
-    const timeStr = parseTime(time || "10 AM");
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    dateObj.setHours(hours, minutes, 0, 0);
-    return dateObj.toISOString();
-  };
-
-  // Function to call dynamic calculation API
-  const callDynamicCalculationAPI = async (card) => {
-    try {
-      // Format dates for API
-      const pickupDate = formatDateTimeForAPI(
-        selectedPickup?.date,
-        selectedPickup?.time
-      );
-      const dropoffDate = formatDateTimeForAPI(
-        selectedDropoff?.date,
-        selectedDropoff?.time
-      );
-
-      if (!pickupDate || !dropoffDate) {
-        toast.error("Please select pickup and dropoff dates");
-        return null;
-      }
-
-      // Determine rate plan based on selectedPlanType prop or card data
-      let ratePlan = selectedPlanType || "daily";
-
-      console.log("=== CARDS RATE PLAN DEBUG ===");
-      console.log("selectedPlanType prop:", selectedPlanType);
-      console.log("card.planName:", card.planName);
-      console.log("ratePlan determined:", ratePlan);
-      console.log("=== END CARDS DEBUG ===");
-
-      // If selectedPlanType is not available, fallback to card data
-      if (!selectedPlanType && card.planName) {
-        if (card.planName.toLowerCase().includes("weekly")) {
-          ratePlan = "weekly";
-        } else if (card.planName.toLowerCase().includes("monthly")) {
-          ratePlan = "monthly";
-        }
-      }
-
-      const requestData = {
-        vehicleModelId: card.id,
-        pickupDate: pickupDate,
-        dropoffDate: dropoffDate,
-        planId: card.planId,
-        ratePlan: ratePlan,
-        isHomeDelivery: true,
-        usageModel: isSubscription ? "payg" : "one_off",
-        durationUnits: isSubscription ? subscriptionDuration : undefined,
-      };
-
-      // Note: promoCodeId will be added later when user apples a coupon
-
-      console.log("Calling dynamic calculation API with:", requestData);
-      console.log("API call details:", {
-        selectedPlanType,
-        cardPlanName: card.planName,
-        finalRatePlan: ratePlan,
-        isCatalog,
-      });
-
-      const response = await postAPI(
-        "/vehicle-plan/dynamic-calculation",
-        requestData
-      );
-
-      if (response.status === "success") {
-        console.log("--------Dynamic calculation response:", response.data);
-        return response.data;
-      } else {
-        throw new Error(response.message || "Failed to calculate pricing");
-      }
-    } catch (error) {
-      console.error("Dynamic calculation error:", error);
-      toast.error(
-        error.message || "Failed to calculate pricing. Please try again."
-      );
-      return null;
-    }
-  };
 
   const handleRentNow = async (card) => {
     if (!card.isAvailable) return; // Don't proceed if vehicle is not available
@@ -280,79 +171,29 @@ const Cards = ({
       }
       navigate("/search");
     } else {
-      // If it's from search page, proceed with booking
-      try {
-        // Call dynamic calculation API first
-        const calculationData = await callDynamicCalculationAPI(card);
+      // If it's from search page, proceed straight to booking. Unlike the
+      // old flow, there's no separate pricing-calculation call to make
+      // first — /catalogue/search already returned this card's final,
+      // priced plan (card.price/card.planId etc.), so Booking.jsx can price
+      // off that directly.
+      const enhancedCard = {
+        ...card,
+        selectedPlanType: selectedPlanType || "daily",
+        rentalMode,
+        usageModel: isSubscription ? "payg" : "one_off",
+        subscriptionDuration: isSubscription ? subscriptionDuration : undefined,
+      };
 
-        if (calculationData) {
-          // Determine rate plan for the enhanced card
-          let ratePlan = selectedPlanType || "daily";
+      setSelectedProduct(enhancedCard);
+      sessionStorage.setItem("selectedProduct", JSON.stringify(enhancedCard));
 
-          console.log("=== CARDS ENHANCED CARD DEBUG ===");
-          console.log("Before creating enhancedCard - ratePlan:", ratePlan);
-          console.log(
-            "Before creating enhancedCard - selectedPlanType:",
-            selectedPlanType
-          );
-
-          // Merge card data with calculation data
-          const enhancedCard = {
-            ...card,
-            calculationData: calculationData,
-            selectedPlanType: ratePlan, // Store the selected plan type
-            rentalMode,
-            usageModel: isSubscription ? "payg" : "one_off",
-            subscriptionDuration: isSubscription ? subscriptionDuration : undefined,
-          };
-
-          console.log(
-            "After creating enhancedCard - selectedPlanType:",
-            enhancedCard.selectedPlanType
-          );
-          console.log(
-            "Storing to sessionStorage:",
-            JSON.stringify({ selectedPlanType: enhancedCard.selectedPlanType })
-          );
-          console.log("=== END ENHANCED CARD DEBUG ===");
-
-          setSelectedProduct(enhancedCard);
-          sessionStorage.setItem(
-            "selectedProduct",
-            JSON.stringify(enhancedCard)
-          );
-
-          // Check authentication
-          if (token) {
-            // User is logged in, proceed to booking
-            navigate("/booking");
-          } else {
-            // User is not logged in, show login page
-            setShowLoginPage(true);
-          }
-        } else {
-          // If calculation failed, still proceed with basic card data
-          setSelectedProduct(card);
-          sessionStorage.setItem("selectedProduct", JSON.stringify(card));
-
-          // Check authentication
-          if (token) {
-            navigate("/booking");
-          } else {
-            setShowLoginPage(true);
-          }
-        }
-      } catch (error) {
-        console.error("Error in handleRentNow:", error);
-        // Fallback: proceed with basic card data
-        setSelectedProduct(card);
-        sessionStorage.setItem("selectedProduct", JSON.stringify(card));
-
-        if (token) {
-          navigate("/booking");
-        } else {
-          setShowLoginPage(true);
-        }
+      // Check authentication
+      if (token) {
+        // User is logged in, proceed to booking
+        navigate("/booking");
+      } else {
+        // User is not logged in, show login page
+        setShowLoginPage(true);
       }
     }
   };

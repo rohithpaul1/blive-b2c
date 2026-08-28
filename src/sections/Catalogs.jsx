@@ -4,14 +4,48 @@ import Cards from "../components/Cards";
 import Pagination from "../components/Pagination";
 import { useNavigate } from "react-router-dom";
 import { getAPI } from "../caller/axiosUrls";
+import { getHubs } from "../lib/hubs";
 import Loader from "../components/Loader";
 import { useContext } from "react";
 import { SearchBarContext } from "../contexts/SearchBarContext";
-import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
+import { RENTAL_MODES } from "../utils/subscription";
+
+// /catalogue/search (the real B2C backend) is scoped to one hub per call —
+// there's no "every hub at once" version. No hub-picker UI exists yet (see
+// conversation), so this defaults to the first hub /catalogue/hubs returns,
+// same default-to-first pattern already used in Booking.jsx. Goes through
+// the shared getHubs() cache so this doesn't fire its own separate request.
+const fetchDefaultHubId = async () => {
+  const hubs = await getHubs();
+  return hubs?.[0]?.id ?? null;
+};
+
+// SUBSCRIPTION searches take a `howLong` enum, not a date range — the existing
+// Daily/Weekly/Monthly tabs don't map 1:1 onto it (that enum has 5 options:
+// 1week/1 month/3 months/6 months/12 months). Approximated here; worth a
+// product call on whether subscription needs its own tab set instead.
+const HOW_LONG_FOR_PLAN_TYPE = {
+  daily: "1week",
+  weekly: "1 month",
+  monthly: "3 months",
+};
+
+const toApiIsoString = (date, time) => {
+  if (!date) return null;
+  const base = new Date(date);
+  const [, timeVal, modifier] = /^(\d{1,2}(?::\d{2})?)\s*(AM|PM)?$/i.exec((time || "10 AM").trim()) || [];
+  let [hours, minutes = "0"] = (timeVal || "10").split(":");
+  hours = parseInt(hours, 10);
+  if (modifier?.toUpperCase() === "PM" && hours < 12) hours += 12;
+  if (modifier?.toUpperCase() === "AM" && hours === 12) hours = 0;
+  base.setHours(hours, parseInt(minutes, 10) || 0, 0, 0);
+  return base.toISOString();
+};
 
 const Catalogs = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [vehicles, setVehicles] = useState([]);
+  const [hubId, setHubId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // const [currentPage, setCurrentPage] = useState(1);
@@ -19,7 +53,6 @@ const Catalogs = () => {
   const [totalItems, setTotalItems] = useState(0);
 
   // Filtering state
-  const [selectedBrand] = useState("all");
   // The home catalog has no visible price filter, so it must not silently
   // exclude weekly or monthly plans whose cycle price is above ₹1,000.
   const [priceRange] = useState({ min: 0, max: Number.POSITIVE_INFINITY });
@@ -48,90 +81,47 @@ const Catalogs = () => {
     { name: "Monthly", discount: 50, planType: "monthly" },
   ];
 
-  // Helper function to format date and time for API
-  const formatDateTimeForAPI = (date, time) => {
-    if (!date) return null;
-
-    // Parse time string (e.g., "10 AM", "2 PM")
-    const parseTime = (timeStr) => {
-      const [time, modifier] = timeStr.split(" ");
-      let [hours, minutes] = time.split(":");
-      if (!minutes) minutes = "00";
-
-      hours = parseInt(hours, 10);
-      if (modifier.toUpperCase() === "PM" && hours < 12) {
-        hours += 12;
-      }
-      if (modifier.toUpperCase() === "AM" && hours === 12) {
-        hours = 0;
-      }
-
-      return `${hours.toString().padStart(2, "0")}:${minutes}`;
-    };
-
-    // Format date as YYYY-MM-DD
-    const dateStr = new Date(date).toISOString().split("T")[0];
-    const timeStr = parseTime(time || "10 AM");
-
-    // Return formatted datetime string
-    return `${dateStr} ${timeStr}:00.000`;
-  };
-
-  // Fetch vehicles from API with pickup/dropoff dates
-  const fetchVehicles = async (filters = {}) => {
+  // Fetch vehicles from /catalogue/search — real, priced, available results
+  // for one hub. Unlike the old endpoint, this returns ONE plan tier per
+  // call (whichever the date range / howLong resolves to), not all three
+  // (daily/weekly/monthly) at once — so a tab change genuinely needs a new
+  // call, not just a client-side re-slice. That already happens naturally
+  // here since selectedPickup/selectedDropoff change per tab (see
+  // handleTabChange below) and are in this effect's dependency array.
+  const fetchVehicles = async () => {
+    if (!hubId) return; // still resolving the default hub
     try {
       setLoading(true);
       setError(null);
 
-      // Build query parameters
       const params = new URLSearchParams({
-        page: "1",
-        limit: "50",
-        ...filters,
+        hubId,
+        rentalTerm: isSubscription ? "SUBSCRIPTION" : "FIXED_TERM",
+        pickupDateTime: toApiIsoString(selectedPickup?.date, selectedPickup?.time) || new Date().toISOString(),
       });
 
-      // Add pickup and dropoff dates if available
-      if (selectedPickup?.date) {
-        const pickupDateTime = formatDateTimeForAPI(
-          selectedPickup.date,
-          selectedPickup.time
-        );
-        if (pickupDateTime) {
-          params.append("pickupDate", pickupDateTime);
-        }
-      }
-
-      if (selectedDropoff?.date) {
-        const dropoffDateTime = formatDateTimeForAPI(
-          selectedDropoff.date,
-          selectedDropoff.time
-        );
-        if (dropoffDateTime) {
-          params.append("dropoffDate", dropoffDateTime);
-        }
-      }
-
-      const response = await getAPI(
-        `/vehicle-plan/vehicle-model-with-plan?${params}`
-      );
-
-      if (response.status === "success" && response.data?.data) {
-        setVehicles(response.data.data);
-
-        // Update pagination info
-        if (response.data.pagination) {
-          setTotalPages(response.data.pagination.totalPages);
-          setTotalItems(response.data.pagination.total);
-        }
-
-        // Extract unique brands for filter
-        const uniqueBrands = [
-          ...new Set(response.data.data.map((item) => item.brand.name)),
-        ];
-        setBrands(uniqueBrands);
+      if (isSubscription) {
+        params.append("howLong", HOW_LONG_FOR_PLAN_TYPE[tabs[selectedTab].planType] || "1 month");
       } else {
-        throw new Error("Failed to fetch vehicles");
+        const dropoffDateTime = toApiIsoString(selectedDropoff?.date, selectedDropoff?.time);
+        if (dropoffDateTime) params.append("dropoffDateTime", dropoffDateTime);
       }
+
+      const results = await getAPI(`/catalogue/search?${params}`);
+      // `results || []` alone isn't enough — a non-array truthy response
+      // (an error object, an unexpected wrapper) would pass that guard and
+      // then crash every .map() below, taking down the whole page since
+      // there's no error boundary above this. Array.isArray closes that.
+      const list = Array.isArray(results) ? results : [];
+      setVehicles(list);
+      setTotalItems(list.length);
+      setTotalPages(1);
+
+      // No brand field on this endpoint's response — vehicle names here are
+      // conventionally "Brand Model" (e.g. "Ather 450X"), so this is a
+      // best-effort stand-in, not real brand data.
+      const uniqueBrands = [...new Set(list.map((item) => item.name?.split(" ")[0]).filter(Boolean))];
+      setBrands(uniqueBrands);
     } catch (err) {
       console.error("Error fetching vehicles:", err);
       setError(err.message || "Failed to load vehicles");
@@ -140,15 +130,21 @@ const Catalogs = () => {
     }
   };
 
+  // Resolve a default hub once on mount — see fetchDefaultHubId's comment.
+  useEffect(() => {
+    fetchDefaultHubId()
+      .then(setHubId)
+      .catch((err) => {
+        console.error("Error fetching default hub:", err);
+        setError("Failed to load hub locations");
+        setLoading(false);
+      });
+  }, []);
+
   // Fetch vehicles when dependencies change
   useEffect(() => {
-    const filters = {};
-    if (selectedBrand !== "all") filters.brand = selectedBrand;
-    if (availabilityFilter !== "all")
-      filters.available = availabilityFilter === "available";
-
-    fetchVehicles(filters);
-  }, [selectedBrand, availabilityFilter, selectedPickup, selectedDropoff]); // Added pickup/dropoff dependencies
+    fetchVehicles();
+  }, [hubId, isSubscription, selectedTab, selectedPickup, selectedDropoff]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize current plan type on component mount and restore from sessionStorage
   useEffect(() => {
@@ -208,73 +204,65 @@ const Catalogs = () => {
     };
   }, [selectedTab, tabs]); // Dependencies to ensure we have current values
 
-  // Transform API data to match Cards component format
-  const transformVehicleData = (vehicleData, planType) => {
-    return vehicleData.map((vehicle) => {
-      const { model, plan, brand, availableVehiclesCount } = vehicle;
-      const configuredPlan = rentalPlanFor(vehicle, rentalMode, planType);
-      if (isSubscription && !configuredPlan) return null;
-
-      // Get price based on selected tab
-      let price;
-      let actualPrice = null;
-
-      switch (planType) {
-        case "daily":
-          price = configuredPlan?.price ?? plan.enterDailyPlanPrice;
-          break;
-        case "weekly":
-          price = configuredPlan?.price ?? plan.enterWeeklyPlanPrice;
-          actualPrice = plan.enterDailyPlanPrice * 7;
-          break;
-        case "monthly":
-          price = configuredPlan?.price ?? plan.enterMonthlyPlanPrice;
-          actualPrice = plan.enterDailyPlanPrice * 30;
-          break;
-        default:
-          price = plan.enterDailyPlanPrice;
-      }
+  // Transform /catalogue/search results to match Cards component format.
+  // This endpoint already returns the ONE plan tier matching the requested
+  // dates/howLong (server picks daily/weekly/monthly based on duration), so
+  // there's no per-tab plan lookup needed here any more — the search call
+  // itself (see fetchVehicles) already asked for the right one.
+  //
+  // Two fields have no real source in this endpoint's response and are
+  // approximated: brandName (no brand object — derived from the vehicle
+  // name's first word, e.g. "Ather 450X" -> "Ather") and several spec
+  // fields (batteryType, perDayKmLimit, currentMileage, vehicleSpeed,
+  // engineType, vehicleCategory) that simply aren't in the response —
+  // defaulted the same way the old code already defaulted missing values.
+  const transformVehicleData = (vehicleData) => {
+    return (vehicleData || []).map((item) => {
+      const plan = item.plan || {};
+      const perDayPrice = plan.perDayPrice ?? plan.baseRate ?? 0;
+      const totalAmount = plan.totalAmount ?? perDayPrice;
+      const durationDays = plan.durationDays ?? 1;
+      // Mirrors the old "what it'd cost at the daily rate" strike-through,
+      // shown only when the plan's actual price is a real discount off that.
+      const dailyRateEquivalent = perDayPrice * durationDays;
+      const availableCount = item.availableUnits ?? 0;
 
       return {
-        id: model.id,
-        vehicleName: model.modelName,
-        manufacturer: model.manufacturer,
-        brandName: brand.name,
-        imgUrl: brand.brandLogo || `/images/${brand.name}.png`,
-        price: price,
-        actualPrice: actualPrice,
+        id: item.vehicleModelId,
+        vehicleName: item.name,
+        manufacturer: item.vehicleType || "",
+        brandName: item.name?.split(" ")[0] || "EV",
+        imgUrl: item.modelImages?.[0] || "/images/CartoonScooter.png",
+        price: totalAmount,
+        actualPrice: dailyRateEquivalent > totalAmount ? dailyRateEquivalent : null,
 
-        // Use real data from API instead of hardcoded values
-        range: model.range || 0,
-        topSpeed: model.speed || 0,
-        chargeTime: model.batteryChargingTime || 0,
+        range: item.rangePerCharge || 0,
+        topSpeed: item.topSpeed || 0,
+        chargeTime: item.chargingDuration || 0,
 
-        // Additional vehicle specs from API
-        batteryType: model.batteryType || "charging",
-        batteryCapacity: model.batteryCapacity || 0,
-        perDayKmLimit: model.perDayKmLimit || 0,
-        currentMileage: model.currentMileage || 0,
-        vehicleSpeed: model.vehicleSpeed || "standard",
-        engineType: model.engineType || "ev",
-        vehicleCategory: model.vehicleCategory || "two-wheeler",
-        b2cDeposit: model.b2cDeposit,
-        isAvailable: availableVehiclesCount > 0,
-        nextAvailableDate:
-          availableVehiclesCount > 0 ? "Available Now" : "30th Aug, 10am",
-        availableCount: availableVehiclesCount,
-        planId: configuredPlan?.id ?? plan.id,
-        planName: configuredPlan?.name ?? plan.name,
+        batteryType: "charging",
+        batteryCapacity: item.batteryCapacity || 0,
+        perDayKmLimit: plan.defaultValues?.includedKm || 0,
+        currentMileage: 0,
+        vehicleSpeed: "standard",
+        engineType: item.fuelType === "BEV" ? "ev" : "fuel",
+        vehicleCategory: item.vehicleType === "SCOOTERS_BIKES" ? "two-wheeler" : "vehicle",
+        b2cDeposit: plan.depositAmount,
+        isAvailable: availableCount > 0,
+        nextAvailableDate: availableCount > 0 ? "Available Now" : "Contact hub",
+        availableCount,
+        planId: plan.id,
+        planName: plan.name,
         usageModel: isSubscription ? "payg" : "one_off",
         rentalMode,
-        billingPolicy: configuredPlan?.billingPolicy ?? null,
+        billingPolicy: null,
       };
-    }).filter(Boolean);
+    });
   };
 
   // Apply client-side filtering, sorting, and pagination
   const filteredAndSortedVehicles = useMemo(() => {
-    const currentPlanType = tabs[selectedTab].planType;
-    let transformedVehicles = transformVehicleData(vehicles, currentPlanType);
+    let transformedVehicles = transformVehicleData(vehicles);
 
     // Apply price range filter
     transformedVehicles = transformedVehicles.filter(
