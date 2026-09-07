@@ -197,6 +197,21 @@ function calcPricing(body = {}) {
   const security_deposit = v.model.b2cDeposit;
   const subtotal = taxableBase; // pre-tax payable; UI adds GST + deposit as needed
 
+  // Subscription mechanics, internally consistent with the pay-today split:
+  // fund the first period into the wallet up front; the deposit is held
+  // separately (not spent from the wallet); the recurring charge auto-debits
+  // on each renewal.
+  const per_period_base =
+    ratePlan === 'monthly' ? v.plan.enterMonthlyPlanPrice
+    : ratePlan === 'weekly' ? v.plan.enterWeeklyPlanPrice
+    : v.plan.enterDailyPlanPrice;
+  const recurring_charge = per_period_base + Math.round(per_period_base * 0.18);
+  const minimum_wallet_balance = 0;
+  const wallet_available = 0; // demo user starts with an empty wallet
+  const required_opening_balance = recurring_charge; // first period funded up front
+  const opening_wallet_top_up = Math.max(0, required_opening_balance - wallet_available);
+  const final_amount = opening_wallet_top_up + security_deposit; // charged today
+
   return {
     payment_breakdown: {
       duration: days,
@@ -210,9 +225,14 @@ function calcPricing(body = {}) {
       included_km_per_day: v.model.perDayKmLimit,
       extra_km_charge: v.model.perKmCharge,
       onboarding_fee: v.plan.onboardingFee,
-      opening_wallet_balance: v.plan.openingWalletBalance || null,
-      opening_wallet_available: v.plan.openingWalletBalance ? 0 : null,
-      opening_wallet_top_up: v.plan.openingWalletBalance || null,
+      recurring_charge,
+      minimum_wallet_balance,
+      wallet_available,
+      required_opening_balance,
+      final_amount,
+      opening_wallet_balance: required_opening_balance,
+      opening_wallet_available: wallet_available,
+      opening_wallet_top_up,
     },
     vehicleModelId: v.model.id,
     ratePlan,

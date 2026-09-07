@@ -145,6 +145,15 @@ const Booking = () => {
     Number(_pb.opening_wallet_top_up ?? Math.max(0, openingWalletBalance - walletAvailable)) || 0;
   const showOpeningWallet = openingWalletBalance > 0;
 
+  // Subscription "pay today" split + ongoing mechanics (see Price Details).
+  const subDeposit = Number(_pb.security_deposit ?? 0) || 0;
+  const subRecurring = Number(_pb.recurring_charge ?? 0) || 0;
+  const subMinBalance = Number(_pb.minimum_wallet_balance ?? 0) || 0;
+  const _subRate =
+    _pb.ratePlan ?? selectedProduct?.calculationData?.ratePlan ?? currentPlanType;
+  const subUnit = planUnit(_subRate);
+  const subCadence = renewalCadenceLabel(_subRate);
+
   const navigate = useNavigate();
 
 
@@ -1584,55 +1593,28 @@ const Booking = () => {
                       {isSubscription && selectedProduct?.calculationData?.payment_breakdown ? (
                         <>
                           <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Recurring charge</p>
+                            <p className="text-[14px] text-[#3A3A3A]">Wallet top-up</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.recurring_charge)}
-                              <span className="text-[11px] font-normal text-[#717171]">
-                                /{selectedProduct.calculationData.commitment?.unit || "period"}
-                              </span>
+                              ₹{formattedAmount(openingWalletTopUp)}
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Estimated for planned duration</p>
+                            <p className="text-[14px] text-[#3A3A3A]">Security deposit</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.commitment_total)}
+                              ₹{formattedAmount(subDeposit)}
                             </p>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Security deposit held in wallet</p>
-                            <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.security_deposit)}
-                            </p>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <p className="text-[14px] text-[#3A3A3A]">Keep available before renewal</p>
-                            <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.minimum_wallet_balance)}
-                            </p>
-                          </div>
-                          <div className="mt-[6px] rounded-[10px] border border-[#e6e2ea] bg-white px-[12px] py-[10px]">
-                            <div className="flex items-center justify-between text-[12px]">
-                              <span className="text-[#67616c]">Wallet available</span>
-                              <span className="font-medium text-[#302b34]">
-                                ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.wallet_available)}
-                              </span>
-                            </div>
-                            <div className="mt-[5px] flex items-center justify-between text-[12px]">
-                              <span className="text-[#67616c]">Required at start</span>
-                              <span className="font-bold text-[#302b34]">
-                                ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.required_opening_balance)}
-                              </span>
-                            </div>
-                          </div>
-                          {selectedProduct.calculationData.payment_breakdown.home_delivery_amount > 0 && (
+                          {showOnboardingFee && (
                             <div className="flex items-center justify-between">
-                              <p className="text-[14px] text-[#3A3A3A]">Home delivery</p>
+                              <div className="flex items-center gap-x-[4px]">
+                                <p className="text-[14px] text-[#3A3A3A]">Onboarding fee</p>
+                                <span className="text-[11px] text-[#717171]">one-time</span>
+                              </div>
                               <p className="text-[14px] font-medium text-[#3A3A3A]">
-                                ₹{formattedAmount(selectedProduct.calculationData.payment_breakdown.home_delivery_amount)}
+                                ₹{formattedAmount(onboardingFee)}
                               </p>
                             </div>
                           )}
-                          {renderExtraCharges()}
                         </>
                       ) : selectedProduct?.calculationData?.payment_breakdown ? (
                         <>
@@ -1828,7 +1810,7 @@ const Booking = () => {
                     <div className="mt-[10px] min-h-[1px] w-full rounded-[8px] flex-1 bg-[#EDEDED]" />
                     <div className="flex mt-[12px] items-center justify-between">
                       <p className="font-medium text-[22px] text-[#222222]">
-                        {isSubscription ? "Add to wallet today" : "Total"}
+                        {isSubscription ? "Pay today" : "Total"}
                       </p>
                       <p className="font-bold text-[22px] text-[#222222]">
                         ₹{formattedAmount(calculateTotal())}
@@ -1852,6 +1834,37 @@ const Booking = () => {
                           : "Confirm subscription"
                         : "Proceed to Payment"}
                   </button>
+                  {isSubscription && (
+                    <>
+                      <p className="mt-[12px] text-[12px] leading-[1.5] text-[#9aa1ac]">
+                        Top-up funds your first {subUnit}
+                        {walletAvailable > 0
+                          ? ` (₹${formattedAmount(subRecurring)} − your ₹${formattedAmount(walletAvailable)} wallet)`
+                          : ""}. The deposit is held separately and refunded when you cancel.
+                      </p>
+                      <div className="mt-[18px] rounded-[14px] border border-[#e6eaf3] bg-[#f4f6fb] p-[16px]">
+                        <div className="mb-[12px] flex items-center gap-x-[8px] text-[13px] font-semibold text-[#3f4a61]">
+                          <img className="h-[15px] w-[15px]" src="/images/Info.png" alt="" />
+                          How your subscription works
+                        </div>
+                        <div className="flex items-center justify-between py-[6px] text-[14px]">
+                          <span className="text-[#67616c]">Recurring charge</span>
+                          <span className="font-semibold text-[#302b34]">
+                            ₹{formattedAmount(subRecurring)} / {subUnit}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between py-[6px] text-[14px]">
+                          <span className="text-[#67616c]">Minimum wallet balance</span>
+                          <span className="font-semibold text-[#302b34]">
+                            ₹{formattedAmount(subMinBalance)}
+                          </span>
+                        </div>
+                        <p className="mt-[8px] border-t border-[#e6eaf3] pt-[10px] text-[12px] leading-[1.5] text-[#67616c]">
+                          Each renewal date, the {subCadence} charge is auto-debited from your wallet. Keep it above the minimum balance so the renewal doesn’t fail.
+                        </p>
+                      </div>
+                    </>
+                  )}
                   </section>
 
                   {!isSubscription && <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
