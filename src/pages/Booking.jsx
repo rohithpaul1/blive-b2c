@@ -148,6 +148,11 @@ const Booking = () => {
   // Subscription "pay today" split + ongoing mechanics (see Price Details).
   const subDeposit = Number(_pb.security_deposit ?? 0) || 0;
   const subRecurring = Number(_pb.recurring_charge ?? 0) || 0;
+  // Wallet top-up = opening wallet balance to fund, minus what the rider
+  // already holds. Fall back to the first period's charge when the quote
+  // doesn't carry an explicit opening balance.
+  const subOpeningBalance = openingWalletBalance > 0 ? openingWalletBalance : subRecurring;
+  const subWalletTopUp = Math.max(0, subOpeningBalance - walletAvailable);
   const subMinBalance = Number(_pb.minimum_wallet_balance ?? 0) || 0;
   const _subRate =
     _pb.ratePlan ?? selectedProduct?.calculationData?.ratePlan ?? currentPlanType;
@@ -1595,7 +1600,7 @@ const Booking = () => {
                           <div className="flex items-center justify-between">
                             <p className="text-[14px] text-[#3A3A3A]">Wallet top-up</p>
                             <p className="text-[14px] font-medium text-[#3A3A3A]">
-                              ₹{formattedAmount(openingWalletTopUp)}
+                              ₹{formattedAmount(subWalletTopUp)}
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
