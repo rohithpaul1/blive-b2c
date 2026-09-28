@@ -18,6 +18,7 @@ import Business from './pages/Business';
 import BusinessVehicle from './pages/BusinessVehicle';
 import BusinessPortalAccess from './pages/BusinessPortalAccess';
 import BusinessPortal from './pages/BusinessPortal';
+import PayLink from './pages/PayLink';
 
 const App = () => {
   const { loading } = useContext(UserContext);
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/business/vehicles/:modelId" element={<BusinessVehicle />} />
           <Route path="/business/access" element={<BusinessPortalAccess />} />
           <Route path="/business/portal" element={<BusinessPortal />} />
+          <Route path="/pay/:token" element={<PayLink />} />
           <Route path="/" element={<Navigate to="/home" />} />
           <Route path="*" element={<Navigate to="/home" />} />
         </Routes>
