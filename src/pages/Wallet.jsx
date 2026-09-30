@@ -3,10 +3,10 @@ import { useMutation, useQuery } from "convex/react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  CalendarDays,
+  Check,
   ChevronRight,
+  Clock3,
   ShieldCheck,
-  WalletCards,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,9 @@ import Login from "../components/Login";
 import Loader from "../components/Loader";
 import { useUser } from "../contexts/UserContext";
 import Navbar from "../sections/Navbar";
+
+// Wallet: one balance, the deposit in plain words, one action, and a short
+// activity list. Dues only appear when something is actually owed.
 
 const rupees = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -23,35 +26,35 @@ const rupees = (value) =>
   }).format(Number(value || 0));
 
 const readableDate = (value) => {
-  if (!value) return "To be scheduled";
+  if (!value) return "";
   const parsed =
     typeof value === "number" || /^\d+$/.test(String(value))
       ? new Date(Number(value))
       : new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "To be scheduled";
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(parsed);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(parsed);
 };
 
 const transactionLabel = {
   topup: "Money added",
   charge: "Subscription payment",
-  hold: "Amount held",
-  release: "Hold released",
+  hold: "Security deposit held",
+  release: "Deposit returned",
   refund: "Refund",
   adjustment: "Balance adjustment",
-  fixed_rental: "Fixed rental payment",
+  fixed_rental: "Rental payment",
   subscription: "Subscription payment",
   wallet_topup: "Money added",
-  wallet_hold: "Amount held",
-  wallet_release: "Hold released",
+  wallet_hold: "Security deposit held",
+  wallet_release: "Deposit returned",
   wallet_refund: "Refund credited",
   wallet_adjustment: "Balance adjustment",
   deposit: "Security deposit",
 };
+
+const PRESETS = [500, 1000, 2000];
+const PREVIEW_ROWS = 4;
+const isHold = (t) => ["hold", "wallet_hold", "deposit"].includes(t.type);
 
 const Wallet = () => {
   const { isAuthenticated } = useUser();
@@ -62,22 +65,24 @@ const Wallet = () => {
   const [amount, setAmount] = useState(1000);
   const [customAmount, setCustomAmount] = useState("");
   const [adding, setAdding] = useState(false);
-  const [historyView, setHistoryView] = useState("transactions");
+  const [justAdded, setJustAdded] = useState(0);
+  const [historyView, setHistoryView] = useState("activity");
+  const [showAll, setShowAll] = useState(false);
 
   const chosenAmount = useMemo(
     () => Number(customAmount || amount || 0),
     [amount, customAmount],
   );
 
-  const handleTopUp = async () => {
-    if (!Number.isFinite(chosenAmount) || chosenAmount < 100) {
+  const topUp = async (value) => {
+    if (!Number.isFinite(value) || value < 100) {
       toast.error("Enter at least ₹100");
       return;
     }
     try {
       setAdding(true);
-      await addMoney({ amount: chosenAmount });
-      toast.success(`${rupees(chosenAmount)} added to your wallet`);
+      await addMoney({ amount: value });
+      setJustAdded(value);
       setCustomAmount("");
     } catch (error) {
       toast.error(error?.message || "Unable to add money right now");
@@ -94,232 +99,224 @@ const Wallet = () => {
     );
   }
 
+  const sub = wallet?.activeSubscription;
+  const needed = sub?.amountNeeded > 0 ? sub.amountNeeded : 0;
+  const outstanding = Number(finance?.summary?.outstanding || 0);
+  const transactions = finance?.transactions ?? [];
+  const receipts = finance?.receipts ?? [];
+  const visibleTx = showAll ? transactions : transactions.slice(0, PREVIEW_ROWS);
+  const visibleReceipts = showAll ? receipts : receipts.slice(0, PREVIEW_ROWS);
+  const listLength = historyView === "activity" ? transactions.length : receipts.length;
+
   return (
-    <div className="min-h-screen bg-[#f7f7f8] text-[#222222]">
+    <div className="min-h-screen bg-[#f5f4f7] text-[#1b1530]">
       <Navbar onSearchPage={false} expanded={true} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-[148px] sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <p className="text-sm font-medium text-[#6d6d72]">Wallet and payments</p>
-          <h1 className="mt-1 text-[28px] font-bold tracking-[-0.02em] sm:text-[34px]">
-            Your money
-          </h1>
-          <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#6d6d72] sm:text-base">
-            Recharge subscriptions, review fixed-rental payments, and keep every receipt and refund in one place.
-          </p>
-        </div>
-
-        {finance?.summary && (
-          <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {[
-              ["Fixed rentals paid", finance.summary.fixedRentalPaid],
-              ["Subscriptions paid", finance.summary.subscriptionPaid],
-              ["Refunds", finance.summary.refunds],
-              ["Outstanding", finance.summary.outstanding],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-2xl border border-[#e8e8eb] bg-white p-4 sm:p-5">
-                <p className="text-xs font-medium text-[#77777d]">{label}</p>
-                <p className="mt-2 text-lg font-bold tracking-[-0.02em] sm:text-xl">{rupees(value)}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <h1 className="mb-6 text-[28px] font-bold tracking-[-0.02em] sm:text-[34px]">Wallet</h1>
 
         {wallet === undefined ? (
-          <div className="flex min-h-[360px] items-center justify-center rounded-3xl border border-[#e8e8eb] bg-white">
+          <div className="flex min-h-[360px] items-center justify-center rounded-3xl border border-[#ecebf0] bg-white">
             <Loader />
           </div>
         ) : (
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
-            <section className="min-w-0 overflow-hidden rounded-3xl bg-[#271254] text-white shadow-[0_18px_50px_rgba(39,18,84,0.16)]">
-              <div className="p-6 sm:p-8">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-white/70">Available balance</p>
-                    <p className="mt-2 text-[38px] font-bold tracking-[-0.04em] sm:text-[48px]">
-                      {rupees(wallet.availableBalance)}
-                    </p>
-                  </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
-                    <WalletCards size={24} aria-hidden="true" />
-                  </div>
-                </div>
-
-                {wallet.activeSubscription ? (
-                  <div className="mt-8 rounded-2xl border border-white/15 bg-white/10 p-5">
-                    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/60">
-                          Next renewal
-                        </p>
-                        <p className="mt-2 text-lg font-semibold">
-                          {wallet.activeSubscription.vehicleName}
-                        </p>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/75">
-                          <span className="flex items-center gap-2">
-                            <CalendarDays size={16} aria-hidden="true" />
-                            {readableDate(wallet.activeSubscription.nextChargeAt)}
-                          </span>
-                          <span>
-                            {rupees(wallet.activeSubscription.recurringCharge)} every {wallet.activeSubscription.cadence}
-                          </span>
-                        </div>
-                      </div>
-                      {wallet.activeSubscription.amountNeeded > 0 && (
-                        <div className="rounded-xl bg-[#fff2df] px-4 py-3 text-[#7a3e00]">
-                          <p className="text-xs font-semibold uppercase tracking-wide">Add before renewal</p>
-                          <p className="mt-1 text-lg font-bold">
-                            {rupees(wallet.activeSubscription.amountNeeded)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="mt-8 max-w-[520px] break-words text-sm leading-6 text-white/70">
-                    Your wallet becomes active when a subscription rental starts.
+          <div className="flex flex-col gap-5">
+            {/* Dues: only when something is owed */}
+            {needed > 0 && (
+              <div className="flex flex-col gap-3 rounded-2xl border border-[#f6d7a8] bg-[#fff4e5] p-4 sm:flex-row sm:items-center sm:gap-4 sm:px-5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffe4bf] text-[#8a4b00]">
+                  <Clock3 size={20} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-[#5c3200]">
+                    Add {rupees(needed)} before your renewal{sub?.nextChargeAt ? ` on ${readableDate(sub.nextChargeAt)}` : ""}
                   </p>
-                )}
-              </div>
-              <div className="grid border-t border-white/10 bg-black/10 sm:grid-cols-2">
-                <div className="p-5 sm:px-8">
-                  <p className="text-xs font-medium uppercase tracking-wide text-white/55">Wallet total</p>
-                  <p className="mt-1 text-lg font-semibold">{rupees(wallet.balance)}</p>
+                  <p className="mt-0.5 text-sm text-[#7a4a10]">So your {sub?.vehicleName || "subscription"} keeps running without a break.</p>
                 </div>
-                <div className="border-t border-white/10 p-5 sm:border-l sm:border-t-0 sm:px-8">
-                  <p className="text-xs font-medium uppercase tracking-wide text-white/55">Held for deposit</p>
-                  <p className="mt-1 text-lg font-semibold">{rupees(wallet.heldAmount)}</p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => topUp(needed)}
+                  disabled={adding}
+                  className="min-h-11 rounded-xl bg-[#8a4b00] px-5 text-sm font-semibold text-white hover:bg-[#723e00] disabled:opacity-50"
+                >
+                  Add {rupees(needed)}
+                </button>
               </div>
-            </section>
+            )}
+            {outstanding > 0 && (
+              <div className="flex flex-col gap-3 rounded-2xl border border-[#f6d7a8] bg-[#fff4e5] p-4 sm:flex-row sm:items-center sm:gap-4 sm:px-5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffe4bf] text-[#8a4b00]">
+                  <Clock3 size={20} aria-hidden="true" />
+                </span>
+                <p className="min-w-0 flex-1 font-semibold text-[#5c3200]">{rupees(outstanding)} is due on your rentals</p>
+                <button
+                  type="button"
+                  onClick={() => { setHistoryView("receipts"); setShowAll(true); }}
+                  className="min-h-11 rounded-xl border border-[#d9a55c] bg-white px-5 text-sm font-semibold text-[#5c3200] hover:bg-[#fffaf2]"
+                >
+                  See what's due
+                </button>
+              </div>
+            )}
 
-            <aside className="min-w-0 rounded-3xl border border-[#e8e8eb] bg-white p-5 sm:p-6">
-              <h2 className="text-xl font-bold">Add money</h2>
-              <p className="mt-1 text-sm leading-5 text-[#6d6d72]">
-                Choose an amount or enter your own.
-              </p>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                {[500, 1000, 2000, 5000].map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => {
-                      setAmount(preset);
-                      setCustomAmount("");
-                    }}
-                    className={`min-h-11 rounded-xl border px-3 text-sm font-semibold transition-colors ${
-                      !customAmount && amount === preset
-                        ? "border-[#5d35b5] bg-[#f6f2ff] text-[#4a2595]"
-                        : "border-[#dedee3] bg-white hover:border-[#b8a7dc]"
-                    }`}
-                  >
-                    {rupees(preset)}
-                  </button>
-                ))}
-              </div>
-              <label className="mt-4 block text-sm font-semibold" htmlFor="wallet-amount">
-                Custom amount
-              </label>
-              <div className="mt-2 flex h-12 items-center rounded-xl border border-[#dedee3] px-4 focus-within:border-[#5d35b5] focus-within:ring-2 focus-within:ring-[#5d35b5]/10">
-                <span className="text-[#6d6d72]">₹</span>
-                <input
-                  id="wallet-amount"
-                  inputMode="numeric"
-                  value={customAmount}
-                  onChange={(event) => setCustomAmount(event.target.value.replace(/[^0-9]/g, ""))}
-                  placeholder="Enter amount"
-                  className="h-full min-w-0 flex-1 bg-transparent px-2 outline-none"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleTopUp}
-                disabled={adding}
-                className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#351a75] px-5 text-sm font-bold text-white transition-colors hover:bg-[#2c155f] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {adding ? "Adding money…" : `Add ${rupees(chosenAmount)}`}
-              </button>
-              <div className="mt-4 flex items-start gap-3 rounded-xl bg-[#f7f7f8] p-3 text-xs leading-5 text-[#5f5f64]">
-                <ShieldCheck className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
-                This test checkout updates your wallet instantly. No real payment is collected.
-              </div>
-            </aside>
+            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_400px]">
+              <div className="flex min-w-0 flex-col gap-5">
+                {/* One number */}
+                <section className="rounded-3xl bg-[#231552] p-6 text-white sm:p-10">
+                  <p className="text-sm font-medium text-[#cfc8ec] sm:text-[15px]">Available to use</p>
+                  <p className="mt-2 text-[44px] font-bold leading-none tracking-[-0.03em] sm:text-[64px]">
+                    {rupees(wallet.availableBalance)}
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-[#cfc8ec] sm:text-[15px]">
+                    {sub
+                      ? `Used automatically for your ${sub.vehicleName || "subscription"} renewal${sub.nextChargeAt ? ` on ${readableDate(sub.nextChargeAt)}` : ""}.`
+                      : "You can use this balance once your subscription starts."}
+                  </p>
+                  {wallet.heldAmount > 0 && (
+                    <div className="mt-7 flex items-center gap-3.5 rounded-2xl bg-[#2f1f66] p-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3d2b7d] text-[#e4defa]">
+                        <ShieldCheck size={18} aria-hidden="true" />
+                      </span>
+                      <p className="text-sm leading-5 text-[#e4defa]">
+                        <span className="font-semibold text-white">{rupees(wallet.heldAmount)} security deposit</span> is held safely. You get it back when you return your vehicle.
+                      </p>
+                    </div>
+                  )}
+                </section>
 
-            <section className="min-w-0 overflow-hidden rounded-3xl border border-[#e8e8eb] bg-white lg:col-span-2">
-              <div className="flex items-center justify-between border-b border-[#ededf0] px-5 py-5 sm:px-6">
-                <div>
-                  <h2 className="text-xl font-bold">Payment history</h2>
-                  <p className="mt-1 text-sm text-[#77777d]">Wallet activity, rental payments, deposits, refunds, and receipts</p>
-                </div>
+                {/* Recent activity */}
+                <section className="rounded-3xl border border-[#ecebf0] bg-white px-5 py-5 sm:px-8 sm:py-7">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex gap-1" role="tablist" aria-label="History">
+                      {[{ value: "activity", label: "Recent activity" }, { value: "receipts", label: "Receipts" }].map((item) => (
+                        <button
+                          key={item.value}
+                          type="button"
+                          role="tab"
+                          aria-selected={historyView === item.value}
+                          onClick={() => setHistoryView(item.value)}
+                          className={`min-h-10 rounded-lg px-3 text-sm font-semibold ${historyView === item.value ? "bg-[#f1edff] text-[#3b2380]" : "text-[#5d5870] hover:text-[#1b1530]"}`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                    {listLength > PREVIEW_ROWS && (
+                      <button type="button" onClick={() => setShowAll((v) => !v)} className="min-h-10 px-2 text-sm font-semibold text-[#3b2380] hover:text-[#231552]">
+                        {showAll ? "Show less" : "See all"}
+                      </button>
+                    )}
+                  </div>
+
+                  {finance === undefined ? (
+                    <div className="flex min-h-[140px] items-center justify-center"><Loader /></div>
+                  ) : historyView === "activity" ? (
+                    transactions.length === 0 ? (
+                      <p className="py-10 text-center text-sm text-[#5d5870]">Money you add and payments you make will show up here.</p>
+                    ) : (
+                      <ul className="mt-3">
+                        {visibleTx.map((t) => {
+                          const incoming = t.direction === "in";
+                          const hold = isHold(t);
+                          return (
+                            <li key={t.id} className="flex items-center gap-3.5 border-t border-[#f0eff3] py-3.5">
+                              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${incoming && !hold ? "bg-[#e6f4ec] text-[#1f7a4a]" : "bg-[#f1f0f4] text-[#5d5870]"}`}>
+                                {hold ? <ShieldCheck size={18} aria-hidden="true" /> : incoming ? <ArrowDownLeft size={18} aria-hidden="true" /> : <ArrowUpRight size={18} aria-hidden="true" />}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-[15px] font-semibold">{transactionLabel[t.type] || t.note || "Wallet activity"}</p>
+                                <p className="mt-0.5 text-[13px] text-[#5d5870]">{readableDate(t.createdAtMs)}</p>
+                              </div>
+                              <p className={`text-[15px] font-semibold ${incoming && !hold ? "text-[#1f7a4a]" : "text-[#1b1530]"}`}>
+                                {incoming && !hold ? "+" : ""}{rupees(t.amount)}
+                              </p>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )
+                  ) : receipts.length === 0 ? (
+                    <p className="py-10 text-center text-sm text-[#5d5870]">A receipt appears here after your first rental payment.</p>
+                  ) : (
+                    <ul className="mt-3">
+                      {visibleReceipts.map((r) => (
+                        <li key={r.id} className="flex items-center gap-3.5 border-t border-[#f0eff3] py-3.5">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[15px] font-semibold">{r.number}</p>
+                            <p className="mt-0.5 text-[13px] text-[#5d5870]">
+                              {readableDate(r.periodStart)} – {readableDate(r.periodEnd)}
+                              {r.outstanding > 0 && <span className="text-[#8a4b00]"> · {rupees(r.outstanding)} due</span>}
+                            </p>
+                          </div>
+                          <p className="text-[15px] font-semibold">{rupees(r.total)}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {sub && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/booking/${sub.bookingId}`)}
+                      className="mt-2 flex min-h-12 w-full items-center justify-between border-t border-[#f0eff3] pt-2 text-sm font-semibold text-[#1b1530] hover:text-[#3b2380]"
+                    >
+                      View active rental
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </button>
+                  )}
+                </section>
               </div>
-              <div className="flex gap-1 border-b border-[#ededf0] px-5 pt-3 sm:px-6">
-                {[{ value: "transactions", label: "Transactions" }, { value: "receipts", label: "Receipts" }].map((item) => (
-                  <button key={item.value} type="button" onClick={() => setHistoryView(item.value)} className={`border-b-2 px-3 py-3 text-sm font-semibold ${historyView === item.value ? "border-[#351a75] text-[#351a75]" : "border-transparent text-[#77777d]"}`}>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-              {historyView === "transactions" && (finance === undefined ? (
-                <div className="flex min-h-[180px] items-center justify-center"><Loader /></div>
-              ) : (finance?.transactions ?? []).length === 0 ? (
-                <div className="px-6 py-12 text-center">
-                  <p className="font-semibold">No payment activity yet</p>
-                  <p className="mt-1 text-sm text-[#77777d]">Rental payments, wallet top-ups, charges, and refunds will appear here.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-[#ededf0]">
-                  {finance.transactions.map((transaction) => {
-                    const incoming = transaction.direction === "in";
+
+              {/* Add money */}
+              <aside className="rounded-3xl border border-[#ecebf0] bg-white p-6 sm:p-8">
+                <h2 className="text-[22px] font-bold">Add money</h2>
+                <p className="mt-1 text-sm text-[#5d5870]">Top up in seconds with UPI or card.</p>
+                <div className="mt-5 grid grid-cols-3 gap-2.5">
+                  {PRESETS.map((preset) => {
+                    const on = !customAmount && amount === preset;
                     return (
-                      <div key={transaction.id} className="flex items-center gap-4 px-5 py-4 sm:px-6">
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${incoming ? "bg-[#eaf8ef] text-[#19733b]" : "bg-[#fff0ef] text-[#a1322d]"}`}>
-                          {incoming ? <ArrowDownLeft size={20} aria-hidden="true" /> : <ArrowUpRight size={20} aria-hidden="true" />}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold sm:text-base">
-                            {transaction.note || transactionLabel[transaction.type] || "Wallet activity"}
-                          </p>
-                          <p className="mt-0.5 text-xs text-[#77777d] sm:text-sm">
-                            {readableDate(transaction.createdAtMs)}
-                            {transaction.bookingNumber ? ` · ${transaction.bookingNumber}` : ""}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-sm font-bold sm:text-base ${incoming ? "text-[#19733b]" : "text-[#a1322d]"}`}>
-                            {incoming ? "+" : "−"}{rupees(transaction.amount)}
-                          </p>
-                          {transaction.reference && <p className="mt-0.5 max-w-[180px] truncate text-xs text-[#77777d]">{transaction.reference}</p>}
-                        </div>
-                      </div>
+                      <button
+                        key={preset}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => { setAmount(preset); setCustomAmount(""); setJustAdded(0); }}
+                        className={`min-h-[52px] rounded-2xl text-base font-semibold transition-colors ${
+                          on ? "border-2 border-[#3b2380] bg-[#f1edff] text-[#3b2380]" : "border border-[#dcdae3] bg-white hover:border-[#b8a7dc]"
+                        }`}
+                      >
+                        {rupees(preset)}
+                      </button>
                     );
                   })}
                 </div>
-              ))}
-              {historyView === "receipts" && (finance === undefined ? (
-                <div className="flex min-h-[180px] items-center justify-center"><Loader /></div>
-              ) : (finance?.receipts ?? []).length === 0 ? (
-                <div className="px-6 py-12 text-center"><p className="font-semibold">No receipts yet</p><p className="mt-1 text-sm text-[#77777d]">A receipt appears here after your first rental payment.</p></div>
-              ) : (
-                <div className="divide-y divide-[#ededf0]">
-                  {finance.receipts.map((receipt) => (
-                    <div key={receipt.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-6">
-                      <div><p className="text-sm font-semibold">{receipt.number}</p><p className="mt-1 text-xs text-[#77777d]">{receipt.bookingNumber} · {readableDate(receipt.periodStart)} to {readableDate(receipt.periodEnd)}</p></div>
-                      <div className="sm:text-right"><p className="text-xs font-semibold capitalize text-[#5f5f64]">{receipt.status}</p>{receipt.outstanding > 0 && <p className="mt-1 text-xs text-[#a26316]">{rupees(receipt.outstanding)} due</p>}</div>
-                      <p className="text-sm font-bold sm:min-w-[120px] sm:text-right">{rupees(receipt.paid)} / {rupees(receipt.total)}</p>
-                    </div>
-                  ))}
+                <label className="mt-5 block text-sm font-semibold" htmlFor="wallet-amount">Or enter an amount</label>
+                <div className="mt-2 flex h-[52px] items-center rounded-2xl border border-[#dcdae3] px-4 focus-within:border-[#3b2380] focus-within:ring-2 focus-within:ring-[#3b2380]/10">
+                  <span className="text-[#5d5870]">₹</span>
+                  <input
+                    id="wallet-amount"
+                    inputMode="numeric"
+                    value={customAmount}
+                    onChange={(e) => { setCustomAmount(e.target.value.replace(/[^0-9]/g, "").slice(0, 6)); setJustAdded(0); }}
+                    placeholder="Enter amount"
+                    className="h-full min-w-0 flex-1 bg-transparent px-2 text-base outline-none"
+                  />
                 </div>
-              ))}
-              {wallet.activeSubscription && (
                 <button
                   type="button"
-                  onClick={() => navigate(`/booking/${wallet.activeSubscription.bookingId}`)}
-                  className="flex min-h-12 w-full items-center justify-between border-t border-[#ededf0] px-5 text-sm font-semibold hover:bg-[#fafafa] sm:px-6"
+                  onClick={() => topUp(chosenAmount)}
+                  disabled={adding || !(chosenAmount > 0)}
+                  className="mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#3b2380] px-5 text-base font-semibold text-white transition-colors hover:bg-[#2c155f] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  View active rental
-                  <ChevronRight size={18} aria-hidden="true" />
+                  {adding ? "Adding money…" : chosenAmount > 0 ? `Add ${rupees(chosenAmount)}` : "Choose an amount"}
                 </button>
-              )}
-            </section>
+                {justAdded > 0 && (
+                  <p className="mt-4 flex items-center gap-2 text-sm font-medium text-[#1f7a4a]" role="status">
+                    <Check size={16} strokeWidth={2.4} aria-hidden="true" />
+                    {rupees(justAdded)} added to your wallet
+                  </p>
+                )}
+                <p className="mt-4 text-xs text-[#6b6780]">Demo checkout: your wallet updates instantly, no real payment is taken.</p>
+              </aside>
+            </div>
           </div>
         )}
       </main>
