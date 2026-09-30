@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   Clock3,
+  Download,
   ShieldCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -25,14 +26,16 @@ const rupees = (value) =>
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
 
-const readableDate = (value) => {
+const readableDate = (value, withTime = false) => {
   if (!value) return "";
   const parsed =
     typeof value === "number" || /^\d+$/.test(String(value))
       ? new Date(Number(value))
       : new Date(value);
   if (Number.isNaN(parsed.getTime())) return "";
-  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(parsed);
+  return new Intl.DateTimeFormat("en-IN", withTime
+    ? { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }
+    : { day: "numeric", month: "short" }).format(parsed);
 };
 
 const transactionLabel = {
@@ -66,8 +69,8 @@ const Wallet = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [adding, setAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(0);
-  const [historyView, setHistoryView] = useState("activity");
   const [showAll, setShowAll] = useState(false);
+  const [openId, setOpenId] = useState(undefined); // undefined = newest row open
 
   const chosenAmount = useMemo(
     () => Number(customAmount || amount || 0),
@@ -83,6 +86,7 @@ const Wallet = () => {
       setAdding(true);
       await addMoney({ amount: value });
       setJustAdded(value);
+      setOpenId(undefined);
       setCustomAmount("");
     } catch (error) {
       toast.error(error?.message || "Unable to add money right now");
@@ -105,8 +109,8 @@ const Wallet = () => {
   const transactions = finance?.transactions ?? [];
   const receipts = finance?.receipts ?? [];
   const visibleTx = showAll ? transactions : transactions.slice(0, PREVIEW_ROWS);
-  const visibleReceipts = showAll ? receipts : receipts.slice(0, PREVIEW_ROWS);
-  const listLength = historyView === "activity" ? transactions.length : receipts.length;
+  const receiptByBooking = new Map(receipts.map((r) => [r.bookingNumber, r]));
+  const firstDue = receipts.find((r) => r.outstanding > 0);
 
   return (
     <div className="min-h-screen bg-[#f5f4f7] text-[#1b1530]">
@@ -150,7 +154,7 @@ const Wallet = () => {
                 <p className="min-w-0 flex-1 font-semibold text-[#5c3200]">{rupees(outstanding)} is due on your rentals</p>
                 <button
                   type="button"
-                  onClick={() => { setHistoryView("receipts"); setShowAll(true); }}
+                  onClick={() => firstDue && navigate(`/booking/${firstDue.id}`)}
                   className="min-h-11 rounded-xl border border-[#d9a55c] bg-white px-5 text-sm font-semibold text-[#5c3200] hover:bg-[#fffaf2]"
                 >
                   See what's due
@@ -183,24 +187,14 @@ const Wallet = () => {
                   )}
                 </section>
 
-                {/* Recent activity */}
+                {/* Recent activity: every payment carries its own receipt */}
                 <section className="rounded-3xl border border-[#ecebf0] bg-white px-5 py-5 sm:px-8 sm:py-7">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex gap-1" role="tablist" aria-label="History">
-                      {[{ value: "activity", label: "Recent activity" }, { value: "receipts", label: "Receipts" }].map((item) => (
-                        <button
-                          key={item.value}
-                          type="button"
-                          role="tab"
-                          aria-selected={historyView === item.value}
-                          onClick={() => setHistoryView(item.value)}
-                          className={`min-h-10 rounded-lg px-3 text-sm font-semibold ${historyView === item.value ? "bg-[#f1edff] text-[#3b2380]" : "text-[#5d5870] hover:text-[#1b1530]"}`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
+                  <div className="flex items-start justify-between gap-3 pb-2">
+                    <div>
+                      <h2 className="text-lg font-semibold">Recent activity</h2>
+                      <p className="mt-0.5 text-[13px] text-[#5d5870]">Tap any payment to see its receipt.</p>
                     </div>
-                    {listLength > PREVIEW_ROWS && (
+                    {transactions.length > PREVIEW_ROWS && (
                       <button type="button" onClick={() => setShowAll((v) => !v)} className="min-h-10 px-2 text-sm font-semibold text-[#3b2380] hover:text-[#231552]">
                         {showAll ? "Show less" : "See all"}
                       </button>
@@ -209,47 +203,69 @@ const Wallet = () => {
 
                   {finance === undefined ? (
                     <div className="flex min-h-[140px] items-center justify-center"><Loader /></div>
-                  ) : historyView === "activity" ? (
-                    transactions.length === 0 ? (
-                      <p className="py-10 text-center text-sm text-[#5d5870]">Money you add and payments you make will show up here.</p>
-                    ) : (
-                      <ul className="mt-3">
-                        {visibleTx.map((t) => {
-                          const incoming = t.direction === "in";
-                          const hold = isHold(t);
-                          return (
-                            <li key={t.id} className="flex items-center gap-3.5 border-t border-[#f0eff3] py-3.5">
+                  ) : transactions.length === 0 ? (
+                    <p className="py-10 text-center text-sm text-[#5d5870]">Money you add and payments you make will show up here.</p>
+                  ) : (
+                    <ul>
+                      {visibleTx.map((t, i) => {
+                        const incoming = t.direction === "in";
+                        const hold = isHold(t);
+                        const receipt = t.bookingNumber ? receiptByBooking.get(t.bookingNumber) : null;
+                        const open = openId === undefined ? i === 0 : openId === t.id;
+                        const details = [
+                          ["Receipt no.", receipt?.number || `RCPT-${String(t.id).slice(-8).toUpperCase()}`],
+                          ["Date", readableDate(t.createdAtMs, true)],
+                          t.bookingNumber && ["Booking", t.bookingNumber],
+                          receipt && ["Rental period", `${readableDate(receipt.periodStart)} – ${readableDate(receipt.periodEnd)}`],
+                          receipt && ["Paid so far", `${rupees(receipt.paid)} of ${rupees(receipt.total)}`],
+                          receipt?.outstanding > 0 && ["Still due", rupees(receipt.outstanding)],
+                          t.reference && ["Reference", t.reference],
+                        ].filter(Boolean);
+                        return (
+                          <li key={t.id} className="border-t border-[#f0eff3]">
+                            <button
+                              type="button"
+                              aria-expanded={open}
+                              onClick={() => setOpenId(open ? null : t.id)}
+                              className="flex w-full items-center gap-3.5 py-3.5 text-left"
+                            >
                               <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${incoming && !hold ? "bg-[#e6f4ec] text-[#1f7a4a]" : "bg-[#f1f0f4] text-[#5d5870]"}`}>
                                 {hold ? <ShieldCheck size={18} aria-hidden="true" /> : incoming ? <ArrowDownLeft size={18} aria-hidden="true" /> : <ArrowUpRight size={18} aria-hidden="true" />}
                               </span>
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-[15px] font-semibold">{transactionLabel[t.type] || t.note || "Wallet activity"}</p>
-                                <p className="mt-0.5 text-[13px] text-[#5d5870]">{readableDate(t.createdAtMs)}</p>
-                              </div>
-                              <p className={`text-[15px] font-semibold ${incoming && !hold ? "text-[#1f7a4a]" : "text-[#1b1530]"}`}>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-[15px] font-semibold">{transactionLabel[t.type] || t.note || "Wallet activity"}</span>
+                                <span className="mt-0.5 block text-[13px] text-[#5d5870]">{readableDate(t.createdAtMs)}</span>
+                              </span>
+                              <span className={`text-[15px] font-semibold ${incoming && !hold ? "text-[#1f7a4a]" : "text-[#1b1530]"}`}>
                                 {incoming && !hold ? "+" : ""}{rupees(t.amount)}
-                              </p>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )
-                  ) : receipts.length === 0 ? (
-                    <p className="py-10 text-center text-sm text-[#5d5870]">A receipt appears here after your first rental payment.</p>
-                  ) : (
-                    <ul className="mt-3">
-                      {visibleReceipts.map((r) => (
-                        <li key={r.id} className="flex items-center gap-3.5 border-t border-[#f0eff3] py-3.5">
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[15px] font-semibold">{r.number}</p>
-                            <p className="mt-0.5 text-[13px] text-[#5d5870]">
-                              {readableDate(r.periodStart)} – {readableDate(r.periodEnd)}
-                              {r.outstanding > 0 && <span className="text-[#8a4b00]"> · {rupees(r.outstanding)} due</span>}
-                            </p>
-                          </div>
-                          <p className="text-[15px] font-semibold">{rupees(r.total)}</p>
-                        </li>
-                      ))}
+                              </span>
+                              <ChevronRight size={18} aria-hidden="true" className={`shrink-0 text-[#5d5870] transition-transform ${open ? "rotate-90" : ""}`} />
+                            </button>
+                            {open && (
+                              <div className="mb-3.5 ml-0 rounded-2xl bg-[#f8f7fa] p-4 sm:ml-[54px]">
+                                <dl className="flex flex-col gap-2.5">
+                                  {details.map(([k, v]) => (
+                                    <div key={k} className="flex justify-between gap-4 text-[13px]">
+                                      <dt className="text-[#5d5870]">{k}</dt>
+                                      <dd className="text-right font-semibold">{v}</dd>
+                                    </div>
+                                  ))}
+                                </dl>
+                                {receipt && (
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(`/booking/${receipt.id}`)}
+                                    className="mt-3 flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#3b2380] hover:text-[#231552]"
+                                  >
+                                    <Download size={16} aria-hidden="true" />
+                                    Download receipt
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
 
