@@ -52,11 +52,11 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
         >
           <img
             onClick={() => navigate(isBusinessWebsite ? "/business" : "/home")}
-            className={`h-[34px] w-auto cursor-pointer ${
+            className={`h-[44px] w-auto cursor-pointer md:h-[52px] ${
               onSearchPage ? "col-start-1 row-start-1" : ""
             }`}
-            src="/images/BliveLogo.svg"
-            alt="BLive"
+            src="/images/BliveNxtLogo.svg"
+            alt="b:live NXT"
           />
           {onSearchPage && (
             <div className="col-span-3 row-start-2 mt-[8px] flex w-full justify-self-center md:col-span-1 md:col-start-2 md:row-start-1 md:mt-0">

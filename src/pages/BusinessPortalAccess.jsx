@@ -147,7 +147,7 @@ function BusinessPortalAccess() {
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10 lg:px-14">
         <div className="w-full max-w-[480px]">
           <div className="flex items-center justify-between lg:hidden">
-            <img src="/images/BliveLogo.svg" alt="BLive" className="h-8 w-auto" />
+            <img src="/images/BliveNxtLogo.svg" alt="b:live NXT" className="h-12 w-auto" />
             <button type="button" onClick={() => navigate("/business")} className="text-[13px] font-bold text-[#5b5360]">
               Back
             </button>
