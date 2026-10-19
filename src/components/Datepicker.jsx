@@ -209,7 +209,7 @@ export default function DateTimePicker({
                 : "text-[#6f6973]"
             }`}
           >
-            <span className="block text-[11px] font-bold uppercase tracking-[0.08em]">Pickup</span>
+            <span className="block text-[12px] font-bold uppercase tracking-[0.08em]">Pickup</span>
             <span className="mt-[2px] block text-[13px] font-medium">
               {pickupDate ? format(pickupDate, "d MMM") : "Select date"}
             </span>
@@ -224,7 +224,7 @@ export default function DateTimePicker({
                 : "text-[#6f6973]"
             } disabled:cursor-not-allowed disabled:opacity-50`}
           >
-            <span className="block text-[11px] font-bold uppercase tracking-[0.08em]">Return</span>
+            <span className="block text-[12px] font-bold uppercase tracking-[0.08em]">Return</span>
             <span className="mt-[2px] block text-[13px] font-medium">
               {dropoffDate ? format(dropoffDate, "d MMM") : "Select date"}
             </span>
@@ -236,7 +236,7 @@ export default function DateTimePicker({
         <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#e6e2ee] bg-[#faf9fc] px-[16px] py-[12px]">
           <div>
             <p className="text-[12px] font-bold text-[#29252f]">Expected duration</p>
-            <p className="mt-[2px] text-[11px] text-[#717171]">
+            <p className="mt-[2px] text-[12px] text-[#717171]">
               Planning for {startingPeriodLabel(currentPlanType, subscriptionDuration)} from this date. You can extend later.
             </p>
           </div>

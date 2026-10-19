@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import SearchPage from './pages/SearchPage';
@@ -19,6 +19,18 @@ import BusinessVehicle from './pages/BusinessVehicle';
 import BusinessPortalAccess from './pages/BusinessPortalAccess';
 import BusinessPortal from './pages/BusinessPortal';
 import PayLink from './pages/PayLink';
+import MobileTabBar from './components/MobileTabBar';
+
+// Every route change starts at the top of the page, unless it targets an #anchor.
+const ScrollToTop = () => {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
+  return null;
+};
+
+const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
 
 const App = () => {
   const { loading } = useContext(UserContext);
@@ -31,7 +43,13 @@ const App = () => {
     <LoginPageProvider>
       {loading && <FullPageLoader />}
       <Router>
-        <Toaster position="bottom-right" reverseOrder={false} />
+        <ScrollToTop />
+        {/* On phones, toasts sit under the header so they never cover the tab bar or a checkout button */}
+        <Toaster
+          position={isPhone ? 'top-center' : 'bottom-right'}
+          containerStyle={isPhone ? { top: 84 } : undefined}
+          reverseOrder={false}
+        />
         <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/search" element={<SearchPage />} />
@@ -50,6 +68,7 @@ const App = () => {
           <Route path="/" element={<Navigate to="/home" />} />
           <Route path="*" element={<Navigate to="/home" />} />
         </Routes>
+        <MobileTabBar />
       </Router>
     </LoginPageProvider>
   )

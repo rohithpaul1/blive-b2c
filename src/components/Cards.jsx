@@ -48,7 +48,10 @@ const getOemIdentity = (card) => {
 
 const OemBrandMark = ({ card }) => {
   const [logoFailed, setLogoFailed] = useState(false);
-  const { label, initials, src } = getOemIdentity(card);
+  const { label, src } = getOemIdentity(card);
+
+  // No known logo: show nothing rather than an initials placeholder box.
+  if (!src || logoFailed) return null;
 
   return (
     <span
@@ -56,18 +59,12 @@ const OemBrandMark = ({ card }) => {
       aria-label={`${label} logo`}
       role="img"
     >
-      {src && !logoFailed ? (
-        <img
-          className="h-full w-full object-contain"
-          src={src}
-          alt=""
-          onError={() => setLogoFailed(true)}
-        />
-      ) : (
-        <span className="text-[10px] font-black tracking-[0.04em] text-[#444]">
-          {initials}
-        </span>
-      )}
+      <img
+        className="h-full w-full object-contain"
+        src={src}
+        alt=""
+        onError={() => setLogoFailed(true)}
+      />
     </span>
   );
 };
@@ -375,11 +372,11 @@ const Cards = ({
             >
               <div className="relative h-[220px] w-full overflow-hidden bg-[linear-gradient(145deg,#f5f4f8_0%,#ebe9ef_100%)] sm:h-[240px] xl:h-[250px]">
                 {!card.isAvailable ? (
-                  <div className="absolute z-20 top-[14px] left-[14px] rounded-full border border-[#e8e8e8] bg-white/95 px-[10px] py-[6px] text-[11px] font-bold text-[#5d5d5d] shadow-sm">
+                  <div className="absolute z-20 top-[14px] left-[14px] rounded-full border border-[#e8e8e8] bg-white/95 px-[10px] py-[6px] text-[12px] font-bold text-[#5d5d5d] shadow-sm">
                     Next available {card.nextAvailableDate}
                   </div>
                 ) : card.availableCount <= 2 ? (
-                  <div className="absolute z-20 top-[14px] right-[14px] rounded-full bg-[#fff1f1] px-[10px] py-[6px] text-[11px] font-bold text-[#c43333]">
+                  <div className="absolute z-20 top-[14px] right-[14px] rounded-full bg-[#fff1f1] px-[10px] py-[6px] text-[12px] font-bold text-[#c43333]">
                     Only {card.availableCount} left
                   </div>
                 ) : null}
@@ -415,7 +412,7 @@ const Cards = ({
                       <button
                         type="button"
                         onClick={() => navigate(getDetailsPath(card))}
-                        className="mt-[2px] text-[11px] font-bold text-[#6b5a78] underline-offset-2 hover:underline"
+                        className="mt-[2px] text-[12px] font-bold text-[#6b5a78] underline-offset-2 hover:underline"
                       >
                         View model details
                       </button>
@@ -433,12 +430,14 @@ const Cards = ({
                       ? "Indicative business rate"
                       : isSubscription
                       ? `${startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)} planned`
-                      : `₹${formatCurrency(pricing.total)} total`}
+                      : pricing.total > pricing.dailyRate
+                      ? `₹${formatCurrency(pricing.total)} total`
+                      : "Taxes and deposit shown at checkout"}
                   </p>
                 </div>
 
                 {isSubscription && (
-                  <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[11px] text-[11px]">
+                  <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[11px] text-[12px]">
                     <span className="font-medium text-[#4e4753]">
                       Planned until {formatShortDate(selectedDropoff?.date)}
                     </span>
@@ -448,20 +447,21 @@ const Cards = ({
                   </div>
                 )}
 
+                {(card.range || card.topSpeed || Number(card.chargeTime) > 0) && (
                 <div className="mt-[18px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[13px] text-center text-[#373737]">
                   <div className="flex flex-col items-center gap-[4px] border-r border-[#e5e5e5]">
                     <img className="size-[18px]" src="/images/speedometer-01.png" alt="" />
-                    <span className="text-[13px] font-bold leading-none text-[#262626]">
+                    <span className="text-[14px] font-bold leading-none text-[#262626]">
                       {card.range ? `${card.range} km` : "—"}
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-[0.03em] text-[#8a8a8a]">Range</span>
+                    <span className="text-[12px] font-medium text-[#6a6a6a]">Range</span>
                   </div>
                   <div className="flex flex-col items-center gap-[4px] border-r border-[#e5e5e5]">
                     <img className="size-[18px]" src="/images/bi_stopwatch.png" alt="" />
-                    <span className="text-[13px] font-bold leading-none text-[#262626]">
+                    <span className="text-[14px] font-bold leading-none text-[#262626]">
                       {card.topSpeed ? `${card.topSpeed} km/h` : "—"}
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-[0.03em] text-[#8a8a8a]">Top speed</span>
+                    <span className="text-[12px] font-medium text-[#6a6a6a]">Top speed</span>
                   </div>
                   <div className="flex flex-col items-center gap-[4px]">
                     <img
@@ -469,14 +469,15 @@ const Cards = ({
                       src="/images/mdi_battery-charging-outline.png"
                       alt=""
                     />
-                    <span className="text-[13px] font-bold leading-none text-[#262626]">
+                    <span className="text-[14px] font-bold leading-none text-[#262626]">
                       {Number(card.chargeTime) > 0 ? `${card.chargeTime} hr` : "—"}
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-[0.03em] text-[#8a8a8a]">Charge time</span>
+                    <span className="text-[12px] font-medium text-[#6a6a6a]">Charge time</span>
                   </div>
                 </div>
+                )}
 
-                <div className="mt-[16px] grid min-h-[36px] grid-cols-2 items-start gap-[16px] text-[12px] leading-[1.35] text-[#626262]">
+                <div className="mt-[16px] grid min-h-[36px] grid-cols-2 items-start gap-[16px] text-[13px] leading-[1.4] text-[#5e5e5e]">
                   <div className="flex flex-col gap-[6px]">
                     <span className="flex items-start gap-[5px]">
                       <span className="text-[#351a75]">✓</span>
@@ -491,7 +492,7 @@ const Cards = ({
                       </span>
                     </span>
                     {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0 || Number(card.openingWalletBalance) > 0) && (
-                      <span className="flex items-start gap-[5px] text-[11px] text-[#8a8a8a]">
+                      <span className="flex items-start gap-[5px] text-[12px] text-[#6a6a6a]">
                         {/* invisible tick (matched to the 12px tick above) keeps this line flush */}
                         <span className="invisible text-[12px]" aria-hidden="true">✓</span>
                         <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">

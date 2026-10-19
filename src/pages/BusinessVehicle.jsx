@@ -109,11 +109,11 @@ function BusinessVehicle() {
                     <img src={image} alt={model.modelName} className="max-h-[430px] w-full object-contain" />
                   </div>
                   <div className="flex flex-col p-6 sm:p-9 lg:p-11">
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-[#f1edf6] px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-[#5b3b78]">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-[#f1edf6] px-3 py-2 text-[12px] font-black uppercase tracking-[0.08em] text-[#5b3b78]">
                       <Building2 className="size-3.5" aria-hidden="true" />
                       Business fleet model
                     </span>
-                    <p className="mt-7 text-[12px] font-bold uppercase tracking-[0.1em] text-[#89838b]">
+                    <p className="mt-7 text-[12px] font-bold uppercase tracking-[0.1em] text-[#716c75]">
                       {brand?.name || model.manufacturer || "BLive catalogue"}
                     </p>
                     <h1 className="mt-2 text-[38px] font-black leading-[1.04] tracking-[-0.045em] sm:text-[50px]">
@@ -125,12 +125,12 @@ function BusinessVehicle() {
                     </p>
 
                     <div className="mt-7 rounded-[18px] border border-[#e6e3e7] bg-[#fbfafc] p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#89838b]">Indicative business rate</p>
+                      <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#716c75]">Indicative business rate</p>
                       <p className="mt-2 text-[28px] font-black tracking-[-0.03em]">
                         {dailyRate > 0 ? `₹${dailyRate.toLocaleString("en-IN")}` : "Quoted for your fleet"}
                         {dailyRate > 0 && <span className="ml-1 text-[13px] font-bold text-[#777179]">/ day</span>}
                       </p>
-                      <p className="mt-2 text-[11px] leading-5 text-[#89838b]">
+                      <p className="mt-2 text-[12px] leading-5 text-[#716c75]">
                         Your final rate depends on fleet quantity, city, rental duration, and deployment plan.
                       </p>
                     </div>
@@ -138,12 +138,12 @@ function BusinessVehicle() {
                     <div className="mt-6 grid grid-cols-2 gap-3">
                       <div className="rounded-[14px] border border-[#e6e3e7] p-4">
                         <MapPin className="size-4 text-[#65526f]" aria-hidden="true" />
-                        <p className="mt-3 text-[11px] text-[#888189]">Catalogue availability</p>
+                        <p className="mt-3 text-[12px] text-[#888189]">Catalogue availability</p>
                         <p className="mt-1 text-[14px] font-black">{Number(vehicle.availableVehiclesCount || 0)} vehicles</p>
                       </div>
                       <div className="rounded-[14px] border border-[#e6e3e7] p-4">
                         <Zap className="size-4 text-[#65526f]" aria-hidden="true" />
-                        <p className="mt-3 text-[11px] text-[#888189]">Powertrain</p>
+                        <p className="mt-3 text-[12px] text-[#888189]">Powertrain</p>
                         <p className="mt-1 text-[14px] font-black">
                           {["ev", "electric"].includes(String(model.engineType || "").toLowerCase())
                             ? "Electric"

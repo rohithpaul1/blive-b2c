@@ -18,19 +18,19 @@ const WhyBlive = () => {
   ];
 
   return (
-    <section className="flex flex-col items-center justify-center bg-[#0f0f0f] px-[clamp(20px,8vw,120px)] py-[88px] text-white">
-      <h2 className="text-center text-[36px] font-bold md:text-[44px]">Why BLive?</h2>
+    <section className="flex flex-col items-center justify-center bg-[#0f0f0f] px-[clamp(20px,8vw,120px)] py-[64px] text-white md:py-[88px]">
+      <h2 className="text-center text-[30px] font-bold md:text-[44px]">Why BLive?</h2>
       <p className="mt-[14px] max-w-[720px] text-center text-[15px] text-[#d2d2d2]">
         Your trusted partner for effortless and eco-friendly EV rentals.
       </p>
-      <div className="mt-[64px] grid w-full max-w-[1180px] grid-cols-1 gap-[48px] md:grid-cols-3 md:gap-[32px]">
+      <div className="mt-[40px] grid w-full max-w-[1180px] grid-cols-1 gap-[36px] md:mt-[64px] md:grid-cols-3 md:gap-[32px]">
         {reasons.map((reason) => (
           <article key={reason.title} className="flex flex-col items-center text-center">
             <div className="flex size-[48px] items-center justify-center rounded-full bg-white ring-4 ring-white/10">
               <img className="size-[24px]" src={reason.icon} alt="" />
             </div>
             <h3 className="mt-[20px] text-[18px] font-bold">{reason.title}</h3>
-            <p className="mt-[8px] max-w-[340px] text-[13px] leading-[1.65] text-[#c9c9c9]">
+            <p className="mt-[8px] max-w-[340px] text-[15px] leading-[1.55] text-[#c9c9c9]">
               {reason.text}
             </p>
           </article>

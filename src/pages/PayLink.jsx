@@ -81,7 +81,7 @@ const PayLink = () => {
       <Navbar onSearchPage={false} expanded={true} />
       <div className="mt-[124px] w-full max-w-[520px] px-[16px] pb-[48px]">
         {loading ? (
-          <p className="text-center text-[#969696] mt-[48px]">Loading your booking…</p>
+          <p className="text-center text-[#6a6a6a] mt-[48px]">Loading your booking…</p>
         ) : data?.state === "not_found" ? (
           <div className="rounded-[16px] bg-white shadow-md p-[24px] text-center">
             <h1 className="text-[22px] font-bold text-[#222222]">Link not found</h1>
@@ -89,7 +89,7 @@ const PayLink = () => {
           </div>
         ) : (
           <div className="rounded-[16px] bg-white shadow-md p-[24px]">
-            <p className="text-[13px] text-[#969696]">Booking {data.bookingNumber}</p>
+            <p className="text-[13px] text-[#6a6a6a]">Booking {data.bookingNumber}</p>
             <h1 className="text-[22px] font-bold text-[#222222] mt-[4px]">
               {data.state === "paid"
                 ? "Booking confirmed"
@@ -139,7 +139,7 @@ const PayLink = () => {
                   {paying ? "Processing…" : `Pay ${inr(data.amount)}`}
                 </button>
                 {data.expiresAt && (
-                  <p className="mt-[8px] text-center text-[13px] text-[#969696]">
+                  <p className="mt-[8px] text-center text-[13px] text-[#6a6a6a]">
                     Vehicle held until {new Date(data.expiresAt).toLocaleString("en-IN")}
                   </p>
                 )}

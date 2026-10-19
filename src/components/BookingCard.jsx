@@ -236,20 +236,20 @@ const BookingCard = ({ item, tab, onClick }) => {
                         </div>
                         <div className='flex items-center gap-x-[10px]'>
                             <span className='hidden h-[1px] w-8 rounded-[8px] bg-[#D9D9D9] sm:block' />
-                            <p className='max-w-[84px] text-center text-[11px] text-[#222222]'>
+                            <p className='max-w-[84px] text-center text-[12px] text-[#222222]'>
                                 {isSubscription ? `${startingPeriod} planned` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
                             </p>
                             <span className='hidden h-[1px] w-8 rounded-[8px] bg-[#D9D9D9] sm:block' />
                         </div>
                         <div className='flex min-w-0 flex-col items-end text-right'>
                             <p className='text-[16px] font-bold text-[#222222] sm:text-[18px]'>{formattedDate(item.dropoff?.date || '')} <span className='block text-[13px] text-[#222222B2] sm:inline sm:text-[14px]'>{item.dropoff?.time || 'N/A'}</span></p>
-                            {isSubscription && <p className="text-[11px] text-[#717171]">Planned until</p>}
+                            {isSubscription && <p className="text-[12px] text-[#717171]">Planned until</p>}
                         </div>
                     </div>
                     <div className="text-right">
                         <p className="font-bold text-[24px] text-[#222222]">₹{Number(isSubscription ? item.subscription?.recurringCharge : item.price || 0).toLocaleString("en-IN")}</p>
                         {isSubscription && (
-                            <p className="text-[11px] text-[#717171]">
+                            <p className="text-[12px] text-[#717171]">
                                 Renews {renewalCadenceLabel(item.planType)}
                                 {item.subscription?.nextBillingAt ? ` · next ${new Date(item.subscription.nextBillingAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : ""}
                             </p>

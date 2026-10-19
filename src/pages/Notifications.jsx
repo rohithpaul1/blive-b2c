@@ -141,17 +141,17 @@ const Notifications = () => {
     
     return (
         <>
-            <div className="w-full h-dvh overflow-x-hidden flex flex-col items-center">
+            <div className="w-full min-h-dvh overflow-x-hidden flex flex-col items-center">
                 <Navbar onSearchPage={false} expanded={true} />
-                <div className="mt-[124px] flex items-center w-full border-y border-[#EDEDED] py-[24px] px-[40px] gap-x-[16px]">
-                    <p className="font-bold text-[28px] text-[#222222]">Notifications</p>
+                <div className="mt-[124px] flex w-full items-center gap-x-[12px] border-b border-[#EDEDED] px-[20px] py-[20px] md:border-t md:px-[40px] md:py-[24px]">
+                    <h1 className="text-[24px] font-bold text-[#222222] md:text-[28px]">Notifications</h1>
                     {unseenCount > 0 && (
                         <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             {unseenCount}
                         </span>
                     )}
                 </div>
-                <div className="flex-1 w-[80%] py-[32px] grow flex" >
+                <div className="flex w-full max-w-[880px] flex-1 grow px-[16px] py-[20px] md:px-[40px] md:py-[32px]">
                     {loadingNotifications ? (
                         <div className="flex items-center justify-center w-full">
                             <Loader />

@@ -496,7 +496,7 @@ const BookingDetails = () => {
                 <Navbar onSearchPage={false} expanded={true} />
                 <div className="mt-[124px] flex flex-col items-center justify-center w-full h-96">
                     <p className="font-bold text-[22px] text-[#3A3A3A]">Failed to load booking details</p>
-                    <p className="mt-[8px] font-medium text-[14px] text-[#969696]">{error}</p>
+                    <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">{error}</p>
                     <button 
                         onClick={fetchBookingDetails}
                         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -688,12 +688,12 @@ const BookingDetails = () => {
                     <div className="mt-[16px] bg-[#F7F7F7] py-[16px] px-[24px] rounded-[16px] w-full">
                         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-x-[15px]'>
                             <div className='flex flex-col'>
-                                <p className='text-[11px] text-[#3A3A3A]'>Pick up</p>
+                                <p className='text-[12px] text-[#3A3A3A]'>Pick up</p>
                                 <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.pickup?.date)} <span className='text-[#646464] text-[12px]'>{data?.pickup?.time || "10 AM"}</span></p>
                             </div>
                             <div className='flex flex-1 items-center gap-x-[10px]'>
                                 <span className='hidden h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9] sm:block' />
-                                <p className='text-[11px] text-[#222222]'>
+                                <p className='text-[12px] text-[#222222]'>
                                     {data.rentalMode === 'subscription'
                                         ? `${startingPeriodLabel(data.ratePlan || data.subscription?.commitmentUnit, data.subscription?.commitmentDuration || 1)} planned`
                                         : `${countDays(data.pickup, data.dropoff)} Days`}
@@ -701,7 +701,7 @@ const BookingDetails = () => {
                                 <span className='hidden h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9] sm:block' />
                             </div>
                             <div className='flex flex-col'>
-                                <p className='text-[11px] text-[#3A3A3A] text-right'>
+                                <p className='text-[12px] text-[#3A3A3A] text-right'>
                                     {data.rentalMode === 'subscription' ? 'Planned until' : 'Dropoff'}
                                 </p>
                                 <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.dropoff?.date)} <span className='text-[#646464] text-[12px]'>{data?.dropoff?.time || "10 AM"}</span></p>
@@ -741,7 +741,7 @@ const BookingDetails = () => {
                             <img className="w-[64px] h-[64px] rounded-[8px] object-cover" src={data.imgUrl} alt="Scooter Book Image" />
                             <div className="flex flex-col">
                                 <p className="font-bold text-[18px] text-[#484848]">{data.vehicleName}</p>
-                                <p className="text-[#3A3A3A] text-[11px]">
+                                <p className="text-[#3A3A3A] text-[12px]">
                                     {data.rentalMode === 'subscription' ? 'Subscription cycle' : 'Rate plan'}: {data.ratePlan}
                                 </p>
                             </div>
@@ -798,15 +798,15 @@ const BookingDetails = () => {
                     {data.rentalMode === 'subscription' && (
                         <div className="mt-[16px] grid gap-[12px] rounded-[16px] border border-[#EDEDED] bg-[#F7F7F7] p-[16px] sm:grid-cols-3">
                             <div>
-                                <p className="text-[11px] text-[#717171]">Starting wallet balance</p>
+                                <p className="text-[12px] text-[#717171]">Starting wallet balance</p>
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.requiredOpeningBalance || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] text-[#717171]">Security deposit</p>
+                                <p className="text-[12px] text-[#717171]">Security deposit</p>
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.securityDeposit || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <div>
-                                <p className="text-[11px] text-[#717171]">Estimated for planned duration</p>
+                                <p className="text-[12px] text-[#717171]">Estimated for planned duration</p>
                                 <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.minimumCommitmentValue || 0).toLocaleString('en-IN')}</p>
                             </div>
                             <p className="text-[12px] leading-[18px] text-[#646464] sm:col-span-3">
@@ -816,7 +816,7 @@ const BookingDetails = () => {
                     )}
                     {data.refundDate && <div className="flex flex-col mt-[8px]">
                         <p className="text-[14px] text-[#222222]">Refund Processed on {(formattedDate(data.refundDate.date))}</p>
-                        <p className="text-[#969696] text-[14px] italic">Refunds (if applicable) will reflect in 5–7 business days.</p>
+                        <p className="text-[#6a6a6a] text-[14px] italic">Refunds (if applicable) will reflect in 5–7 business days.</p>
                     </div>}
                     {data.savedAmount && <div className="mt-[16px] bg-[#FFF2CB] py-[8px] px-[16px] rounded-[12px] h-[38px] flex items-center gap-x-[8px]">
                         <img src="/images/Saved.png" alt="Saved Image" className="w-[20px] h-[20px]" />
@@ -828,7 +828,7 @@ const BookingDetails = () => {
                             <img className="w-[40px] h-[40px]" src={data.paymentMethodImg} alt="Google Pay Image" />
                             <div className="flex flex-col">
                                 <p className="font-bold text-[#222222]">{data.paymentMethodName}</p>
-                                <p className="text-[#969696] text-[12px]">{data.paymentMethodDetails}</p>
+                                <p className="text-[#6a6a6a] text-[12px]">{data.paymentMethodDetails}</p>
                             </div>
                         </div>
                     </div>

@@ -39,12 +39,12 @@ const Customers = () => {
   const t = testimonials[index];
 
   return (
-    <section className="flex flex-col px-[clamp(20px,8.5vw,122px)] py-[88px] transition-all duration-500">
-      <div className="flex items-start justify-between">
-        <h2 className="text-[32px] font-bold text-[#0F0F0F] md:text-[40px]">
+    <section className="flex flex-col px-[clamp(20px,8.5vw,122px)] py-[64px] transition-all duration-500 md:py-[88px]">
+      <div className="flex items-end justify-between gap-[16px]">
+        <h2 className="text-[28px] font-bold text-[#0F0F0F] md:text-[40px]">
           What our customers say
         </h2>
-        <div className="flex items-center gap-x-[16px] mt-2">
+        <div className="flex shrink-0 items-center gap-x-[12px] md:gap-x-[16px]">
           <button
             onClick={goPrev}
             className="flex size-[48px] cursor-pointer items-center justify-center rounded-full border border-[#cfcfcf] bg-white transition-colors hover:bg-[#f7f7f7] md:size-[56px]"
@@ -68,12 +68,12 @@ const Customers = () => {
         </div>
       </div>
 
-      <blockquote className="mt-[48px] max-w-[1120px] text-[20px] font-medium leading-[1.7] text-[#313131] transition-all duration-500 md:text-[26px]">
+      <blockquote className="mt-[28px] max-w-[1120px] text-[17px] font-medium leading-[1.6] text-[#313131] transition-all duration-500 md:mt-[48px] md:text-[26px] md:leading-[1.7]">
         “{t.text}”
       </blockquote>
 
-      <div className="mt-[44px] flex items-center gap-x-[18px]">
-        <div className="size-[64px] overflow-hidden rounded-full">
+      <div className="mt-[28px] flex items-center gap-x-[16px] md:mt-[44px] md:gap-x-[18px]">
+        <div className="size-[52px] overflow-hidden rounded-full md:size-[64px]">
           <img
             className="h-full w-full object-cover"
             src={t.photo}
@@ -81,8 +81,8 @@ const Customers = () => {
           />
         </div>
         <div className="flex flex-col gap-y-[4px]">
-          <p className="text-[18px] font-bold text-[#0F0F0F]">{t.name}</p>
-          <p className="text-[14px] text-[#737373]">From {t.location}</p>
+          <p className="text-[17px] font-bold text-[#0F0F0F] md:text-[18px]">{t.name}</p>
+          <p className="text-[14px] text-[#6a6a6a]">From {t.location}</p>
         </div>
       </div>
     </section>

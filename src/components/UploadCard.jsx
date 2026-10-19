@@ -60,7 +60,7 @@ const UploadCard = ({ label, sublabel, valueKey, onUploadComplete, uploadedDocum
                 when the form is submitted. No fake progress percentage. */}
             <div className="absolute bottom-[8px] left-[8px] right-[8px] flex items-center justify-center gap-x-[6px] bg-black/70 rounded-[4px] px-[6px] py-[3px]">
               <span className="w-[8px] h-[8px] rounded-full bg-[#10B981]"></span>
-              <p className="text-[10px] text-white">Ready to upload</p>
+              <p className="text-[12px] text-white">Ready to upload</p>
             </div>
           </>
         ) : uploadedDocument ? (
@@ -79,7 +79,7 @@ const UploadCard = ({ label, sublabel, valueKey, onUploadComplete, uploadedDocum
             </div>
             {/* Status text */}
             <div className="absolute bottom-[8px] left-[8px] right-[8px]">
-              <p className="text-[10px] text-white bg-black/70 px-[4px] py-[2px] rounded-[4px] text-center">
+              <p className="text-[12px] text-white bg-black/70 px-[4px] py-[2px] rounded-[4px] text-center">
                 {uploadedDocument.status}
               </p>
             </div>

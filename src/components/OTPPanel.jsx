@@ -114,7 +114,7 @@ const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent
                 setOtp(val);
             }} hasError={hasError} />
             {hasError && (
-                <p className="mt-[4px] text-[11px] text-[#BE4907]">
+                <p className="mt-[4px] text-[12px] text-[#BE4907]">
                 Verification code is incorrect. Please try again
                 </p>
             )}
@@ -131,7 +131,7 @@ const OTPPanel = ({ isLogin = false, resendCb, selectedCountryCode, setIsOTPSent
             disabled={timeLeft > 0 || sender}
             className={`font-medium text-[14px] ${
               (timeLeft > 0 || sender)
-                ? "text-[#969696] cursor-not-allowed"
+                ? "text-[#6a6a6a] cursor-not-allowed"
                 : "text-[#1B29A9] cursor-pointer"
             }`}
           >

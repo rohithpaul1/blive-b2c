@@ -214,13 +214,13 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode, couponContex
                                 placeholder="Enter code" 
                             />
                             {searchLoading && (
-                                <p className="mt-[6px] text-[11px] text-[#3A3A3A]">Searching...</p>
+                                <p className="mt-[6px] text-[12px] text-[#3A3A3A]">Searching...</p>
                             )}
                             {hasError && !searchLoading && (
-                                <p className="mt-[6px] text-[11px] poppins text-[#BE4907]">Coupon Not Found!</p>
+                                <p className="mt-[6px] text-[12px] text-[#BE4907]">Coupon Not Found!</p>
                             )}
                             {searchResult && !searchLoading && (
-                                <p className="mt-[6px] text-[11px] text-[#22C55E]">Coupon Found!</p>
+                                <p className="mt-[6px] text-[12px] text-[#22C55E]">Coupon Found!</p>
                             )}
                             {!searchLoading && !hasError && !searchResult && promocode && (
                                 <span className="h-[23px]" />
@@ -241,7 +241,7 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode, couponContex
                                         <p className="font-bold text-[#222222]">{searchResult.promocode}</p>
                                         <p onClick={() => {
                                             if (searchResult.isApplicable) applyPromocode(searchResult.promocode, searchResult.couponData);
-                                        }} className={`font-medium text-[14px] ${searchResult.isApplicable ? "text-[#0011A7] cursor-pointer" : "text-[#969696] cursor-not-allowed"}`}>Apply</p>
+                                        }} className={`font-medium text-[14px] ${searchResult.isApplicable ? "text-[#0011A7] cursor-pointer" : "text-[#6a6a6a] cursor-not-allowed"}`}>Apply</p>
                                     </div>
                                     {searchResult.isApplicable && <p className="mt-[4px] text-[#222222] text-[13px]">You will save {searchResult.discountAmount} with this coupon.</p>}
                                     <p className={`mt-[3px] font-bold ${searchResult.isApplicable ? "text-[#C39914]" : "text-[#3A3A3A]"} text-[13px]`}>{searchResult.descripton}</p>
@@ -272,7 +272,7 @@ const PromocodePage = ({ setShowPromocodePage, setAppliedPromocode, couponContex
                                             <p className="font-bold text-[#222222]">{item.promocode}</p>
                                             <p onClick={() => {
                                                 if (item.isApplicable) applyPromocode(item.promocode, item.couponData);
-                                            }} className={`font-medium text-[14px] ${item.isApplicable ? "text-[#0011A7] cursor-pointer" : "text-[#969696] cursor-not-allowed"}`}>Apply</p>
+                                            }} className={`font-medium text-[14px] ${item.isApplicable ? "text-[#0011A7] cursor-pointer" : "text-[#6a6a6a] cursor-not-allowed"}`}>Apply</p>
                                         </div>
                                         {item.isApplicable && <p className="mt-[4px] text-[#222222] text-[13px]">You will save {item.discountAmount} with this coupon.</p>}
                                         <p className={`mt-[3px] font-bold ${item.isApplicable ? "text-[#C39914]" : "text-[#3A3A3A]"} text-[13px]`}>{item.descripton}</p>

@@ -277,7 +277,7 @@ const Booking = () => {
           <p className="text-[14px] text-[#3A3A3A]">Extra kilometres</p>
           <p className="text-[14px] font-medium text-[#3A3A3A] text-right">
             ₹{formattedAmount(extraKmCharge)}/km
-            <span className="block text-[11px] font-normal text-[#717171]">
+            <span className="block text-[12px] font-normal text-[#717171]">
               {includedKmPerDay ? `beyond ${includedKmPerDay} km/day · ` : ""}billed on return
             </span>
           </p>
@@ -287,7 +287,7 @@ const Booking = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-x-[4px]">
             <p className="text-[14px] text-[#3A3A3A]">Onboarding fee</p>
-            <span className="text-[11px] text-[#717171]">one-time</span>
+            <span className="text-[12px] text-[#717171]">one-time</span>
           </div>
           <p className="text-[#3A3A3A] text-[14px] font-medium">
             ₹{formattedAmount(onboardingFee)}
@@ -298,12 +298,12 @@ const Booking = () => {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-x-[4px]">
             <p className="text-[14px] text-[#3A3A3A]">Wallet balance to start</p>
-            <span className="text-[11px] text-[#717171]">required</span>
+            <span className="text-[12px] text-[#717171]">required</span>
           </div>
           <p className="text-[#3A3A3A] text-[14px] font-medium text-right">
             ₹{formattedAmount(openingWalletBalance)}
             {openingWalletTopUp > 0 && (
-              <span className="block text-[11px] font-normal text-[#717171]">
+              <span className="block text-[12px] font-normal text-[#717171]">
                 add ₹{formattedAmount(openingWalletTopUp)} to your wallet
               </span>
             )}
@@ -1266,7 +1266,7 @@ const Booking = () => {
                           ⚠️ Please enter your complete address to proceed with
                           doorstep delivery
                         </p>
-                        <p className="text-[11px] text-[#DC2626] mt-[4px]">
+                        <p className="text-[12px] text-[#DC2626] mt-[4px]">
                           Missing:{" "}
                           {!addressLine1.trim() ? "Address Line 1" : ""}{" "}
                           {!addressLine1.trim() && !addressLine2.trim()
@@ -1289,7 +1289,7 @@ const Booking = () => {
                       <p className="font-bold text-[20px] text-[#262626]">
                         Extend for 2 more days for just ₹100{" "}
                       </p>
-                      <p className="font-medium text-[11px] text-[#595959]">
+                      <p className="font-medium text-[12px] text-[#595959]">
                         Enjoy extra freedom on your EV with doorstep service
                         included.
                       </p>
@@ -1515,7 +1515,7 @@ const Booking = () => {
                   </p>
                   <div className="mt-[24px] gap-x-[15px] flex items-center">
                     <div className="flex flex-col">
-                      <p className="text-[11px] text-[#3A3A3A]">
+                      <p className="text-[12px] text-[#3A3A3A]">
                         {isSubscription ? "Starts" : "Pick up"}
                       </p>
                       <p className="font-bold text-[14px] text-[#222222]">
@@ -1527,7 +1527,7 @@ const Booking = () => {
                     </div>
                     <div className="flex-1 flex items-center gap-x-[10px]">
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
-                      <p className="text-center text-[11px] text-[#222222]">
+                      <p className="text-center text-[12px] text-[#222222]">
                         {isSubscription
                           ? `${startingPeriodLabel(
                               selectedProduct?.selectedPlanType || currentPlanType,
@@ -1538,7 +1538,7 @@ const Booking = () => {
                       <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
                     </div>
                     <div className="flex flex-col">
-                      <p className="text-[11px] text-[#3A3A3A] text-right">
+                      <p className="text-[12px] text-[#3A3A3A] text-right">
                         {isSubscription ? "Planned until" : "Dropoff"}
                       </p>
                       <p className="font-bold text-[14px] text-[#222222]">
@@ -1577,7 +1577,7 @@ const Booking = () => {
                         <p className="font-bold text-[14px] text-[#3A3A3A]">
                           {selectedProduct?.vehicleName}
                         </p>
-                        <p className="text-[#3A3A3A] text-[11px]">
+                        <p className="text-[#3A3A3A] text-[12px]">
                           Rental Plan :{" "}
                           {selectedProduct?.selectedPlanType
                             ? selectedProduct.selectedPlanType
@@ -1613,7 +1613,7 @@ const Booking = () => {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-x-[4px]">
                                 <p className="text-[14px] text-[#3A3A3A]">Onboarding fee</p>
-                                <span className="text-[11px] text-[#717171]">one-time</span>
+                                <span className="text-[12px] text-[#717171]">one-time</span>
                               </div>
                               <p className="text-[14px] font-medium text-[#3A3A3A]">
                                 ₹{formattedAmount(onboardingFee)}
@@ -1885,7 +1885,7 @@ const Booking = () => {
                           <p className="truncate text-[14px] font-bold text-[#351a75]">
                             {appliedPromocode.promocode}
                           </p>
-                          <p className="mt-[2px] text-[11px] text-[#656565]">
+                          <p className="mt-[2px] text-[12px] text-[#656565]">
                             You save ₹{formattedCouponSavings()}
                           </p>
                         </div>

@@ -22,19 +22,19 @@ const HowItWorks = () => {
   }, [scooterImages.length]);
 
   return (
-    <div className="flex flex-col items-center w-[90%] mt-[120px] mx-auto">
+    <div className="mx-auto mt-[64px] flex w-full flex-col items-center px-[20px] md:mt-[120px] md:w-[90%] md:px-0">
       <div className="max-w-[720px]">
-        <p className="font-bold text-[36px] text-center text-[#0F0F0F]">
+        <h2 className="text-center text-[28px] font-bold leading-[1.15] text-[#0F0F0F] md:text-[36px]">
           The EZY Way to Ride
-        </p>
-        <p className="mt-[20px] font-medium text-center text-[18px] text-[#717171]">
+        </h2>
+        <p className="mt-[12px] text-center text-[16px] font-medium text-[#6a6a6a] md:mt-[20px] md:text-[18px]">
           From booking to riding, we make going electric simple.
         </p>
       </div>
-      <div className="mt-[75px] flex items-center">
-        <div className="flex z-10 flex-col gap-y-[16px]">
-          <div className="flex bg-white max-w-[592px] p-[32px] gap-x-[20px] border rounded-[24px] border-[#0000001A]">
-            <div className="flex min-w-[54px] items-center justify-center rounded-[16px] bg-[#F5F5F5]">
+      <div className="mt-[32px] flex w-full flex-col-reverse items-center gap-[24px] md:mt-[75px] lg:w-auto lg:flex-row lg:gap-0">
+        <div className="z-10 flex w-full flex-col gap-y-[12px] lg:w-auto lg:gap-y-[16px]">
+          <div className="flex gap-x-[16px] rounded-[20px] border border-[#0000001A] bg-white p-[20px] lg:max-w-[592px] lg:gap-x-[20px] lg:rounded-[24px] lg:p-[32px]">
+            <div className="flex h-[48px] min-w-[48px] items-center justify-center self-start rounded-[14px] bg-[#F5F5F5] lg:h-auto lg:min-w-[54px] lg:self-stretch lg:rounded-[16px]">
               <img
                 className="w-[24px] h-[24px]"
                 src="/images/search-lg.png"
@@ -42,17 +42,17 @@ const HowItWorks = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-y-[8px]">
-              <p className="font-black font-satoshi text-[24px]">
+              <p className="text-[18px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">
                 Pick your EV
               </p>
-              <p className="text-[18px] text-[#717171]">
+              <p className="text-[15px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
                 From daily commutes to weekend rides select the perfect EV plan
                 at the right price.
               </p>
             </div>
           </div>
-          <div className="flex bg-white max-w-[592px] p-[32px] gap-x-[20px] border rounded-[24px] border-[#0000001A]">
-            <div className="flex min-w-[54px] items-center justify-center rounded-[16px] bg-[#F5F5F5]">
+          <div className="flex gap-x-[16px] rounded-[20px] border border-[#0000001A] bg-white p-[20px] lg:max-w-[592px] lg:gap-x-[20px] lg:rounded-[24px] lg:p-[32px]">
+            <div className="flex h-[48px] min-w-[48px] items-center justify-center self-start rounded-[14px] bg-[#F5F5F5] lg:h-auto lg:min-w-[54px] lg:self-stretch lg:rounded-[16px]">
               <img
                 className="w-[24px] h-[24px]"
                 src="/images/calendar-check-02.png"
@@ -60,14 +60,14 @@ const HowItWorks = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-y-[8px]">
-              <p className="font-black text-[24px]">Book online</p>
-              <p className="text-[18px] text-[#717171]">
+              <p className="text-[18px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">Book online</p>
+              <p className="text-[15px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
                 Reserve online or at the hub easy, fast, and ready when you are
               </p>
             </div>
           </div>
-          <div className="flex bg-white max-w-[592px] p-[32px] gap-x-[20px] border rounded-[24px] border-[#0000001A]">
-            <div className="flex min-w-[54px] items-center justify-center rounded-[16px] bg-[#F5F5F5]">
+          <div className="flex gap-x-[16px] rounded-[20px] border border-[#0000001A] bg-white p-[20px] lg:max-w-[592px] lg:gap-x-[20px] lg:rounded-[24px] lg:p-[32px]">
+            <div className="flex h-[48px] min-w-[48px] items-center justify-center self-start rounded-[14px] bg-[#F5F5F5] lg:h-auto lg:min-w-[54px] lg:self-stretch lg:rounded-[16px]">
               <img
                 className="w-[24px] h-[24px]"
                 src="/images/note-pad.svg"
@@ -75,16 +75,16 @@ const HowItWorks = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-y-[8px]">
-              <p className="font-black text-[24px] ">Submit KYC</p>
-              <p className="text-[18px] text-[#717171]">
+              <p className="text-[18px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">Submit KYC</p>
+              <p className="text-[15px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
                 Get started with a quick verification just your license and ID
                 proof, and you’re ready to ride.
               </p>
             </div>
           </div>
         </div>
-        <div className="relative">
-          <div className="relative right-[60px] w-[740px] h-[638px] rounded-[24px] bg-[#F5F5F5] overflow-hidden">
+        <div className="relative w-full lg:w-auto">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[24px] bg-[#F5F5F5] lg:right-[60px] lg:aspect-auto lg:h-[638px] lg:w-[740px]">
             {/* Carousel Container */}
             <div className="relative w-full h-full">
               {scooterImages.map((image, index) => (
@@ -105,7 +105,8 @@ const HowItWorks = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  aria-label={`Show image ${index + 1}`}
+                  className={`h-3 w-3 rounded-full ring-[14px] ring-transparent transition-all duration-200 ${
                     index === currentImageIndex
                       ? "bg-white shadow-lg"
                       : "bg-white/50 hover:bg-white/70"

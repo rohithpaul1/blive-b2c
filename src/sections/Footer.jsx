@@ -15,7 +15,7 @@ const Footer = () => {
 
   return (
     <footer className="flex min-h-[96px] flex-col items-center justify-between gap-[22px] bg-[#0F0F0F] px-[clamp(20px,8vw,120px)] py-[26px] md:flex-row">
-      <div className="flex items-center gap-x-[10px] text-[13px] text-white">
+      <div className="flex items-center gap-x-[10px] text-[15px] font-medium text-white md:text-[13px]">
         <a className="text-white" href="tel:08047190022">
           080-4719-0022
         </a>{" "}
@@ -23,34 +23,34 @@ const Footer = () => {
       </div>
 
       {/* Center nav */}
-      <nav className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[10px]">
+      <nav className="flex flex-wrap items-center justify-center gap-x-[20px] gap-y-0 md:gap-x-[24px] md:gap-y-[10px]">
         <p
           onClick={() => setShowTermsModal(true)}
-          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
+          className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
         >
           Terms & Conditions
         </p>
         <p
           onClick={() => setShowPrivacyModal(true)}
-          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
+          className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
         >
           Privacy Policy
         </p>
         <p
           onClick={() => navigate("/help-center")}
-          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
+          className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
         >
           Help Center
         </p>
         <p
           onClick={() => navigate("/business")}
-          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
+          className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
         >
           For Business
         </p>
         <a
           href="mailto:contact@blive.co.in"
-          className="figtree cursor-pointer text-[12px] text-[#D9DBE1] transition-colors hover:text-white"
+          className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
         >
           Contact Us
         </a>

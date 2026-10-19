@@ -369,9 +369,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
   return (
     <div
       ref={searchContainerRef}
-      className={`z-40 w-full ${
+      className={`z-40 ${
         onSearchPage
-          ? "relative max-w-[700px]"
+          ? "relative w-full max-w-[700px]"
           : "absolute left-1/2 bottom-0 w-[calc(100%_-_32px)] max-w-[1160px] -translate-x-1/2 translate-y-1/2 md:w-[calc(100%_-_40px)]"
       }`}
     >
@@ -513,7 +513,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           >
             <MapPin className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-bold text-[#4c4750]">Pickup location</span>
+              <span className="block text-[12px] font-bold text-[#4c4750]">Pickup location</span>
               <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
                 {selectedLocation}
               </span>
@@ -529,7 +529,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           >
             <CalendarDays className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
             <span className="min-w-0">
-              <span className="block text-[11px] font-bold text-[#4c4750]">
+              <span className="block text-[12px] font-bold text-[#4c4750]">
                 {isSubscription ? "Start date" : "Pickup date"}
               </span>
               <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
@@ -542,7 +542,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             <label className={`${desktopFieldClass} cursor-pointer`}>
               <Clock3 className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
               <span className="min-w-0 flex-1">
-                <span className="block text-[11px] font-bold text-[#4c4750]">How long?</span>
+                <span className="block text-[12px] font-bold text-[#4c4750]">How long?</span>
                 <select
                   aria-label="Expected subscription duration"
                   value={subscriptionDuration}
@@ -567,7 +567,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             >
               <CalendarDays className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
               <span className="min-w-0">
-                <span className="block text-[11px] font-bold text-[#4c4750]">Return date</span>
+                <span className="block text-[12px] font-bold text-[#4c4750]">Return date</span>
                 <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
                   {formattedDate(selectedDropoff?.date)}
                 </span>
@@ -657,7 +657,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                         value={mobileLocationQuery}
                         onChange={(event) => setMobileLocationQuery(event.target.value)}
                         placeholder="Search city or pickup hub"
-                        className="min-w-0 flex-1 bg-transparent text-[16px] text-[#252126] outline-none placeholder:text-[#8a858c]"
+                        className="min-w-0 flex-1 bg-transparent text-[16px] text-[#252126] outline-none placeholder:text-[#716c75]"
                         autoFocus
                       />
                     </label>

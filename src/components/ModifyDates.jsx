@@ -476,16 +476,16 @@ const ModifyDates = ({ data, setOpenModifyDates, formattedDate, countDays, onDat
                 <div className="mt-[16px] bg-[#F7F7F7] py-[16px] px-[24px] rounded-[16px] w-full">
                     <div className='gap-x-[15px] flex items-center'>
                         <div className='flex flex-col'>
-                            <p className='text-[11px] text-[#3A3A3A]'>Pick up</p>
+                            <p className='text-[12px] text-[#3A3A3A]'>Pick up</p>
                             <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.pickup?.date)} <span className='text-[#646464] text-[12px]'>{data?.pickup?.time || "10 AM"}</span></p>
                         </div>
                         <div className='flex-1 flex items-center gap-x-[10px]'>
                             <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
-                            <p className='text-[11px] text-[#222222]'>{countDays(data.pickup, data.dropoff)} Days</p>
+                            <p className='text-[12px] text-[#222222]'>{countDays(data.pickup, data.dropoff)} Days</p>
                             <span className='h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]' />
                         </div>
                         <div className='flex flex-col'>
-                            <p className='text-[11px] text-[#3A3A3A] text-right'>Dropoff</p>
+                            <p className='text-[12px] text-[#3A3A3A] text-right'>Dropoff</p>
                             <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(step === 1 ? (selectedDropoffDate?.toISOString().split('T')[0] || data?.dropoff?.date) : data?.dropoff?.date)} <span className='text-[#646464] text-[12px]'>{(step === 1 || selectedDropoffDate) ? selectedTime : (data?.dropoff?.time || "10 AM")}</span></p>
                         </div>
                     </div>
@@ -518,7 +518,7 @@ const ModifyDates = ({ data, setOpenModifyDates, formattedDate, countDays, onDat
                                 {/* Weekdays */}
                                 <div className="grid grid-cols-7 gap-1 mb-[6px]">
                                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                        <div key={day} className="text-center text-[10px] text-gray-500 font-medium py-1">
+                                        <div key={day} className="text-center text-[12px] text-gray-500 font-medium py-1">
                                             {day}
                                         </div>
                                     ))}
@@ -551,7 +551,7 @@ const ModifyDates = ({ data, setOpenModifyDates, formattedDate, countDays, onDat
                                 {/* Weekdays */}
                                 <div className="grid grid-cols-7 gap-1 mb-[6px]">
                                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                        <div key={day} className="text-center text-[10px] text-gray-500 font-medium py-1">
+                                        <div key={day} className="text-center text-[12px] text-gray-500 font-medium py-1">
                                             {day}
                                         </div>
                                     ))}
@@ -570,7 +570,7 @@ const ModifyDates = ({ data, setOpenModifyDates, formattedDate, countDays, onDat
                         <div className="mt-[16px] p-[12px] bg-gray-50 rounded-[8px]">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-[10px] text-gray-600 mb-[2px]">Selected Dates</p>
+                                    <p className="text-[12px] text-gray-600 mb-[2px]">Selected Dates</p>
                                     <div className="flex items-center gap-[12px]">
                                         {selectedPickupDate && (
                                             <span className="text-[12px] font-medium text-gray-800">

@@ -43,8 +43,8 @@ const ProfileDropdown = ({ userData, showProfileDropdown, setShowProfileDropdown
     if (!showProfileDropdown) return null;
     
     return (
-        <div ref={profileDropdownRef} className="absolute right-0 z-20 mt-[300px] flex max-h-[234px] w-[316px] flex-col overflow-hidden rounded-[16px] bg-white opacity-100 calender-shadow">
-            <div className="profile-tab p-[24px]">
+        <div ref={profileDropdownRef} className="absolute right-0 top-full z-20 mt-[8px] flex w-[min(316px,calc(100vw-32px))] flex-col overflow-hidden rounded-[16px] bg-white opacity-100 calender-shadow">
+            <div className="profile-tab p-[20px]">
                 <div className="flex items-center gap-x-[16px]">
                     {userData?.profileImage ? (
                         <img 
@@ -53,16 +53,24 @@ const ProfileDropdown = ({ userData, showProfileDropdown, setShowProfileDropdown
                             alt="Profile" 
                         />
                     ) : (
-                        <p className="flex items-center justify-center w-[32px] aspect-square poppins font-medium text-[12px] text-[#222222] rounded-full border-[2px] bg-[#EDEDED] border-[#FFFFFF] overflow-hidden">
+                        <p className="flex items-center justify-center w-[32px] aspect-square font-medium text-[12px] text-[#222222] rounded-full border-[2px] bg-[#EDEDED] border-[#FFFFFF] overflow-hidden">
                             {userData?.firstName?.charAt(0).toUpperCase()}
                         </p>
                     )}
-                    <p className="text-[#FDFDFD] text-[22px] font-bold">{userData?.firstName + " " + userData?.lastName}</p>
+                    <p className="truncate text-[#FDFDFD] text-[18px] font-bold">{userData?.firstName + " " + userData?.lastName}</p>
                 </div>
             </div>
-            <div className="py-[16px] flex flex-col bg-white">
-                <button onClick={() => navigate("/profile")} className="px-[32px] text-left cursor-pointer hover:bg-gray-200 min-h-[60px] text-[#222222] font-medium">Account & Settings</button>
-                <button onClick={handleLogout} className="px-[32px] text-left cursor-pointer hover:bg-gray-200 min-h-[60px] text-[#BE4907] font-bold">Sign Out</button>
+            <div className="py-[8px] flex flex-col bg-white">
+                {[
+                    ["My Bookings", "/my-bookings"],
+                    ["Wallet", "/wallet"],
+                    ["Notifications", "/notifications"],
+                    ["Help Center", "/help-center"],
+                    ["Account & Settings", "/profile"],
+                ].map(([label, to]) => (
+                    <button key={to} onClick={() => navigate(to)} className="px-[24px] text-left cursor-pointer hover:bg-gray-100 min-h-[48px] text-[15px] text-[#222222] font-medium">{label}</button>
+                ))}
+                <button onClick={handleLogout} className="mt-[4px] border-t border-[#ebebeb] px-[24px] text-left cursor-pointer hover:bg-gray-100 min-h-[48px] text-[15px] text-[#BE4907] font-bold">Sign Out</button>
             </div>
         </div>
     )

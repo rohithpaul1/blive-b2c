@@ -51,7 +51,7 @@ const CancellationBar = ({ bookingDate, pickupDate }) => {
           {showFreeCancellation && <span className="absolute right-0 -bottom-[44px] text-[12px] text-[#222222] text-end">
             {formatDateWithTime(pickup)}
             <br />
-            <span className="text-[#969696]">Vehicle Pickup</span>
+            <span className="text-[#6a6a6a]">Vehicle Pickup</span>
           </span>}
         </div>
       </div>

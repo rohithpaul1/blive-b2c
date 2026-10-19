@@ -1,4 +1,6 @@
 import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import Navbar from '../sections/Navbar';
 import { UserContext } from '../contexts/UserContext';
 import ProfilePhotoCropper from '../components/ProfilePhotoCropper';
@@ -8,7 +10,12 @@ import Login from '../components/Login';
 import Loader from '../components/Loader';
 
 const Profile = () => {
-    const { userData, setUserData, isAuthenticated, loading } = useContext(UserContext);
+    const { userData, setUserData, isAuthenticated, loading, logout } = useContext(UserContext);
+    const navigate = useNavigate();
+    const fullName = `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim();
+    const rawPhone = String(userData?.phoneNumber || '');
+    const digits = rawPhone.replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
+    const phone = digits.length === 10 ? `+91 ${digits.slice(0, 5)} ${digits.slice(5)}` : rawPhone;
     const [showImageChange, setShowImageChange] = useState(false);
     const [changeImage, setChangeImage] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -135,12 +142,12 @@ const Profile = () => {
     
     return (
         <>
-            <div className="w-full h-dvh overflow-x-hidden flex flex-col items-center">
+            <div className="w-full min-h-dvh overflow-x-hidden flex flex-col items-center md:h-dvh">
                 {showImageChange && 
-                <div className="fixed z-50 w-screen h-screen top-0 left-0 bg-black/50 flex items-center justify-center">
-                    <div className="relative w-[664px] max-h-[600px] rounded-[16px] login-shadow bg-white overflow-hidden flex flex-col">
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center">
+                    <div className="relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[20px] bg-white login-shadow md:max-h-[600px] md:w-[664px] md:rounded-[16px]">
                         {/* Header */}
-                        <div className="py-[24px] flex items-center header-shadow px-[32px]">
+                        <div className="flex items-center gap-x-[12px] px-[20px] py-[16px] header-shadow md:px-[32px] md:py-[24px]">
                             <div className="flex flex-1 items-center gap-x-[20px]">
                             {changeImage && <img
                                 onClick={() => {
@@ -152,8 +159,8 @@ const Profile = () => {
                                 alt="Chevron Icon"
                             />}
                             <div className="flex flex-col">
-                                <p className="font-bold text-[24px] text-[#212121]">Update Profile Picture</p>
-                                <p className='text-[14px] text-[#3A3A3A]'>A profile picture help others to recognize you easily</p>
+                                <p className="text-[20px] font-bold text-[#212121] md:text-[24px]">Update profile picture</p>
+                                <p className='text-[14px] text-[#3A3A3A]'>A profile picture helps others recognise you easily</p>
                             </div>
                             </div>
                             <img
@@ -166,7 +173,7 @@ const Profile = () => {
                             />
                         </div>
 
-                        <div className="flex-1 overflow-y-auto flex flex-col py-[16px] px-[32px]">
+                        <div className="flex flex-1 flex-col overflow-y-auto px-[20px] py-[16px] md:px-[32px]">
                             {changeImage && <div className=''>
                                 {!selectedImage && <div className="w-full flex flex-col items-center">
                                     <label
@@ -235,7 +242,7 @@ const Profile = () => {
                                 />
                             </div>}
                         </div>
-                        <div className="h-[100px] flex items-center input-shadow-upper px-[32px] gap-x-[16px]">
+                        <div className="flex items-center gap-x-[12px] px-[20px] py-[16px] pb-[calc(16px+env(safe-area-inset-bottom,0px))] input-shadow-upper md:h-[100px] md:px-[32px] md:gap-x-[16px]">
                             {!changeImage && <>
                                 <button
                                     onClick={() => setChangeImage(true)}
@@ -261,47 +268,64 @@ const Profile = () => {
                     </div>
                 </div>}
                 <Navbar onSearchPage={false} expanded={true} />
-                <div className="mt-[124px] flex items-center w-full border-y border-[#EDEDED] py-[24px] px-[40px] gap-x-[16px]">
-                    <p className="font-bold text-[28px] text-[#222222]">Manage Account</p>
+                <div className="mt-[124px] flex w-full items-center gap-x-[16px] border-b border-[#EDEDED] px-[20px] py-[20px] md:border-t md:px-[40px] md:py-[24px]">
+                    <h1 className="text-[24px] font-bold text-[#222222] md:text-[28px]">Manage account</h1>
                 </div>
-                <div className="flex-1 grow flex w-full h-full" >
-                    <div className='w-[25%] sidebar-shadow h-full'>
-                        <div className='h-[150px] profile-info flex gap-x-[16px] items-center px-[40px]'>
-                            <div onClick={() => setShowImageChange(true)} className='relative cursor-pointer'>
-                                <img 
-                                    className='w-[65px] h-[65px] rounded-[50%] object-cover' 
-                                    src={userData?.profileUrl || "/images/placeholder.jpeg"} 
-                                    alt="Profile Picture" 
+                <div className="flex w-full flex-1 flex-col md:h-full md:flex-row">
+                    {/* Identity card: full-width on phones, sidebar from md up */}
+                    <div className="px-[20px] pt-[20px] md:w-[300px] md:shrink-0 md:px-0 md:pt-0 md:sidebar-shadow md:h-full lg:w-[25%]">
+                        <div className="profile-info flex items-center gap-x-[16px] rounded-[16px] px-[20px] py-[20px] md:h-[150px] md:rounded-none md:px-[32px] lg:px-[40px]">
+                            <button type="button" aria-label="Change profile picture" onClick={() => setShowImageChange(true)} className="relative shrink-0 cursor-pointer">
+                                <img
+                                    className="h-[64px] w-[64px] rounded-[50%] object-cover"
+                                    src={userData?.profileUrl || "/images/placeholder.jpeg"}
+                                    alt=""
                                 />
-                                <img className='absolute right-0 -bottom-[10px]' src="/images/Label.png" alt="Label" />
-                            </div>
-                            <div className='flex flex-col'>
-                                <p className='font-bold text-[24px] text-[#FDFDFD]'>
-                                    {userData?.firstName || ''} {userData?.lastName || ''}
-                                </p>
-                                <p className='font-medium text-[18px] text-[#FDFDFD]'>
-                                    +91 {userData?.phoneNumber || ''}
-                                </p>
+                                <img className="absolute right-0 -bottom-[10px]" src="/images/Label.png" alt="" />
+                            </button>
+                            <div className="flex min-w-0 flex-col">
+                                <p className="truncate text-[20px] font-bold text-[#FDFDFD] md:text-[22px]">{fullName}</p>
+                                <p className="text-[15px] font-medium text-[#FDFDFD]/90">{phone}</p>
                             </div>
                         </div>
                     </div>
-                    <div className='h-full p-[32px]'>
-                        <p className='font-medium text-[22px] text-[#222222]'>Personal Information</p>
-                        <p className='text-[14px] text-[#3A3A3A]'>Manage and update your personal information here</p>
-                        <div className='mt-[16px] flex flex-col'>
-                            <div className='flex items-center h-[72px] px-[16px]'>
-                                <p className='font-bold text-[14px] w-[200px] text-[#3A3A3A]'>Full Name</p>
-                                <p className='font-medium text-[14px] w-[200px] text-[#3A3A3A]'>
-                                    {userData?.firstName || ''} {userData?.lastName || ''}
-                                </p>
+                    <div className="min-w-0 flex-1 px-[20px] py-[24px] md:h-full md:p-[32px]">
+                        <h2 className="text-[20px] font-semibold text-[#222222] md:text-[22px]">Personal information</h2>
+                        <p className="mt-[4px] text-[15px] text-[#6a6a6a]">Manage and update your personal information here</p>
+                        <dl className="mt-[12px] flex flex-col divide-y divide-[#ebebeb]">
+                            <div className="flex flex-col gap-[2px] py-[14px] md:flex-row md:items-center md:gap-0 md:px-[16px] md:py-[24px]">
+                                <dt className="text-[14px] font-semibold text-[#6a6a6a] md:w-[200px] md:text-[#3A3A3A]">Full name</dt>
+                                <dd className="text-[16px] font-medium text-[#222222]">{fullName}</dd>
                             </div>
-                            <div className='flex items-center h-[72px] px-[16px]'>
-                                <p className='font-bold text-[14px] w-[200px] text-[#3A3A3A]'>Phone Number</p>
-                                <p className='font-medium text-[14px] w-[200px] text-[#3A3A3A]'>
-                                    +91 {userData?.phoneNumber || ''}
-                                </p>
+                            <div className="flex flex-col gap-[2px] py-[14px] md:flex-row md:items-center md:gap-0 md:px-[16px] md:py-[24px]">
+                                <dt className="text-[14px] font-semibold text-[#6a6a6a] md:w-[200px] md:text-[#3A3A3A]">Phone number</dt>
+                                <dd className="text-[16px] font-medium text-[#222222]">{phone}</dd>
                             </div>
-                        </div>
+                        </dl>
+
+                        {/* Phone-only shortcuts, like Airbnb's profile tab */}
+                        <ul className="mt-[24px] flex flex-col divide-y divide-[#ebebeb] border-y border-[#ebebeb] md:hidden">
+                            {[
+                                ["Notifications", "/notifications"],
+                                ["My bookings", "/my-bookings"],
+                                ["Wallet", "/wallet"],
+                                ["Help Center", "/help-center"],
+                            ].map(([label, to]) => (
+                                <li key={to}>
+                                    <button type="button" onClick={() => navigate(to)} className="flex min-h-[56px] w-full items-center justify-between text-left text-[16px] text-[#222222]">
+                                        {label}
+                                        <ChevronRight size={20} className="text-[#6a6a6a]" aria-hidden="true" />
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                        <button
+                            type="button"
+                            onClick={() => { logout(); navigate('/home'); }}
+                            className="mt-[16px] min-h-[48px] text-[16px] font-semibold text-[#BE4907] underline underline-offset-4 md:hidden"
+                        >
+                            Log out
+                        </button>
                     </div>
                 </div>
             </div>

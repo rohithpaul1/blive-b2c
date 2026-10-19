@@ -35,7 +35,7 @@ const CITY_OPTIONS = [
 const DURATION_OPTIONS = [1, 3, 6, 12, 18, 24, 36];
 
 const inputClass =
-  "mt-2 h-12 w-full rounded-[12px] border border-[#dedce1] bg-white px-4 text-[15px] text-[#262626] outline-none transition placeholder:text-[#969198] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
+  "mt-2 h-12 w-full rounded-[12px] border border-[#dedce1] bg-white px-4 text-[15px] text-[#262626] outline-none transition placeholder:text-[#716c75] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
 
 function FieldLabel({ children }) {
   return (
@@ -361,13 +361,13 @@ function Business() {
                 />
                 <div className="px-2 pb-1 pt-3">
                   <span className="text-[13px] font-bold">Built around your requirement</span>
-                  <span className="mt-1 block text-[11px] text-white/55">
+                  <span className="mt-1 block text-[12px] text-white/55">
                     Model · quantity · duration
                   </span>
                 </div>
               </div>
               <div className="absolute right-3 top-10 rounded-[18px] border border-white/15 bg-white px-4 py-3 text-[#2b2333] shadow-xl sm:right-0">
-                <span className="block text-[10px] font-bold uppercase tracking-[0.08em] text-[#746b7b]">
+                <span className="block text-[12px] font-bold uppercase tracking-[0.08em] text-[#746b7b]">
                   One workflow
                 </span>
                 <span className="mt-1 block text-[16px] font-black">Select → Enquire</span>
@@ -518,7 +518,7 @@ function Business() {
             >
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e4e8] bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#6a5294]">Fleet enquiry</p>
+                  <p className="text-[12px] font-bold uppercase tracking-[0.11em] text-[#6a5294]">Fleet enquiry</p>
                   <h2 id="business-enquiry-title" className="mt-1 text-[20px] font-black sm:text-[23px]">
                     Tell us what your business needs
                   </h2>
@@ -761,7 +761,7 @@ function Business() {
                                 </span>
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-[13px] font-black">{line.modelName}</p>
-                                  <p className="mt-1 text-[11px] text-[#777179]">{line.quantity} vehicles</p>
+                                  <p className="mt-1 text-[12px] text-[#777179]">{line.quantity} vehicles</p>
                                 </div>
                                 <button
                                   type="button"
@@ -779,13 +779,13 @@ function Business() {
                     </div>
 
                     <label className="mt-7 block">
-                      <FieldLabel>Anything else we should know? <span className="font-normal text-[#8a858c]">(optional)</span></FieldLabel>
+                      <FieldLabel>Anything else we should know? <span className="font-normal text-[#716c75]">(optional)</span></FieldLabel>
                       <textarea
                         value={form.notes}
                         onChange={(event) => updateForm("notes", event.target.value)}
                         rows={4}
                         placeholder="Delivery location, usage pattern, charging requirement, or other commercial context"
-                        className="mt-2 w-full resize-y rounded-[12px] border border-[#dedce1] bg-white px-4 py-3 text-[14px] leading-6 outline-none placeholder:text-[#969198] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10"
+                        className="mt-2 w-full resize-y rounded-[12px] border border-[#dedce1] bg-white px-4 py-3 text-[14px] leading-6 outline-none placeholder:text-[#716c75] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10"
                       />
                     </label>
 
@@ -815,7 +815,7 @@ function Business() {
                       {submitting ? "Submitting enquiry…" : "Submit fleet enquiry"}
                       {!submitting && <ArrowRight className="size-[18px]" aria-hidden="true" />}
                     </button>
-                    <p className="mt-3 text-center text-[11px] text-[#8a858c]">
+                    <p className="mt-3 text-center text-[12px] text-[#716c75]">
                       Submitting an enquiry does not create a booking or request payment.
                     </p>
                   </div>

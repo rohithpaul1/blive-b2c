@@ -264,7 +264,7 @@ const MyBookings = () => {
                     ) : error ? (
                         <div className="mt-[100px] flex-1 h-full w-full flex flex-col items-center justify-center">
                             <p className="font-bold text-[22px] text-[#3A3A3A]">Error loading bookings</p>
-                            <p className="mt-[8px] font-medium text-[14px] text-[#969696]">{error}</p>
+                            <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">{error}</p>
                             <button 
                                 onClick={fetchBookingHistory}
                                 className="mt-4 min-h-11 rounded-full bg-[#351a75] px-6 py-2 font-semibold text-white hover:bg-[#2c155f]"
@@ -277,22 +277,22 @@ const MyBookings = () => {
                             {tab === "Ongoing" && 
                             <>
                                 <p className="font-bold text-[22px] text-[#3A3A3A]">No rides in progress right now.</p>
-                                <p className="mt-[8px] font-medium text-[14px] text-[#969696]">Start a booking and hit the road!</p>
+                                <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">Start a booking and hit the road!</p>
                             </>}
                             {tab === "Upcoming" && 
                             <>
                                 <p className="font-bold text-[22px] text-[#3A3A3A]">No upcoming bookings yet</p>
-                                <p className="mt-[8px] font-medium text-[14px] text-[#969696]">Plan ahead and reserve your ride early.</p>
+                                <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">Plan ahead and reserve your ride early.</p>
                             </>}
                             {tab === "Past" && 
                             <>
                                 <p className="font-bold text-[22px] text-[#3A3A3A]">No past rides to show</p>
-                                <p className="mt-[8px] font-medium text-[14px] text-[#969696]">Your completed trips will appear here.</p>
+                                <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">Your completed trips will appear here.</p>
                             </>}
                             {tab === "Cancelled" && 
                             <>
                                 <p className="font-bold text-[22px] text-[#3A3A3A]">No cancelled bookings</p>
-                                <p className="mt-[8px] font-medium text-[14px] text-[#969696]">If you cancel a ride, it will appear here.</p>
+                                <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">If you cancel a ride, it will appear here.</p>
                             </>}
                         </div>
                     ) : (

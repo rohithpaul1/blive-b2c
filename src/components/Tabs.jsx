@@ -22,7 +22,7 @@ const Tabs = ({ selectedTab, setSelectedTab, tabs }) => {
           </p>
           {tab.discount && (
             <div className="hidden items-center justify-center sm:flex">
-              <p className={`rounded-full px-[7px] py-[2px] text-[10px] font-bold ${selectedTab === i ? "bg-white/14 text-white" : "bg-[#f6f1fb] text-[#5b367e]"}`}>
+              <p className={`rounded-full px-[7px] py-[2px] text-[12px] font-bold ${selectedTab === i ? "bg-white/14 text-white" : "bg-[#f6f1fb] text-[#5b367e]"}`}>
                 Save {tab.discount}%
               </p>
             </div>

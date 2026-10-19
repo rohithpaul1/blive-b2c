@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Building2, Check, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 const fieldClass =
-  "mt-2 h-12 w-full rounded-[12px] border border-[#ddd9e1] bg-white px-4 text-[15px] text-[#2d2930] outline-none transition placeholder:text-[#969198] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
+  "mt-2 h-12 w-full rounded-[12px] border border-[#ddd9e1] bg-white px-4 text-[15px] text-[#2d2930] outline-none transition placeholder:text-[#716c75] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
 
 function BusinessPortalAccess() {
   const navigate = useNavigate();
@@ -141,7 +141,7 @@ function BusinessPortalAccess() {
             ))}
           </div>
         </div>
-        <p className="relative text-[11px] text-white/38">BLive Business Client Portal</p>
+        <p className="relative text-[12px] text-white/38">BLive Business Client Portal</p>
       </section>
 
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10 lg:px-14">
@@ -246,7 +246,7 @@ function BusinessPortalAccess() {
               </button>
             </div>
           </div>
-          <p className="mt-5 text-center text-[11px] leading-5 text-[#8a858c]">
+          <p className="mt-5 text-center text-[12px] leading-5 text-[#716c75]">
             Need access help? Contact BLive at 080-4719-0022.
           </p>
         </div>

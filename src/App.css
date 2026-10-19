@@ -122,9 +122,26 @@ body {
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Regular.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Regular.woff2") format("woff2"), url("/fonts/satoshi/Satoshi-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/satoshi/Satoshi-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -132,6 +149,7 @@ body {
   src: url("/fonts/satoshi/Satoshi-Bold.otf") format("opentype");
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -139,7 +157,9 @@ body {
   src: url("/fonts/satoshi/Satoshi-Black.otf") format("opentype");
   font-weight: 900;
   font-style: normal;
+  font-display: swap;
 }
+
 
 input[type="range"] {
   -webkit-appearance: none;
@@ -239,5 +259,39 @@ input[type="range"]::-webkit-slider-runnable-track {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Type defaults. In the base layer, so any explicit leading-* / text-* utility
+   on an element still wins. Arbitrary text-[Npx] sizes don't set a line-height,
+   so large headings were inheriting body leading (1.5) and looked loose.
+   --------------------------------------------------------------------------- */
+@layer base {
+  h1, h2, h3,
+  [class*="text-[20px]"], [class*="text-[22px]"], [class*="text-[24px]"],
+  [class*="text-[26px]"], [class*="text-[28px]"], [class*="text-[30px]"],
+  [class*="text-[32px]"], [class*="text-[34px]"], [class*="text-[36px]"],
+  [class*="text-[38px]"], [class*="text-[40px]"], [class*="text-[42px]"],
+  [class*="text-[44px]"], [class*="text-[48px]"], [class*="text-[50px]"],
+  [class*="text-[52px]"], [class*="text-[58px]"], [class*="text-[64px]"] {
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+}
+
+/* iOS Safari zooms the page when a focused field is under 16px. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  input[type="checkbox"], input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--blive-purple);
   }
 }

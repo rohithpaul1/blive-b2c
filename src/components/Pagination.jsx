@@ -28,7 +28,7 @@ const Pagination = ({ selectedPage, setSelectedPage, maxPages }) => {
       {/* Previous Button */}
       <p
         className={`py-[5px] px-[8px] font-medium text-[14px] cursor-pointer ${
-          selectedPage === 1 ? "text-[#969696] cursor-not-allowed" : "text-[#1B29A9]"
+          selectedPage === 1 ? "text-[#6a6a6a] cursor-not-allowed" : "text-[#1B29A9]"
         }`}
         onClick={() => selectedPage > 1 && setSelectedPage(selectedPage - 1)}
       >
@@ -54,7 +54,7 @@ const Pagination = ({ selectedPage, setSelectedPage, maxPages }) => {
       <p
         className={`py-[5px] px-[8px] font-medium text-[14px] cursor-pointer ${
           selectedPage === maxPages
-            ? "text-[#969696] cursor-not-allowed"
+            ? "text-[#6a6a6a] cursor-not-allowed"
             : "text-[#1B29A9]"
         }`}
         onClick={() => selectedPage < maxPages && setSelectedPage(selectedPage + 1)}

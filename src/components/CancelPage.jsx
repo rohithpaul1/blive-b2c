@@ -155,7 +155,7 @@ const CancelPage = ({ data, setOpenCancelPage, onBookingCancelled }) => {
                   <p className="font-bold text-[18px] text-[#484848]">
                     {data.vehicleName}
                   </p>
-                  <p className="text-[#3A3A3A] text-[11px]">
+                  <p className="text-[#3A3A3A] text-[12px]">
                     Rate Plan : {data.ratePlan}
                   </p>
                 </div>
