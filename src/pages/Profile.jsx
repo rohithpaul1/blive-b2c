@@ -269,7 +269,7 @@ const Profile = () => {
                 </div>}
                 <Navbar onSearchPage={false} expanded={true} />
                 <div className="mt-[124px] flex w-full items-center gap-x-[16px] border-b border-[#EDEDED] px-[20px] py-[20px] md:border-t md:px-[40px] md:py-[24px]">
-                    <h1 className="text-[24px] font-bold text-[#222222] md:text-[28px]">Manage account</h1>
+                    <h1 className="text-[22px] font-bold text-[#222222] md:text-[28px]">Manage account</h1>
                 </div>
                 <div className="flex w-full flex-1 flex-col md:h-full md:flex-row">
                     {/* Identity card: full-width on phones, sidebar from md up */}

@@ -420,7 +420,7 @@ function Business() {
             </div>
 
             <div className="mt-9 overflow-hidden rounded-[24px] border border-[#e2e0e3] bg-white shadow-[0_12px_35px_rgba(34,29,38,0.06)]">
-              <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-3 lg:gap-6">
+              <div className="grid gap-x-4 gap-y-8 p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-3 lg:gap-x-6">
                 {catalog === undefined &&
                   Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="h-[320px] animate-pulse rounded-[18px] bg-[#f2f1f3]" />

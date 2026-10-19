@@ -19,7 +19,7 @@ const WhyBlive = () => {
 
   return (
     <section className="flex flex-col items-center justify-center bg-[#0f0f0f] px-[clamp(20px,8vw,120px)] py-[64px] text-white md:py-[88px]">
-      <h2 className="text-center text-[30px] font-bold md:text-[44px]">Why BLive?</h2>
+      <h2 className="text-center text-[22px] font-bold md:text-[44px]">Why BLive?</h2>
       <p className="mt-[14px] max-w-[720px] text-center text-[15px] text-[#d2d2d2]">
         Your trusted partner for effortless and eco-friendly EV rentals.
       </p>
@@ -29,8 +29,8 @@ const WhyBlive = () => {
             <div className="flex size-[48px] items-center justify-center rounded-full bg-white ring-4 ring-white/10">
               <img className="size-[24px]" src={reason.icon} alt="" />
             </div>
-            <h3 className="mt-[20px] text-[18px] font-bold">{reason.title}</h3>
-            <p className="mt-[8px] max-w-[340px] text-[15px] leading-[1.55] text-[#c9c9c9]">
+            <h3 className="mt-[16px] text-[16px] font-bold md:mt-[20px] md:text-[18px]">{reason.title}</h3>
+            <p className="mt-[8px] max-w-[340px] text-[14px] leading-[1.55] text-[#c9c9c9] md:text-[15px]">
               {reason.text}
             </p>
           </article>

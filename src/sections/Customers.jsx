@@ -41,7 +41,7 @@ const Customers = () => {
   return (
     <section className="flex flex-col px-[clamp(20px,8.5vw,122px)] py-[64px] transition-all duration-500 md:py-[88px]">
       <div className="flex items-end justify-between gap-[16px]">
-        <h2 className="text-[28px] font-bold text-[#0F0F0F] md:text-[40px]">
+        <h2 className="text-[22px] font-bold text-[#0F0F0F] md:text-[40px]">
           What our customers say
         </h2>
         <div className="flex shrink-0 items-center gap-x-[12px] md:gap-x-[16px]">
@@ -68,7 +68,7 @@ const Customers = () => {
         </div>
       </div>
 
-      <blockquote className="mt-[28px] max-w-[1120px] text-[17px] font-medium leading-[1.6] text-[#313131] transition-all duration-500 md:mt-[48px] md:text-[26px] md:leading-[1.7]">
+      <blockquote className="mt-[28px] max-w-[1120px] text-[16px] font-medium leading-[1.6] text-[#313131] transition-all duration-500 md:mt-[48px] md:text-[26px] md:leading-[1.7]">
         “{t.text}”
       </blockquote>
 
@@ -81,7 +81,7 @@ const Customers = () => {
           />
         </div>
         <div className="flex flex-col gap-y-[4px]">
-          <p className="text-[17px] font-bold text-[#0F0F0F] md:text-[18px]">{t.name}</p>
+          <p className="text-[15px] font-bold text-[#0F0F0F] md:text-[18px]">{t.name}</p>
           <p className="text-[14px] text-[#6a6a6a]">From {t.location}</p>
         </div>
       </div>

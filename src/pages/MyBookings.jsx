@@ -221,7 +221,7 @@ const MyBookings = () => {
             <Navbar onSearchPage={false} expanded={true} />
             <div className="mt-[124px] flex w-full items-center gap-x-[12px] border-y border-[#EDEDED] px-4 py-[20px] sm:px-8 lg:px-[clamp(40px,7vw,112px)]">
                 <img src="/images/Ticket.svg" alt="Ticket Image" />
-                <p className="text-[24px] font-bold text-[#222222] sm:text-[28px]">My Bookings</p>
+                <h1 className="text-[22px] font-bold text-[#222222] sm:text-[28px]">My Bookings</h1>
             </div>
             <div className="flex flex-col pt-[20px]">
                 {wallet?.showInHeader && wallet.activeSubscription && (

@@ -1,6 +1,6 @@
 const Tabs = ({ selectedTab, setSelectedTab, tabs }) => {
   return (
-    <div className="mt-[32px] grid w-full max-w-[610px] grid-cols-3 gap-[4px] rounded-full bg-white p-[4px] sm:mt-[48px]">
+    <div className="mt-[24px] grid w-full max-w-[610px] grid-cols-3 gap-[4px] rounded-full border border-[#e6e6e6] bg-white p-[4px] sm:mt-[48px] md:border-0">
       {tabs.map((tab, i) => (
         <button
           type="button"

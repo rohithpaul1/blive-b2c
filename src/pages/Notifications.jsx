@@ -144,7 +144,7 @@ const Notifications = () => {
             <div className="w-full min-h-dvh overflow-x-hidden flex flex-col items-center">
                 <Navbar onSearchPage={false} expanded={true} />
                 <div className="mt-[124px] flex w-full items-center gap-x-[12px] border-b border-[#EDEDED] px-[20px] py-[20px] md:border-t md:px-[40px] md:py-[24px]">
-                    <h1 className="text-[24px] font-bold text-[#222222] md:text-[28px]">Notifications</h1>
+                    <h1 className="text-[22px] font-bold text-[#222222] md:text-[28px]">Notifications</h1>
                     {unseenCount > 0 && (
                         <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             {unseenCount}

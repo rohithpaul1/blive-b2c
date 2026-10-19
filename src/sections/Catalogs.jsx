@@ -374,13 +374,13 @@ const Catalogs = () => {
   }
 
   return (
-    <section className="mt-[72px] flex flex-col items-center bg-[#F1F2F3] px-[16px] py-[64px] sm:px-[32px] lg:mt-[110px] lg:px-[8vw] lg:py-[88px]">
-      <h2 className="max-w-[920px] text-balance text-center text-[30px] font-bold leading-[1.15] text-[#0F0F0F] sm:text-[38px] lg:text-[48px]">
+    <section className="mt-[56px] flex flex-col items-center bg-white px-[16px] py-[48px] md:bg-[#F1F2F3] sm:px-[32px] lg:mt-[110px] lg:px-[8vw] lg:py-[88px]">
+      <h2 className="max-w-[920px] text-balance text-center text-[22px] font-bold leading-[1.2] text-[#0F0F0F] sm:text-[32px] lg:text-[48px]">
         {isSubscription
           ? "Choose an EV Subscription That Fits Your Routine"
           : "Choose EV Rentals That Match Your Needs"}
       </h2>
-      <p className="mt-[16px] max-w-[720px] text-pretty text-center text-[16px] font-medium leading-[1.55] text-[#3f3f3f] sm:mt-[20px] sm:text-[18px]">
+      <p className="mt-[16px] max-w-[720px] text-pretty text-center text-[14px] font-medium leading-[1.55] text-[#4a4a4a] sm:mt-[20px] sm:text-[18px]">
         {isSubscription
           ? "Choose how long you want to start. Your subscription then renews automatically until you cancel."
           : "Day trip, weekend escape, or city errand. BLive EZY fits your life, without the cost of ownership."}
@@ -394,7 +394,7 @@ const Catalogs = () => {
       />
 
       {/* Vehicle Grid - Show only 6 cards */}
-      <div className="mt-[40px] grid w-full grid-cols-1 gap-[20px] sm:grid-cols-2 lg:mt-[56px] xl:grid-cols-3 xl:gap-[28px]">
+      <div className="mt-[40px] grid w-full grid-cols-1 gap-x-[20px] gap-y-[32px] sm:grid-cols-2 lg:mt-[56px] xl:grid-cols-3 xl:gap-x-[28px] xl:gap-y-[40px]">
         <Cards
           isCatalog={true}
           cards={displayedVehicles}

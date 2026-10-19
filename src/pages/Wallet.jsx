@@ -116,7 +116,7 @@ const Wallet = () => {
     <div className="min-h-screen bg-[#f5f4f7] text-[#1b1530]">
       <Navbar onSearchPage={false} expanded={true} />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-[148px] sm:px-6 lg:px-8">
-        <h1 className="mb-6 text-[28px] font-bold tracking-[-0.02em] sm:text-[34px]">Wallet</h1>
+        <h1 className="mb-6 text-[22px] font-bold tracking-[-0.02em] sm:text-[34px]">Wallet</h1>
 
         {wallet === undefined ? (
           <div className="flex min-h-[360px] items-center justify-center rounded-3xl border border-[#ecebf0] bg-white">

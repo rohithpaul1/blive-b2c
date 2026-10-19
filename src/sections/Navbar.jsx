@@ -53,18 +53,18 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
           <img
             onClick={() => navigate(isBusinessWebsite ? "/business" : "/home")}
             className={`h-[44px] w-auto cursor-pointer md:h-[52px] ${
-              onSearchPage ? "col-start-1 row-start-1" : ""
+              onSearchPage ? "col-start-1 row-start-1 max-md:hidden" : ""
             }`}
             src="/images/BliveNxtLogo.svg"
             alt="b:live NXT"
           />
           {onSearchPage && (
-            <div className="col-span-3 row-start-2 mt-[8px] flex w-full justify-self-center md:col-span-1 md:col-start-2 md:row-start-1 md:mt-0">
+            <div className="col-span-3 row-start-1 flex w-full justify-self-center md:col-span-1 md:col-start-2 md:mt-0">
               <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} />
             </div>
           )}
           {isBusinessWebsite ? (
-            <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end" : ""}`}>
+            <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
               <button
                 type="button"
                 onClick={() => navigate("/home")}
@@ -82,7 +82,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
               </button>
             </div>
           ) : token ? (
-            <div className={`flex items-center gap-x-1.5 md:gap-x-3 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end" : ""}`}>
+            <div className={`flex items-center gap-x-1.5 md:gap-x-3 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
               <button
                 type="button"
                 onClick={() => navigate("/business")}
@@ -228,7 +228,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
               </div>
             </div>
           ) : (
-            <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end" : ""}`}>
+            <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
               <button
                 type="button"
                 onClick={() => navigate("/business")}

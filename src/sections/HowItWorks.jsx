@@ -24,10 +24,10 @@ const HowItWorks = () => {
   return (
     <div className="mx-auto mt-[64px] flex w-full flex-col items-center px-[20px] md:mt-[120px] md:w-[90%] md:px-0">
       <div className="max-w-[720px]">
-        <h2 className="text-center text-[28px] font-bold leading-[1.15] text-[#0F0F0F] md:text-[36px]">
+        <h2 className="text-center text-[22px] font-bold leading-[1.2] text-[#0F0F0F] md:text-[36px]">
           The EZY Way to Ride
         </h2>
-        <p className="mt-[12px] text-center text-[16px] font-medium text-[#6a6a6a] md:mt-[20px] md:text-[18px]">
+        <p className="mt-[8px] text-center text-[14px] font-medium text-[#6a6a6a] md:mt-[20px] md:text-[18px]">
           From booking to riding, we make going electric simple.
         </p>
       </div>
@@ -42,10 +42,10 @@ const HowItWorks = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-y-[8px]">
-              <p className="text-[18px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">
+              <p className="text-[16px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">
                 Pick your EV
               </p>
-              <p className="text-[15px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
+              <p className="text-[14px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
                 From daily commutes to weekend rides select the perfect EV plan
                 at the right price.
               </p>
@@ -60,8 +60,8 @@ const HowItWorks = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-y-[8px]">
-              <p className="text-[18px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">Book online</p>
-              <p className="text-[15px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
+              <p className="text-[16px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">Book online</p>
+              <p className="text-[14px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
                 Reserve online or at the hub easy, fast, and ready when you are
               </p>
             </div>
@@ -75,8 +75,8 @@ const HowItWorks = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-y-[8px]">
-              <p className="text-[18px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">Submit KYC</p>
-              <p className="text-[15px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
+              <p className="text-[16px] font-bold text-[#0F0F0F] lg:text-[24px] lg:font-black">Submit KYC</p>
+              <p className="text-[14px] leading-[1.45] text-[#6a6a6a] lg:text-[18px]">
                 Get started with a quick verification just your license and ID
                 proof, and you’re ready to ride.
               </p>

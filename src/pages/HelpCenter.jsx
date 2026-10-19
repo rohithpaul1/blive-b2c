@@ -23,7 +23,7 @@ const HelpCenter = () => {
       <Navbar onSearchPage={false} expanded={true} />
 
       <div className="mt-[124px] flex w-full items-center gap-x-[16px] border-b border-[#EDEDED] px-[20px] py-[20px] md:border-t md:px-[40px] md:py-[24px]">
-        <h1 className="text-[24px] font-bold text-[#222222] md:text-[28px]">Help Center</h1>
+        <h1 className="text-[22px] font-bold text-[#222222] md:text-[28px]">Help Center</h1>
       </div>
 
       <div className="flex w-full flex-1 flex-col gap-[20px] px-[20px] py-[20px] md:h-full md:flex-row md:gap-0 md:px-[clamp(24px,8vw,150px)] md:py-[32px]">

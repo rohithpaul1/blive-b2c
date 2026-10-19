@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { ProductContext } from "../contexts/ProductContext";
 import { LoginPageContext } from "../contexts/LoginPageContext";
 import { UserContext } from "../contexts/UserContext";
@@ -12,62 +12,6 @@ import {
   renewalCadenceLabel,
   startingPeriodLabel,
 } from "../utils/subscription";
-
-const OEM_LOGOS = [
-  { match: "ather", src: "/images/Ather.png" },
-  { match: "tvs", src: "/images/TVS.png" },
-  { match: "hero", src: "/images/HeroHonda.png" },
-  { match: "bounce", src: "/images/Bounce.png" },
-  { match: "ola", src: "/images/Ola.png" },
-];
-
-const getOemIdentity = (card) => {
-  const label =
-    card.brandName ||
-    card.manufacturer ||
-    card.vehicleName?.split(" ")[0] ||
-    "EV";
-  const searchableName = [
-    card.brandName,
-    card.manufacturer,
-    card.vehicleName,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  const logo = OEM_LOGOS.find(({ match }) => searchableName.includes(match));
-  const initials = label
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-
-  return { label, initials, src: logo?.src };
-};
-
-const OemBrandMark = ({ card }) => {
-  const [logoFailed, setLogoFailed] = useState(false);
-  const { label, src } = getOemIdentity(card);
-
-  // No known logo: show nothing rather than an initials placeholder box.
-  if (!src || logoFailed) return null;
-
-  return (
-    <span
-      className="flex h-[28px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[#ececec] bg-white px-[6px] py-[4px]"
-      aria-label={`${label} logo`}
-      role="img"
-    >
-      <img
-        className="h-full w-full object-contain"
-        src={src}
-        alt=""
-        onError={() => setLogoFailed(true)}
-      />
-    </span>
-  );
-};
 
 const Cards = ({
   cards,
@@ -365,27 +309,53 @@ const Cards = ({
             ? Number(getSelectedQuantity?.(card) || 0)
             : 0;
 
-          return (
-            <article
-              key={"card-menu-" + i}
-              className="group flex min-h-[540px] flex-col overflow-hidden rounded-[24px] border border-[#ebebeb] bg-white shadow-[0_8px_20px_rgba(16,24,40,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(16,24,40,0.12)]"
-            >
-              <div className="relative h-[220px] w-full overflow-hidden bg-[linear-gradient(145deg,#f5f4f8_0%,#ebe9ef_100%)] sm:h-[240px] xl:h-[250px]">
+          const rate = isSubscription ? pricing.cycleRate : pricing.dailyRate;
+          const specLine = [
+            card.range ? `${card.range} km range` : null,
+            card.topSpeed ? `${card.topSpeed} km/h top speed` : null,
+            !card.range && Number(card.chargeTime) > 0 ? `${card.chargeTime} hr charge` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          const allowanceLine = [
+            dailyIncludedKm > 0
+              ? isSubscription || isBusiness
+                ? `${dailyIncludedKm} km/day included`
+                : `${includedKm} km included`
+              : "Usage allowance shown at checkout",
+            "No fuel costs",
+          ].join(" · ");
+          const feeLine = [
+            Number(card.perKmCharge) > 0 ? `+₹${card.perKmCharge}/km beyond limit` : null,
+            Number(card.onboardingFee) > 0 ? `₹${card.onboardingFee} one-time onboarding fee` : null,
+            Number(card.openingWalletBalance) > 0 ? `₹${card.openingWalletBalance} min wallet balance to start` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          // Personal rentals: the whole card opens the booking flow (Airbnb-style).
+          // Business cards keep their own fleet controls, so the card itself isn't a button.
+          const tappable = !isBusiness && card.isAvailable;
+          const actionLabel = isSubscription ? "Choose subscription" : "Rent";
+
+          const body = (
+            <>
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#f1f0f3]">
                 {!card.isAvailable ? (
-                  <div className="absolute z-20 top-[14px] left-[14px] rounded-full border border-[#e8e8e8] bg-white/95 px-[10px] py-[6px] text-[12px] font-bold text-[#5d5d5d] shadow-sm">
+                  <span className="absolute left-[12px] top-[12px] z-20 rounded-full bg-white px-[10px] py-[5px] text-[12px] font-bold text-[#222222] shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
                     Next available {card.nextAvailableDate}
-                  </div>
+                  </span>
                 ) : card.availableCount <= 2 ? (
-                  <div className="absolute z-20 top-[14px] right-[14px] rounded-full bg-[#fff1f1] px-[10px] py-[6px] text-[12px] font-bold text-[#c43333]">
+                  <span className="absolute left-[12px] top-[12px] z-20 rounded-full bg-white px-[10px] py-[5px] text-[12px] font-bold text-[#c43333] shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
                     Only {card.availableCount} left
-                  </div>
+                  </span>
                 ) : null}
                 <img
                   className={`${
-                    !card.isAvailable ? "opacity-50 grayscale" : ""
-                  } h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.025]`}
+                    !card.isAvailable ? "opacity-55 grayscale" : ""
+                  } h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]`}
                   src={card.imgUrl}
-                  alt={`${card.vehicleName} available for ${isSubscription ? "subscription" : "fixed rental"}`}
+                  alt=""
+                  loading="lazy"
                   onError={(e) => {
                     const img = e.target;
                     const step = img.dataset.fbStep || "0";
@@ -398,146 +368,85 @@ const Cards = ({
                     }
                   }}
                 />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[44px] bg-gradient-to-t from-white to-transparent" />
               </div>
 
-              <div className="flex flex-1 flex-col px-[20px] pb-[22px] pt-[4px] sm:pt-[6px]">
-                <div className="flex items-center gap-[8px]">
-                  <OemBrandMark card={card} />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-[20px] font-bold text-[#262626]">
-                      {card.vehicleName}
-                    </h2>
-                    {isBusiness && getDetailsPath?.(card) && (
-                      <button
-                        type="button"
-                        onClick={() => navigate(getDetailsPath(card))}
-                        className="mt-[2px] text-[12px] font-bold text-[#6b5a78] underline-offset-2 hover:underline"
-                      >
-                        View model details
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-[10px] flex flex-wrap items-end gap-x-[8px] gap-y-[4px]">
-                  <p className="text-[24px] font-black leading-none text-[#351a75]">
-                    ₹{formatCurrency(isSubscription ? pricing.cycleRate : pricing.dailyRate)}
-                    <span className="ml-[2px] text-[13px] font-bold">/{pricing.unit}</span>
+              <div className="mt-[12px] flex flex-col gap-[2px] text-left">
+                <h2 className={`truncate text-[16px] font-bold leading-[1.3] md:text-[17px] ${card.isAvailable ? "text-[#222222]" : "text-[#8a8a8a]"}`}>
+                  {card.vehicleName}
+                </h2>
+                {specLine && <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{specLine}</p>}
+                <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{allowanceLine}</p>
+                {feeLine && <p className="text-[13px] leading-[1.45] text-[#6a6a6a]">{feeLine}</p>}
+                {isSubscription && card.isAvailable && (
+                  <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">
+                    Planned until {formatShortDate(selectedDropoff?.date)} · Renews {renewalCadenceLabel(selectedPlanType || currentPlanType)}
                   </p>
-                  <p className="text-[13px] text-[#6b6b6b]">
-                    {isBusiness
-                      ? "Indicative business rate"
-                      : isSubscription
-                      ? `${startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)} planned`
-                      : pricing.total > pricing.dailyRate
-                      ? `₹${formatCurrency(pricing.total)} total`
-                      : "Taxes and deposit shown at checkout"}
-                  </p>
-                </div>
-
-                {isSubscription && (
-                  <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[12px] border border-[#e8e4ed] bg-[#faf9fb] px-[12px] py-[11px] text-[12px]">
-                    <span className="font-medium text-[#4e4753]">
-                      Planned until {formatShortDate(selectedDropoff?.date)}
-                    </span>
-                    <span className="font-bold text-[#33734b]">
-                      Renews {renewalCadenceLabel(selectedPlanType || currentPlanType)}
-                    </span>
-                  </div>
                 )}
+                <p className={`mt-[4px] text-[15px] leading-[1.4] ${card.isAvailable ? "text-[#222222]" : "text-[#8a8a8a]"}`}>
+                  {!card.isAvailable && !isBusiness ? (
+                    "Unavailable for your dates"
+                  ) : (
+                    <>
+                      <span className="font-bold">₹{formatCurrency(rate)}</span> {pricing.unit}
+                      {isBusiness ? (
+                        <span className="text-[#6a6a6a]"> · Indicative business rate</span>
+                      ) : isSubscription ? (
+                        <span className="text-[#6a6a6a]"> · {startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)} planned</span>
+                      ) : pricing.total > pricing.dailyRate ? (
+                        <>
+                          {" · "}
+                          <span className="underline underline-offset-[3px]">₹{formatCurrency(pricing.total)} total</span>
+                        </>
+                      ) : null}
+                    </>
+                  )}
+                </p>
+              </div>
+            </>
+          );
 
-                {(card.range || card.topSpeed || Number(card.chargeTime) > 0) && (
-                <div className="mt-[18px] grid grid-cols-3 rounded-[16px] bg-[#f7f7f7] px-[12px] py-[13px] text-center text-[#373737]">
-                  <div className="flex flex-col items-center gap-[4px] border-r border-[#e5e5e5]">
-                    <img className="size-[18px]" src="/images/speedometer-01.png" alt="" />
-                    <span className="text-[14px] font-bold leading-none text-[#262626]">
-                      {card.range ? `${card.range} km` : "—"}
-                    </span>
-                    <span className="text-[12px] font-medium text-[#6a6a6a]">Range</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-[4px] border-r border-[#e5e5e5]">
-                    <img className="size-[18px]" src="/images/bi_stopwatch.png" alt="" />
-                    <span className="text-[14px] font-bold leading-none text-[#262626]">
-                      {card.topSpeed ? `${card.topSpeed} km/h` : "—"}
-                    </span>
-                    <span className="text-[12px] font-medium text-[#6a6a6a]">Top speed</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-[4px]">
-                    <img
-                      className="size-[18px]"
-                      src="/images/mdi_battery-charging-outline.png"
-                      alt=""
-                    />
-                    <span className="text-[14px] font-bold leading-none text-[#262626]">
-                      {Number(card.chargeTime) > 0 ? `${card.chargeTime} hr` : "—"}
-                    </span>
-                    <span className="text-[12px] font-medium text-[#6a6a6a]">Charge time</span>
-                  </div>
-                </div>
-                )}
+          return (
+            <article key={"card-menu-" + i} className="group flex flex-col">
+              {tappable ? (
+                <button
+                  type="button"
+                  onClick={() => handleRentNow(card)}
+                  aria-label={`${actionLabel} ${card.vehicleName}, ₹${formatCurrency(rate)} per ${pricing.unit}`}
+                  className="block w-full cursor-pointer rounded-[16px] text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#351a75]"
+                >
+                  {body}
+                </button>
+              ) : (
+                <div aria-disabled={!card.isAvailable && !isBusiness ? true : undefined}>{body}</div>
+              )}
 
-                <div className="mt-[16px] grid min-h-[36px] grid-cols-2 items-start gap-[16px] text-[13px] leading-[1.4] text-[#5e5e5e]">
-                  <div className="flex flex-col gap-[6px]">
-                    <span className="flex items-start gap-[5px]">
-                      <span className="text-[#351a75]">✓</span>
-                      <span>
-                        {dailyIncludedKm > 0
-                          ? isSubscription
-                            ? `${dailyIncludedKm} km/day included`
-                            : isBusiness
-                            ? `${dailyIncludedKm} km/day included`
-                            : `${includedKm} km included`
-                          : "Usage allowance shown at checkout"}
-                      </span>
-                    </span>
-                    {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0 || Number(card.openingWalletBalance) > 0) && (
-                      <span className="flex items-start gap-[5px] text-[12px] text-[#6a6a6a]">
-                        {/* invisible tick (matched to the 12px tick above) keeps this line flush */}
-                        <span className="invisible text-[12px]" aria-hidden="true">✓</span>
-                        <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">
-                          {Number(card.perKmCharge) > 0 && (
-                            <span>+₹{card.perKmCharge}/km beyond limit</span>
-                          )}
-                          {Number(card.perKmCharge) > 0 && Number(card.onboardingFee) > 0 && (
-                            <span className="text-[#d4d4d4]">·</span>
-                          )}
-                          {Number(card.onboardingFee) > 0 && (
-                            <span>₹{card.onboardingFee} one-time onboarding fee</span>
-                          )}
-                          {(Number(card.perKmCharge) > 0 || Number(card.onboardingFee) > 0) && Number(card.openingWalletBalance) > 0 && (
-                            <span className="text-[#d4d4d4]">·</span>
-                          )}
-                          {Number(card.openingWalletBalance) > 0 && (
-                            <span>₹{card.openingWalletBalance} min wallet balance to start</span>
-                          )}
-                        </span>
-                      </span>
-                    )}
-                  </div>
-                  <span className="flex items-start justify-end gap-[5px] text-right">
-                    <span className="text-[#351a75]">✓</span>
-                    No fuel costs
-                  </span>
-                </div>
-
-                {isBusiness ? (
-                  selectedQuantity > 0 ? (
-                    <div className="mt-[16px] flex h-[46px] items-center gap-[10px]">
-                      <div className="flex h-full flex-1 items-center justify-between rounded-full border border-[#351a75] px-[6px] text-[#351a75]">
+              {isBusiness && (
+                <>
+                  {getDetailsPath?.(card) && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(getDetailsPath(card))}
+                      className="mt-[6px] self-start text-[14px] font-bold text-[#222222] underline underline-offset-[3px]"
+                    >
+                      View model details
+                    </button>
+                  )}
+                  {selectedQuantity > 0 ? (
+                    <div className="mt-[12px] flex h-[44px] items-center gap-[10px]">
+                      <div className="flex h-full flex-1 items-center justify-between rounded-[12px] border border-[#351a75] px-[6px] text-[#351a75]">
                         <button
                           type="button"
                           onClick={() => onDecrease?.(card)}
-                          className="flex size-[34px] items-center justify-center rounded-full text-[22px] leading-none hover:bg-[#f2eef6]"
+                          className="flex size-[36px] items-center justify-center rounded-full text-[22px] leading-none hover:bg-[#f2eef6]"
                           aria-label={`Decrease ${card.vehicleName} quantity`}
                         >
                           −
                         </button>
-                        <span className="text-[14px] font-black">{selectedQuantity} vehicles</span>
+                        <span className="text-[15px] font-bold">{selectedQuantity} vehicles</span>
                         <button
                           type="button"
                           onClick={() => onIncrease?.(card)}
-                          className="flex size-[34px] items-center justify-center rounded-full text-[20px] leading-none hover:bg-[#f2eef6]"
+                          className="flex size-[36px] items-center justify-center rounded-full text-[20px] leading-none hover:bg-[#f2eef6]"
                           aria-label={`Increase ${card.vehicleName} quantity`}
                         >
                           +
@@ -546,7 +455,7 @@ const Cards = ({
                       <button
                         type="button"
                         onClick={() => onRemove?.(card)}
-                        className="flex h-full items-center justify-center rounded-full border border-[#dedede] px-[15px] text-[12px] font-bold text-[#6c666e] hover:bg-[#f7f7f7]"
+                        className="flex h-full items-center justify-center rounded-[12px] border border-[#dedede] px-[15px] text-[14px] font-bold text-[#555555] hover:bg-[#f7f7f7]"
                       >
                         Remove
                       </button>
@@ -555,29 +464,13 @@ const Cards = ({
                     <button
                       type="button"
                       onClick={() => onSelect?.(card)}
-                      className="mt-[16px] flex h-[46px] w-full items-center justify-center rounded-full border border-[#351a75] px-[24px] text-[15px] font-bold text-[#351a75] transition-colors hover:bg-[#351a75] hover:text-white"
+                      className="mt-[12px] flex h-[44px] w-full items-center justify-center rounded-[12px] bg-[#351a75] px-[24px] text-[15px] font-bold text-white transition-colors hover:bg-[#2c155f]"
                     >
                       Add to fleet
                     </button>
-                  )
-                ) : (
-                  <button
-                    onClick={() => handleRentNow(card)}
-                    className={`${
-                      card.isAvailable
-                        ? "cursor-pointer border-[#351a75] text-[#351a75] hover:bg-[#351a75] hover:text-white"
-                        : "cursor-not-allowed border-[#dedede] bg-[#f4f4f4] text-[#999]"
-                    } mt-[16px] flex h-[46px] w-full items-center justify-center rounded-full border px-[24px] text-[15px] font-bold transition-colors`}
-                    disabled={!card.isAvailable}
-                  >
-                    {card.isAvailable
-                      ? isSubscription
-                        ? "Choose subscription"
-                        : "Rent now"
-                      : "Unavailable"}
-                  </button>
-                )}
-              </div>
+                  )}
+                </>
+              )}
             </article>
           );
         })}

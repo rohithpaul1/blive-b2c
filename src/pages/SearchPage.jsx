@@ -436,20 +436,20 @@ const SearchPage = () => {
         expanded={true}
         onSearchTrigger={handleSearchTrigger}
       />
-      <main className="px-[16px] pb-[72px] pt-[158px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[108px]">
+      <main className="px-[16px] pb-[72px] pt-[96px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[108px]">
         {isLoading ? (
           <Loader />
         ) : (
           <>
             <div className="flex flex-col gap-[6px]">
-              <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b]">
+              <span className="hidden text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b] md:block">
                 {isSubscription ? "Subscriptions" : "Fixed rentals"}
               </span>
               <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
-                <h1 className="text-[24px] font-bold text-[#1f1f1f]">
-                  {filteredAndSortedVehicles?.length} vehicles available in {selectedLocation}
+                <h1 className="text-[15px] font-medium leading-[1.35] text-[#222222] md:text-[24px] md:font-bold md:text-[#1f1f1f]">
+                  {filteredAndSortedVehicles?.length} {filteredAndSortedVehicles?.length === 1 ? "vehicle" : "vehicles"} available in {selectedLocation}
                 </h1>
-                <p className="text-[14px] text-[#6b6b6b]">
+                <p className="hidden text-[14px] text-[#6b6b6b] md:block">
                   {isSubscription
                     ? "Choose how long you expect to ride. Billing renews automatically until you cancel."
                     : "Choose a vehicle now. You can confirm pickup and extras next."}
@@ -457,7 +457,7 @@ const SearchPage = () => {
               </div>
             </div>
 
-            <div className="mt-[20px] flex flex-wrap items-center justify-between gap-[16px] border-b border-[#ededed] pb-[18px]">
+            <div className="mt-[12px] flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[4px] border-b border-[#ededed] pb-[12px] md:mt-[20px] md:pb-[18px]">
               <div className="relative flex flex-wrap items-center gap-[8px]">
                 <button
                   id="sort-btn"
@@ -469,7 +469,7 @@ const SearchPage = () => {
                     src="/images/Sort-Down.png"
                     alt="Sort Down Icon"
                   />
-                  <p className="font-medium text-[12px] text-[#3A3A3A]">
+                  <p className="font-medium text-[13px] text-[#3A3A3A]">
                     {sortOption}
                   </p>
                   <img
@@ -487,10 +487,10 @@ const SearchPage = () => {
                   setSortOption={handleSortChange}
                 />
                 <span className="hidden sm:block w-[1px] h-[20px] bg-[#EDEDED]" />
-                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[12px] font-medium text-[#3a3a3a]">
+                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[13px] font-medium text-[#3a3a3a]">
                   All models
                 </span>
-                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[12px] font-medium text-[#3a3a3a]">
+                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[13px] font-medium text-[#3a3a3a]">
                   EV only
                 </span>
               </div>
@@ -503,7 +503,7 @@ const SearchPage = () => {
                   src="/images/Filter.png"
                   alt="Filter Icon"
                 />
-                <p className="font-bold text-[#00010C]">All Filters</p>
+                <p className="text-[14px] font-bold text-[#00010C]">All filters</p>
               </button>
               {showFiltersPage && (
                 <FilterPage
@@ -515,7 +515,7 @@ const SearchPage = () => {
                 />
               )}
             </div>
-            <div className="mt-[30px] grid w-full grid-cols-1 gap-[20px] sm:grid-cols-2 xl:grid-cols-3 xl:gap-[28px]">
+            <div className="mt-[16px] grid w-full grid-cols-1 gap-x-[20px] gap-y-[32px] sm:grid-cols-2 md:mt-[30px] xl:grid-cols-3 xl:gap-x-[28px] xl:gap-y-[40px]">
               <Cards
                 cards={filteredAndSortedVehicles}
                 selectedPlanType={selectedPlanType}
