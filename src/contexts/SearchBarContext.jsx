@@ -326,7 +326,64 @@ const SearchBarProvider = ({ children }) => {
     );
   };
 
+  // A /search link carries the search in its query string (mode, location, pickup,
+  // dropoff or duration, plan). Copy it into sessionStorage before the restore below
+  // runs, so a shared or bookmarked link shows its own place and dates, not the
+  // last search made in this tab. Returns true when the URL held a search.
+  const applySearchFromUrl = () => {
+    if (typeof window === "undefined" || window.location.pathname !== "/search") return false;
+    const params = new URLSearchParams(window.location.search);
+    const location = params.get("location")?.trim();
+    const pickupParam = params.get("pickup");
+    if (!location && !pickupParam) return false;
+
+    const parseDay = (value) => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return null;
+      const [y, m, d] = value.split("-").map(Number);
+      const date = new Date(y, m - 1, d, 10, 0, 0, 0); // local 10 AM, the app's default slot
+      return Number.isNaN(date.getTime()) ? null : date;
+    };
+    const today = new Date();
+    today.setHours(10, 0, 0, 0);
+
+    const mode =
+      params.get("mode") === RENTAL_MODES.subscription
+        ? RENTAL_MODES.subscription
+        : RENTAL_MODES.fixed;
+    let pickup = parseDay(pickupParam) || today;
+    if (pickup < today) pickup = today; // links to past dates start today instead
+
+    sessionStorage.setItem("rentalMode", mode);
+    setRentalModeState(mode);
+    if (location) sessionStorage.setItem("selectedLocation", location);
+    sessionStorage.setItem("selectedPickupDate", pickup.toISOString());
+    sessionStorage.setItem("selectedPickupTime", "10 AM");
+
+    if (mode === RENTAL_MODES.subscription) {
+      const duration = normaliseDuration(params.get("duration"));
+      sessionStorage.setItem("subscriptionDuration", String(duration));
+      setSubscriptionDurationState(duration);
+      const until = addPlanDuration(pickup, "monthly", duration);
+      sessionStorage.setItem("selectedDropoffDate", until.toISOString());
+    } else {
+      let dropoff = parseDay(params.get("dropoff"));
+      if (!dropoff || dropoff <= pickup) {
+        dropoff = new Date(pickup);
+        dropoff.setDate(dropoff.getDate() + 1);
+      }
+      sessionStorage.setItem("selectedDropoffDate", dropoff.toISOString());
+    }
+    sessionStorage.setItem("selectedDropoffTime", "10 AM");
+
+    const plan = params.get("plan");
+    if (["daily", "weekly", "monthly"].includes(plan)) {
+      sessionStorage.setItem("currentPlanType", plan);
+    }
+    return true;
+  };
+
   useEffect(() => {
+    applySearchFromUrl();
     const pickupDate = sessionStorage.getItem("selectedPickupDate");
     const dropOffDate = sessionStorage.getItem("selectedDropoffDate");
     const pickupTime = sessionStorage.getItem("selectedPickupTime");
