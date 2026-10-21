@@ -301,10 +301,9 @@ const Cards = ({
   return (
     <>
       {cards &&
-        cards.map((card, i) => {
+        (isBusiness ? cards : cards.filter((c) => c.isAvailable)).map((card, i) => {
           const pricing = getPricing(card);
           const dailyIncludedKm = Number(card.perDayKmLimit) || Number(card.range) || 0;
-          const includedKm = dailyIncludedKm * rentalDays;
           const selectedQuantity = isBusiness
             ? Number(getSelectedQuantity?.(card) || 0)
             : 0;
@@ -317,21 +316,12 @@ const Cards = ({
           ]
             .filter(Boolean)
             .join(" · ");
-          const allowanceLine = [
+          // At most two grey lines per card: specs (when known), then the km allowance.
+          // Per-km and onboarding fees are shown at checkout with the deposit and GST.
+          const allowanceLine =
             dailyIncludedKm > 0
-              ? isSubscription || isBusiness
-                ? `${dailyIncludedKm} km/day included`
-                : `${includedKm} km included`
-              : "Usage allowance shown at checkout",
-            "No fuel costs",
-          ].join(" · ");
-          const feeLine = [
-            Number(card.perKmCharge) > 0 ? `+₹${card.perKmCharge}/km beyond limit` : null,
-            Number(card.onboardingFee) > 0 ? `₹${card.onboardingFee} one-time onboarding fee` : null,
-            Number(card.openingWalletBalance) > 0 ? `₹${card.openingWalletBalance} min wallet balance to start` : null,
-          ]
-            .filter(Boolean)
-            .join(" · ");
+              ? `${dailyIncludedKm} km/day included`
+              : "Usage allowance shown at checkout";
           // Personal rentals: the whole card opens the booking flow (Airbnb-style).
           // Business cards keep their own fleet controls, so the card itself isn't a button.
           const tappable = !isBusiness && card.isAvailable;
@@ -340,11 +330,7 @@ const Cards = ({
           const body = (
             <>
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#f1f0f3]">
-                {!card.isAvailable ? (
-                  <span className="absolute left-[12px] top-[12px] z-20 rounded-full bg-white px-[10px] py-[5px] text-[12px] font-bold text-[#222222] shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
-                    Next available {card.nextAvailableDate}
-                  </span>
-                ) : card.availableCount <= 2 ? (
+                {card.isAvailable && card.availableCount <= 2 ? (
                   <span className="absolute left-[12px] top-[12px] z-20 rounded-full bg-white px-[10px] py-[5px] text-[12px] font-bold text-[#c43333] shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
                     Only {card.availableCount} left
                   </span>
@@ -376,7 +362,6 @@ const Cards = ({
                 </h2>
                 {specLine && <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{specLine}</p>}
                 <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{allowanceLine}</p>
-                {feeLine && <p className="text-[13px] leading-[1.45] text-[#6a6a6a]">{feeLine}</p>}
                 {isSubscription && card.isAvailable && (
                   <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">
                     Planned until {formatShortDate(selectedDropoff?.date)} · Renews {renewalCadenceLabel(selectedPlanType || currentPlanType)}
@@ -386,19 +371,21 @@ const Cards = ({
                   {!card.isAvailable && !isBusiness ? (
                     "Unavailable for your dates"
                   ) : (
+                    !isBusiness && !isSubscription && rentalDays > 1 ? (
+                      <>
+                        <span className="font-bold">₹{formatCurrency(pricing.total)}</span> for {rentalDays} days
+                        <span className="text-[#6a6a6a]"> · ₹{formatCurrency(rate)}/day</span>
+                      </>
+                    ) : (
                     <>
                       <span className="font-bold">₹{formatCurrency(rate)}</span> {pricing.unit}
                       {isBusiness ? (
                         <span className="text-[#6a6a6a]"> · Indicative business rate</span>
                       ) : isSubscription ? (
                         <span className="text-[#6a6a6a]"> · {startingPeriodLabel(selectedPlanType || currentPlanType, subscriptionDuration)} planned</span>
-                      ) : pricing.total > pricing.dailyRate ? (
-                        <>
-                          {" · "}
-                          <span className="underline underline-offset-[3px]">₹{formatCurrency(pricing.total)} total</span>
-                        </>
                       ) : null}
                     </>
+                    )
                   )}
                 </p>
               </div>
@@ -474,6 +461,42 @@ const Cards = ({
             </article>
           );
         })}
+
+      {/* Personal rentals: sold-out models go in a short list after the bookable ones */}
+      {!isBusiness && cards?.some((c) => !c.isAvailable) && (
+        <section className="col-span-full border-t border-[#ebebeb] pt-[20px]" aria-label="Not available for your dates">
+          <h2 className="text-[16px] font-bold text-[#222222]">Not available for your dates</h2>
+          <ul className="mt-[12px] grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-3">
+            {cards
+              .filter((c) => !c.isAvailable)
+              .map((card) => {
+                const pricing = getPricing(card);
+                const rate = isSubscription ? pricing.cycleRate : pricing.dailyRate;
+                const spec = card.range ? `${card.range} km range · ` : "";
+                return (
+                  <li key={"unavailable-" + (card.id || card.vehicleName)} className="flex items-center gap-[12px] opacity-80">
+                    <img
+                      className="h-[66px] w-[88px] shrink-0 rounded-[12px] bg-[#f1f0f3] object-cover grayscale"
+                      src={card.imgUrl}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/images/Scooter.png";
+                      }}
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] font-bold text-[#222222]">{card.vehicleName}</p>
+                      <p className="text-[13px] text-[#6a6a6a]">
+                        {spec}₹{formatCurrency(rate)}/{pricing.unit}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+          </ul>
+        </section>
+      )}
     </>
   );
 };

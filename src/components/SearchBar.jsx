@@ -381,7 +381,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           setMobileOpen(true);
           setMobileStep("where");
         }}
-        className="flex min-h-[62px] w-full items-center gap-[12px] rounded-full border border-[#e7e5e8] bg-white p-[8px] pl-[16px] text-left shadow-[0_8px_24px_rgba(16,24,40,0.12)] md:hidden"
+        className={`flex min-h-[62px] w-full items-center gap-[12px] rounded-full border bg-white p-[8px] pl-[16px] text-left md:hidden ${onSearchPage ? "border-[#dddddd] shadow-[0_2px_8px_rgba(0,0,0,0.07)]" : "border-[#e7e5e8] shadow-[0_8px_24px_rgba(16,24,40,0.12)]"}`}
         aria-label="Open vehicle search"
       >
         <Search className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />

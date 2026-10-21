@@ -45,11 +45,16 @@ const SortDropdown = ({ sortOption, setSortOption, setShowSortDropdown, showSort
     }, []);
 
     return (
-        <div ref={sortRef} className={`absolute left-0 overflow-hidden transition-all duration-500 ${showSortDropdown ? "mt-[620px] w-[438px] h-[562px] py-[16px]" : "mt-[50px] h-0 w-[138px]"} rounded-[16px] z-20 bg-white calender-shadow`}>
-            <p className="py-[16px] text-left px-[32px] text-[18px] font-bold text-[#222222]">Sort</p>
+        <>
+        {/* Phones: a bottom sheet over a dimmed page. md and up: the original dropdown. */}
+        {showSortDropdown && <div className="fixed inset-0 z-[59] bg-black/40 md:hidden" aria-hidden="true" />}
+        <div ref={sortRef} className={`overflow-hidden bg-white calender-shadow ${showSortDropdown
+            ? "fixed inset-x-0 bottom-0 z-[60] w-full rounded-t-[20px] pt-[8px] pb-[calc(16px+env(safe-area-inset-bottom,0px))] md:absolute md:inset-x-auto md:bottom-auto md:left-0 md:z-20 md:mt-[620px] md:h-[562px] md:w-[438px] md:rounded-[16px] md:py-[16px]"
+            : "hidden md:absolute md:left-0 md:z-20 md:mt-[50px] md:block md:h-0 md:w-[138px] md:rounded-[16px]"} md:transition-all md:duration-500`}>
+            <p className="py-[14px] text-left px-[24px] text-[18px] font-bold text-[#222222] md:px-[32px] md:py-[16px]">Sort by</p>
 
             {options.map((option, idx) => (
-                <div key={idx} className="w-full flex items-center gap-x-[12px] px-[32px] h-[58px]">
+                <div key={idx} className="w-full flex items-center gap-x-[12px] px-[24px] h-[52px] md:px-[32px] md:h-[58px]">
                     <label className="flex items-center gap-x-[12px] cursor-pointer w-full">
                         <input
                             type="radio"
@@ -60,7 +65,7 @@ const SortDropdown = ({ sortOption, setSortOption, setShowSortDropdown, showSort
                             className="hidden peer"
                         />
                         <span className="w-4 h-4 rounded-full border-3 border-white outline outline-[#CBCBCB] peer-checked:outline-[#0011A7] peer-checked:bg-[#0011A7]" />
-                        <p className="font-medium text-[#222222]">{option}</p>
+                        <p className="text-[15px] font-medium text-[#222222]">{option}</p>
                     </label>
                 </div>
             ))}
@@ -76,6 +81,7 @@ const SortDropdown = ({ sortOption, setSortOption, setShowSortDropdown, showSort
                 Apply
             </button>
         </div>
+        </>
     );
 };
 

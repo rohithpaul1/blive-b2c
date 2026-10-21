@@ -8,9 +8,8 @@ import SortDropdown from "../components/SortDropdown";
 import FilterPage from "../components/FilterPage";
 import { ProductContext } from "../contexts/ProductContext";
 import { getAPI } from "../caller/axiosUrls";
-import WhyBlive from "../sections/WhyBlive";
-import Customers from "../sections/Customers";
 import Footer from "../sections/Footer";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
 
 const VEHICLE_IMAGES = {
@@ -429,8 +428,12 @@ const SearchPage = () => {
     };
   }, [fromCatalogSelection, planTypes]); // Dependencies to ensure we have current values
 
+  const availableCount = (filteredAndSortedVehicles || []).filter((v) => v.isAvailable).length;
+  const unavailableCount = (filteredAndSortedVehicles || []).length - availableCount;
+
+  // overflow-x-clip (not hidden) so the sticky filter row sticks to the page scroll
   return (
-    <div className="w-full overflow-x-hidden overflow-y-auto bg-white">
+    <div className="w-full overflow-x-clip bg-white">
       <Navbar
         onSearchPage={true}
         expanded={true}
@@ -441,96 +444,95 @@ const SearchPage = () => {
           <Loader />
         ) : (
           <>
-            <div className="flex flex-col gap-[6px]">
-              <span className="hidden text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b] md:block">
-                {isSubscription ? "Subscriptions" : "Fixed rentals"}
-              </span>
-              <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
-                <h1 className="text-[15px] font-medium leading-[1.35] text-[#222222] md:text-[24px] md:font-bold md:text-[#1f1f1f]">
-                  {filteredAndSortedVehicles?.length} {filteredAndSortedVehicles?.length === 1 ? "vehicle" : "vehicles"} available in {selectedLocation}
-                </h1>
-                <p className="hidden text-[14px] text-[#6b6b6b] md:block">
-                  {isSubscription
-                    ? "Choose how long you expect to ride. Billing renews automatically until you cancel."
-                    : "Choose a vehicle now. You can confirm pickup and extras next."}
-                </p>
+            {/* Phones: one swipeable row of filter chips pinned under the search bar, then a short count. */}
+            <div className="flex flex-col">
+              <div className={`sticky top-[82px] ${showSortDropdown || showFiltersPage ? "z-[60]" : "z-30"} order-first -mx-[16px] border-b border-[#ebebeb] bg-white px-[16px] pb-[12px] md:static md:order-none md:mx-0 md:mt-[20px] md:border-[#ededed] md:bg-transparent md:px-0 md:pb-[18px]`}>
+                <div className="relative">
+                  <div className="-mx-[16px] flex items-center gap-[8px] overflow-x-auto px-[16px] [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+                    <button
+                      type="button"
+                      onClick={() => setShowFiltersPage(true)}
+                      className="flex h-[36px] shrink-0 cursor-pointer items-center gap-[6px] whitespace-nowrap rounded-full border border-[#dddddd] bg-white px-[14px] text-[13px] font-medium text-[#222222] transition-colors hover:border-[#222222] md:h-[44px] md:text-[14px]"
+                    >
+                      <SlidersHorizontal size={15} aria-hidden="true" />
+                      Filters
+                    </button>
+                    <button
+                      id="sort-btn"
+                      type="button"
+                      onClick={() => setShowSortDropdown(!showSortDropdown)}
+                      aria-expanded={showSortDropdown}
+                      className="flex h-[36px] shrink-0 cursor-pointer items-center gap-[6px] whitespace-nowrap rounded-full border border-[#222222] bg-[#222222] px-[14px] text-[13px] font-medium text-white md:h-[44px] md:text-[14px]"
+                    >
+                      {sortOption}
+                      <ChevronDown size={15} className={`transition-transform duration-300 ${showSortDropdown ? "rotate-180" : ""}`} aria-hidden="true" />
+                    </button>
+                    <span className="flex h-[36px] shrink-0 items-center whitespace-nowrap rounded-full border border-[#dddddd] px-[14px] text-[13px] font-medium text-[#222222] md:h-[44px] md:text-[14px]">
+                      All models
+                    </span>
+                    <span className="flex h-[36px] shrink-0 items-center whitespace-nowrap rounded-full border border-[#dddddd] px-[14px] text-[13px] font-medium text-[#222222] md:h-[44px] md:text-[14px]">
+                      EV only
+                    </span>
+                  </div>
+                  <SortDropdown
+                    showSortDropdown={showSortDropdown}
+                    setShowSortDropdown={setShowSortDropdown}
+                    sortOption={sortOption}
+                    setSortOption={handleSortChange}
+                  />
+                </div>
+                {showFiltersPage && (
+                  <FilterPage
+                    data={filterData}
+                    showFiltersPage={showFiltersPage}
+                    setShowFiltersPage={setShowFiltersPage}
+                    selectedFilters={selectedFilters}
+                    setSelectedFilters={handleFilterApply}
+                  />
+                )}
               </div>
-            </div>
 
-            <div className="mt-[12px] flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[4px] border-b border-[#ededed] pb-[12px] md:mt-[20px] md:pb-[18px]">
-              <div className="relative flex flex-wrap items-center gap-[8px]">
-                <button
-                  id="sort-btn"
-                  onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="flex min-h-[44px] cursor-pointer items-center gap-x-[8px] rounded-full border border-[#D9D9D9] bg-white px-[14px] py-[8px] transition-colors hover:border-[#8d7ab8]"
-                >
-                  <img
-                    className="w-[16px] aspect-sqaure"
-                    src="/images/Sort-Down.png"
-                    alt="Sort Down Icon"
-                  />
-                  <p className="font-medium text-[13px] text-[#3A3A3A]">
-                    {sortOption}
+              <div className="mt-[12px] flex flex-col gap-[6px] md:mt-0">
+                <span className="hidden text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b] md:block">
+                  {isSubscription ? "Subscriptions" : "Fixed rentals"}
+                </span>
+                <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
+                  <h1 className="text-[14px] text-[#6a6a6a] md:text-[24px] md:font-bold md:text-[#1f1f1f]">
+                    <span className="md:hidden">
+                      <b className="font-bold text-[#222222]">
+                        {availableCount} {availableCount === 1 ? "vehicle" : "vehicles"}
+                      </b>{" "}
+                      available{unavailableCount > 0 ? ` · ${unavailableCount} not available` : ""}
+                    </span>
+                    <span className="hidden md:inline">
+                      {availableCount} {availableCount === 1 ? "vehicle" : "vehicles"} available in {selectedLocation}
+                    </span>
+                  </h1>
+                  <p className="hidden text-[14px] text-[#6b6b6b] md:block">
+                    {isSubscription
+                      ? "Choose how long you expect to ride. Billing renews automatically until you cancel."
+                      : "Choose a vehicle now. You can confirm pickup and extras next."}
                   </p>
-                  <img
-                    className={`${
-                      showSortDropdown ? "rotate-180" : ""
-                    } transition-all duration-500 w-[20px] aspect-sqaure`}
-                    src="/images/mynaui_chevron-down.png"
-                    alt="Dropdown Icon"
-                  />
-                </button>
-                <SortDropdown
-                  showSortDropdown={showSortDropdown}
-                  setShowSortDropdown={setShowSortDropdown}
-                  sortOption={sortOption}
-                  setSortOption={handleSortChange}
-                />
-                <span className="hidden sm:block w-[1px] h-[20px] bg-[#EDEDED]" />
-                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[13px] font-medium text-[#3a3a3a]">
-                  All models
-                </span>
-                <span className="rounded-full border border-[#e4e4e4] bg-[#fafafa] px-[14px] py-[8px] text-[13px] font-medium text-[#3a3a3a]">
-                  EV only
-                </span>
+                </div>
               </div>
-              <button
-                onClick={() => setShowFiltersPage(true)}
-                className="flex min-h-[44px] cursor-pointer items-center gap-x-[8px] rounded-full border border-transparent px-[12px] py-[8px] transition-colors hover:border-[#e4e4e4]"
-              >
-                <img
-                  className="w-[20px] aspect-sqaure"
-                  src="/images/Filter.png"
-                  alt="Filter Icon"
-                />
-                <p className="text-[14px] font-bold text-[#00010C]">All filters</p>
-              </button>
-              {showFiltersPage && (
-                <FilterPage
-                  data={filterData}
-                  showFiltersPage={showFiltersPage}
-                  setShowFiltersPage={setShowFiltersPage}
-                  selectedFilters={selectedFilters}
-                  setSelectedFilters={handleFilterApply}
-                />
-              )}
-            </div>
             <div className="mt-[16px] grid w-full grid-cols-1 gap-x-[20px] gap-y-[32px] sm:grid-cols-2 md:mt-[30px] xl:grid-cols-3 xl:gap-x-[28px] xl:gap-y-[40px]">
               <Cards
                 cards={filteredAndSortedVehicles}
                 selectedPlanType={selectedPlanType}
               />
             </div>
-            <Pagination
-              selectedPage={selectedPage}
-              setSelectedPage={handlePageChange}
-              maxPages={maxPages}
-            />
+            {maxPages > 1 && (
+              <Pagination
+                selectedPage={selectedPage}
+                setSelectedPage={handlePageChange}
+                maxPages={maxPages}
+              />
+            )}
+            </div>
           </>
         )}
       </main>
-      <WhyBlive />
-      <Customers />
+      {/* Marketing sections stay on the home page; results end at the footer. */}
       <Footer />
     </div>
   );
