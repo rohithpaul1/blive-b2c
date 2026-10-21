@@ -154,7 +154,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       updateCurrentPlanType("monthly");
     }
     if (mobileOpen) {
-      setMobileStep("where");
+      // Keep the rider's progress: only step back if the step no longer exists.
+      setMobileStep((step) => (step === "duration" && mode !== RENTAL_MODES.subscription ? "when" : step));
       setMobileDateStage("pickup");
     }
   };
@@ -304,7 +305,13 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       start: firstDay,
       end: endOfMonth(mobileCalendarMonth),
     });
-    return [...Array(firstDay.getDay()).fill(null), ...days];
+    const cells = [...Array(firstDay.getDay()).fill(null), ...days];
+    // Drop whole weeks that are already in the past so today's week sits at the top.
+    const today = startOfDay(new Date());
+    const weeks = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+    const firstUseful = weeks.findIndex((week) => week.some((d) => d && !isBefore(d, today)));
+    return (firstUseful > 0 ? weeks.slice(firstUseful) : weeks).flat();
   }, [mobileCalendarMonth]);
 
   const handleMobileDateClick = (date) => {
@@ -613,46 +620,62 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             aria-modal="true"
             aria-label="Search vehicles"
           >
-            <div className="border-b border-[#e9e7eb] bg-white px-[16px] pb-[14px] pt-[max(12px,env(safe-area-inset-top))]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[18px] font-bold text-[#242126]">Find your ride</p>
-                  <p className="mt-[2px] text-[12px] text-[#716c75]">Where do you want to ride?</p>
-                </div>
+            <div className="bg-[#f7f7f8] px-[16px] pb-[8px] pt-[max(12px,env(safe-area-inset-top))]">
+              <div className="grid grid-cols-[44px_1fr_44px] items-center gap-[8px]">
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="flex size-[44px] items-center justify-center rounded-full border border-[#e3e0e5] bg-white shadow-sm"
+                  className="flex size-[40px] items-center justify-center rounded-full border border-[#dddddd] bg-white"
                   aria-label="Close search"
                 >
-                  <X className="size-[20px]" aria-hidden="true" />
+                  <X className="size-[18px]" aria-hidden="true" />
                 </button>
+                {/* One segmented control for the two rental types; the sheet's step titles carry the hierarchy */}
+                <div className="mx-auto grid w-full max-w-[260px] grid-cols-2 rounded-full bg-[#ebebeb] p-[3px]" role="tablist" aria-label="Rental type">
+                  {[
+                    [RENTAL_MODES.fixed, "Fixed rental"],
+                    [RENTAL_MODES.subscription, "Subscription"],
+                  ].map(([mode, label]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      role="tab"
+                      aria-selected={rentalMode === mode}
+                      onClick={() => handleModeChange(mode)}
+                      className={`min-h-[36px] rounded-full text-[14px] font-medium transition-colors ${
+                        rentalMode === mode ? "bg-white text-[#222222] shadow-[0_1px_4px_rgba(0,0,0,0.12)]" : "text-[#6a6a6a]"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <span aria-hidden="true" />
               </div>
-              <div className="mt-[14px]">{modeSwitch(true)}</div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-[12px] pb-[118px] pt-[12px]">
+            <div className="flex-1 overflow-y-auto px-[12px] pb-[118px] pt-[8px] [scrollbar-width:none]">
               <section
-                className={`overflow-hidden rounded-[24px] border bg-white transition-shadow ${
+                className={`overflow-hidden rounded-[20px] border bg-white transition-shadow ${
                   mobileStep === "where"
-                    ? "border-[#d8d4dc] shadow-[0_10px_28px_rgba(28,22,35,0.10)]"
-                    : "border-[#e6e3e8]"
+                    ? "border-[#e3e3e3] shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
+                    : "border-[#e6e6e6]"
                 }`}
               >
                 {mobileStep !== "where" ? (
                   <button
                     type="button"
                     onClick={() => setMobileStep("where")}
-                    className="flex min-h-[74px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
+                    className="flex min-h-[60px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
                   >
-                    <span className="text-[15px] font-medium text-[#777179]">Where</span>
-                    <span className="truncate text-[15px] font-bold text-[#252126]">{selectedLocation}</span>
+                    <span className="text-[14px] text-[#6a6a6a]">Where</span>
+                    <span className="truncate text-[14px] font-bold text-[#222222]">{selectedLocation}</span>
                   </button>
                 ) : (
                   <div className="p-[20px]">
-                    <h2 className="text-[28px] font-bold tracking-[-0.02em] text-[#252126]">Where?</h2>
-                    <label className="mt-[18px] flex min-h-[58px] items-center gap-[12px] rounded-[14px] border border-[#89848b] bg-white px-[16px] focus-within:border-[#351a75] focus-within:ring-1 focus-within:ring-[#351a75]">
-                      <Search className="size-[22px] shrink-0 text-[#252126]" aria-hidden="true" />
+                    <h2 className="text-[22px] font-bold text-[#222222]">Where?</h2>
+                    <label className="mt-[14px] flex min-h-[52px] items-center gap-[10px] rounded-[12px] border border-[#b0b0b0] bg-white px-[14px] focus-within:border-[#222222] focus-within:ring-1 focus-within:ring-[#222222]">
+                      <Search className="size-[20px] shrink-0 text-[#222222]" aria-hidden="true" />
                       <input
                         value={mobileLocationQuery}
                         onChange={(event) => setMobileLocationQuery(event.target.value)}
@@ -662,7 +685,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                       />
                     </label>
 
-                    <p className="mt-[20px] text-[13px] font-bold text-[#4c4750]">Suggested locations</p>
+                    <p className="mt-[18px] text-[13px] font-medium text-[#6a6a6a]">Suggested</p>
                     <div className="mt-[8px]">
                       {!locationPermissionGranted && (
                         <button
@@ -671,14 +694,14 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                             getUserLocation();
                             setMobileStep("when");
                           }}
-                          className="flex min-h-[68px] w-full items-center gap-[14px] rounded-[14px] px-[4px] text-left hover:bg-[#f8f6fa]"
+                          className="flex min-h-[60px] w-full items-center gap-[14px] rounded-[12px] px-[2px] text-left hover:bg-[#f7f7f7]"
                         >
-                          <span className="flex size-[48px] shrink-0 items-center justify-center rounded-[14px] bg-[#eef3fb] text-[#356aa8]">
-                            <Navigation className="size-[21px]" aria-hidden="true" />
+                          <span className="flex size-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#f2f2f2] text-[#222222]">
+                            <Navigation className="size-[19px]" aria-hidden="true" />
                           </span>
                           <span>
-                            <span className="block text-[15px] font-bold text-[#252126]">Near me</span>
-                            <span className="mt-[2px] block text-[13px] text-[#777179]">Use your current location</span>
+                            <span className="block text-[15px] font-medium text-[#222222]">Near me</span>
+                            <span className="mt-[1px] block text-[13px] text-[#6a6a6a]">Use your current location</span>
                           </span>
                         </button>
                       )}
@@ -687,14 +710,14 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                           key={location.name}
                           type="button"
                           onClick={() => selectLocation(location.name)}
-                          className="flex min-h-[68px] w-full items-center gap-[14px] rounded-[14px] px-[4px] text-left hover:bg-[#f8f6fa]"
+                          className="flex min-h-[60px] w-full items-center gap-[14px] rounded-[12px] px-[2px] text-left hover:bg-[#f7f7f7]"
                         >
-                          <span className="flex size-[48px] shrink-0 items-center justify-center rounded-[14px] bg-[#f4f0f8] text-[#5c3b88]">
-                            <MapPin className="size-[21px]" aria-hidden="true" />
+                          <span className="flex size-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#f2f2f2] text-[#222222]">
+                            <MapPin className="size-[19px]" aria-hidden="true" />
                           </span>
                           <span className="min-w-0">
-                            <span className="block truncate text-[15px] font-bold text-[#252126]">{location.name}</span>
-                            <span className="mt-[2px] block text-[13px] text-[#777179]">{location.detail}</span>
+                            <span className="block truncate text-[15px] font-medium text-[#222222]">{location.name}</span>
+                            <span className="mt-[1px] block text-[13px] text-[#6a6a6a]">{location.detail}</span>
                           </span>
                         </button>
                       ))}
@@ -704,20 +727,20 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
               </section>
 
               <section
-                className={`mt-[12px] overflow-hidden rounded-[24px] border bg-white transition-shadow ${
+                className={`mt-[12px] overflow-hidden rounded-[20px] border bg-white transition-shadow ${
                   mobileStep === "when"
-                    ? "border-[#d8d4dc] shadow-[0_10px_28px_rgba(28,22,35,0.10)]"
-                    : "border-[#e6e3e8]"
+                    ? "border-[#e3e3e3] shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
+                    : "border-[#e6e6e6]"
                 }`}
               >
                 {mobileStep !== "when" ? (
                   <button
                     type="button"
                     onClick={() => setMobileStep("when")}
-                    className="flex min-h-[74px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
+                    className="flex min-h-[60px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
                   >
-                    <span className="text-[15px] font-medium text-[#777179]">When</span>
-                    <span className="text-right text-[15px] font-bold text-[#252126]">
+                    <span className="text-[14px] text-[#6a6a6a]">When</span>
+                    <span className="text-right text-[14px] font-bold text-[#222222]">
                       {isSubscription
                         ? formattedDate(selectedPickup?.date, false)
                         : `${formattedDate(selectedPickup?.date, false)} – ${formattedDate(selectedDropoff?.date, false)}`}
@@ -725,27 +748,27 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                   </button>
                 ) : (
                   <div className="p-[20px]">
-                    <h2 className="text-[28px] font-bold tracking-[-0.02em] text-[#252126]">When?</h2>
+                    <h2 className="text-[22px] font-bold text-[#222222]">When?</h2>
                     {!isSubscription && (
-                      <div className="mt-[16px] grid grid-cols-2 rounded-full bg-[#efedf0] p-[4px]">
+                      <div className="mt-[14px] grid grid-cols-2 rounded-full bg-[#ebebeb] p-[3px]">
                         <button
                           type="button"
                           onClick={() => setMobileDateStage("pickup")}
-                          className={`min-h-[42px] rounded-full text-[13px] font-bold ${mobileDateStage === "pickup" ? "bg-white text-[#252126] shadow-sm" : "text-[#777179]"}`}
+                          className={`min-h-[40px] rounded-full text-[14px] font-medium ${mobileDateStage === "pickup" ? "bg-white text-[#222222] shadow-[0_1px_4px_rgba(0,0,0,0.12)]" : "text-[#6a6a6a]"}`}
                         >
                           Pickup · {formattedDate(selectedPickup?.date, false)}
                         </button>
                         <button
                           type="button"
                           onClick={() => setMobileDateStage("dropoff")}
-                          className={`min-h-[42px] rounded-full text-[13px] font-bold ${mobileDateStage === "dropoff" ? "bg-white text-[#252126] shadow-sm" : "text-[#777179]"}`}
+                          className={`min-h-[40px] rounded-full text-[14px] font-medium ${mobileDateStage === "dropoff" ? "bg-white text-[#222222] shadow-[0_1px_4px_rgba(0,0,0,0.12)]" : "text-[#6a6a6a]"}`}
                         >
                           Return · {formattedDate(selectedDropoff?.date, false)}
                         </button>
                       </div>
                     )}
                     {isSubscription && (
-                      <p className="mt-[8px] text-[13px] text-[#777179]">Choose the day you want your subscription to begin.</p>
+                      <p className="mt-[4px] text-[14px] text-[#6a6a6a]">Choose the day your subscription starts.</p>
                     )}
 
                     <div className="mt-[20px] flex items-center justify-between">
@@ -757,7 +780,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                       >
                         <ChevronLeft className="size-[20px]" aria-hidden="true" />
                       </button>
-                      <p className="text-[17px] font-bold text-[#252126]">{format(mobileCalendarMonth, "MMMM yyyy")}</p>
+                      <p className="text-[16px] font-bold text-[#222222]">{format(mobileCalendarMonth, "MMMM yyyy")}</p>
                       <button
                         type="button"
                         onClick={() => setMobileCalendarMonth((month) => addMonths(month, 1))}
@@ -768,35 +791,50 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                       </button>
                     </div>
 
-                    <div className="mt-[16px] grid grid-cols-7 text-center text-[12px] font-medium text-[#777179]">
+                    <div className="mt-[12px] grid grid-cols-7 text-center text-[12px] font-medium text-[#6a6a6a]">
                       {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
                         <span key={`${day}-${index}`}>{day}</span>
                       ))}
                     </div>
-                    <div className="mt-[8px] grid grid-cols-7 gap-y-[6px]">
+                    <div className="mt-[8px] grid grid-cols-7 gap-y-[4px]">
                       {calendarDays.map((day, index) => {
                         if (!day) return <span key={`empty-${index}`} />;
                         const disabled = isBefore(startOfDay(day), startOfDay(new Date()));
                         const selected = isCalendarDaySelected(day);
                         const inRange = isCalendarDayInRange(day);
+                        // A continuous grey band runs from pickup to return, like Airbnb's range picker.
+                        const hasRange =
+                          !isSubscription &&
+                          selectedPickup?.date &&
+                          selectedDropoff?.date &&
+                          !isSameDay(selectedPickup.date, selectedDropoff.date);
+                        const isStart = hasRange && isSameDay(day, selectedPickup.date);
+                        const isEnd = hasRange && isSameDay(day, selectedDropoff.date);
+                        const band = inRange
+                          ? "bg-[#f0f0f0]"
+                          : isStart
+                            ? "bg-[linear-gradient(to_right,transparent_50%,#f0f0f0_50%)]"
+                            : isEnd
+                              ? "bg-[linear-gradient(to_left,transparent_50%,#f0f0f0_50%)]"
+                              : "";
                         return (
-                          <button
-                            key={day.toISOString()}
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => handleMobileDateClick(day)}
-                            className={`mx-auto flex size-[42px] items-center justify-center rounded-full text-[14px] font-medium transition-colors ${
-                              selected
-                                ? "bg-[#2f2350] text-white"
-                                : inRange
-                                  ? "bg-[#eee9f5] text-[#35264c]"
+                          <div key={day.toISOString()} className={`flex justify-center ${band}`}>
+                            <button
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => handleMobileDateClick(day)}
+                              aria-pressed={selected}
+                              className={`flex size-[44px] items-center justify-center rounded-full text-[15px] font-medium transition-colors ${
+                                selected
+                                  ? "bg-[#222222] text-white"
                                   : disabled
-                                    ? "cursor-not-allowed text-[#c9c5ca]"
-                                    : "text-[#252126] hover:bg-[#f2eff5]"
-                            }`}
-                          >
-                            {format(day, "d")}
-                          </button>
+                                    ? "cursor-not-allowed text-[#c4c4c4] line-through decoration-[#d0d0d0]"
+                                    : "text-[#222222] hover:border hover:border-[#222222]"
+                              }`}
+                            >
+                              {format(day, "d")}
+                            </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -806,27 +844,27 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
 
               {isSubscription && (
                 <section
-                  className={`mt-[12px] overflow-hidden rounded-[24px] border bg-white transition-shadow ${
+                  className={`mt-[12px] overflow-hidden rounded-[20px] border bg-white transition-shadow ${
                     mobileStep === "duration"
-                      ? "border-[#d8d4dc] shadow-[0_10px_28px_rgba(28,22,35,0.10)]"
-                      : "border-[#e6e3e8]"
+                      ? "border-[#e3e3e3] shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
+                      : "border-[#e6e6e6]"
                   }`}
                 >
                   {mobileStep !== "duration" ? (
                     <button
                       type="button"
                       onClick={() => setMobileStep("duration")}
-                      className="flex min-h-[74px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
+                      className="flex min-h-[60px] w-full items-center justify-between gap-[16px] px-[20px] text-left"
                     >
-                      <span className="text-[15px] font-medium text-[#777179]">How long?</span>
-                      <span className="text-[15px] font-bold text-[#252126]">
+                      <span className="text-[14px] text-[#6a6a6a]">How long</span>
+                      <span className="text-[14px] font-bold text-[#222222]">
                         About {subscriptionDuration} {Number(subscriptionDuration) === 1 ? "month" : "months"}
                       </span>
                     </button>
                   ) : (
                     <div className="p-[20px]">
-                      <h2 className="text-[28px] font-bold tracking-[-0.02em] text-[#252126]">How long?</h2>
-                      <p className="mt-[6px] text-[13px] leading-[1.45] text-[#777179]">
+                      <h2 className="text-[22px] font-bold text-[#222222]">How long?</h2>
+                      <p className="mt-[4px] text-[14px] leading-[1.45] text-[#6a6a6a]">
                         This helps us show the best subscription. You can extend it later.
                       </p>
                       <div className="mt-[20px] grid grid-cols-2 gap-[10px]">
@@ -835,15 +873,16 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                             key={duration}
                             type="button"
                             onClick={() => setSubscriptionDuration(duration)}
-                            className={`min-h-[70px] rounded-[16px] border px-[14px] text-left transition-colors ${
+                            aria-pressed={Number(subscriptionDuration) === duration}
+                            className={`min-h-[68px] rounded-[14px] px-[12px] text-left text-[#222222] transition-colors ${
                               Number(subscriptionDuration) === duration
-                                ? "border-[#6a5294] bg-[#faf8fd] text-[#35264c]"
-                                : "border-[#dedbe1] bg-white text-[#3f3a42]"
+                                ? "border-2 border-[#222222] bg-[#f7f7f7]"
+                                : "border border-[#dddddd] bg-white"
                             }`}
                           >
-                            <span className="block text-[16px] font-bold">{duration} {duration === 1 ? "month" : "months"}</span>
-                            <span className="mt-[3px] block text-[12px] text-[#777179]">
-                              Planned until {formattedDate(
+                            <span className="block text-[15px] font-bold">{duration} {duration === 1 ? "month" : "months"}</span>
+                            <span className="mt-[2px] block whitespace-nowrap text-[13px] text-[#6a6a6a]">
+                              Until {formattedDate(
                                 (() => {
                                   const date = new Date(selectedPickup?.date || new Date());
                                   date.setMonth(date.getMonth() + duration);
@@ -859,20 +898,32 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                   )}
                 </section>
               )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  navigate("/business");
+                }}
+                className="mx-auto mt-[20px] flex min-h-[44px] items-center gap-[8px] px-[8px] text-[14px] font-medium text-[#222222]"
+              >
+                <Building2 className="size-[17px]" aria-hidden="true" />
+                <span className="underline underline-offset-4">Renting for a business?</span>
+              </button>
             </div>
 
             <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between gap-[16px] border-t border-[#e4e1e6] bg-white px-[20px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[12px]">
               <button
                 type="button"
                 onClick={clearMobileSearch}
-                className="min-h-[48px] px-[2px] text-[14px] font-bold text-[#302c32] underline underline-offset-4"
+                className="min-h-[48px] px-[2px] text-[15px] font-bold text-[#222222] underline underline-offset-4"
               >
                 Clear all
               </button>
               <button
                 type="button"
                 onClick={mobileFooterAction}
-                className="flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[14px] bg-[#351a75] px-[22px] text-[15px] font-bold text-white"
+                className="flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] bg-[#351a75] px-[22px] text-[16px] font-bold text-white"
               >
                 {mobileFooterLabel === "Show vehicles" && <Search className="size-[18px]" aria-hidden="true" />}
                 {mobileFooterLabel}
