@@ -357,7 +357,7 @@ const ModifyDates = ({ data, setOpenModifyDates, formattedDate, countDays, onDat
                       key: razorpayOrder.razorpayKey || RAZORPAY_KEY_ID,
                       amount: razorpayOrder.amount,
                         currency: razorpayOrder.currency,
-                        name: 'Blive',
+                        name: 'BLive NXT',
                         description: `Date Change - Additional ₹${additionalAmount}`,
                         order_id: razorpayOrder.id,
                         handler: async function (razorpayResponse) {

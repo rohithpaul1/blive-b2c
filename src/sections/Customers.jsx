@@ -3,19 +3,19 @@ import { useState, useEffect } from "react";
 const testimonials = [
   {
     name: "Harija M.",
-    location: "Whitefield, Bangalore",
+    location: "Daily commuter",
     photo: "/images/customer1.png",
     text: `I needed an electric scooter for daily office trips. Found BLive through their instagram, rented their Ather 450X. Booking was straightforward. Delivery guy Suresh explained everything properly and answered my questions. Vehicle was also delivered in a very clean condition. When I had a charging issue after 2 weeks, the support team resolved this quickly. `,
   },
   {
     name: "Rajesh K.",
-    location: "Koramangala, Bangalore",
+    location: "Weekend rider",
     photo: "/images/customer2.png",
     text: `Rented the TVS iQube for weekend use. The overall  booking process was pretty easy. Delivery partner Ramesh delivered on time and showed me the features. Scooter runs well, no issues so far. Support responds fast when needed. Fair pricing too.`,
   },
   {
     name: "Priya S.",
-    location: "Electronic City, Bangalore",
+    location: "First-time EV rider",
     photo: "/images/customer3.png",
     text: `First time with electric vehicle. Got the Bounce Infinity delivered next day. Gowrav from customer service called to check if everything was okay after first week. Vehicle performs as expected. Good support team. Saves money on petrol.`,
   },

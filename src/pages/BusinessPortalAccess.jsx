@@ -84,12 +84,16 @@ function BusinessPortalAccess() {
       });
       if (mode === "create") setPendingRedemption(true);
     } catch (signInError) {
+      // Convex Auth surfaces missing-account / wrong-password as a redacted
+      // "Server Error" string — never show that to a business user.
+      const raw = signInError instanceof Error ? signInError.message : "";
+      const redacted = /server error|request id|uncaught|invalidsecret|invalidaccountid/i.test(raw);
       setError(
-        signInError instanceof Error
-          ? signInError.message
+        raw && !redacted
+          ? raw
           : mode === "create"
-          ? "We could not create your portal access."
-          : "The email or password is incorrect."
+          ? "We couldn’t set up your access. Open the invitation link from your accepted quote and try again."
+          : "The email or password is incorrect, or this login hasn’t been set up yet. Use the invitation link from your accepted quote to create access."
       );
       setWorking(false);
     }
@@ -116,7 +120,7 @@ function BusinessPortalAccess() {
           className="relative inline-flex w-fit items-center gap-2 text-[13px] font-bold text-white/70 transition hover:text-white"
         >
           <ArrowLeft className="size-4" />
-          Back to BLive for Business
+          Back to BLive NXT for Business
         </button>
         <div className="relative my-auto max-w-[560px]">
           <span className="flex size-12 items-center justify-center rounded-[15px] bg-white text-[#351a75]">
@@ -127,7 +131,7 @@ function BusinessPortalAccess() {
             <span className="block text-[#c8b5ef]">in one clear view.</span>
           </h1>
           <p className="mt-6 max-w-[490px] text-[17px] leading-7 text-white/62">
-            Track rentals, retrieve commercial documents, and contact the BLive
+            Track rentals, retrieve commercial documents, and contact the BLive NXT
             operations team without switching between emails and spreadsheets.
           </p>
           <div className="mt-10 space-y-4 text-[14px] text-white/75">
@@ -141,7 +145,7 @@ function BusinessPortalAccess() {
             ))}
           </div>
         </div>
-        <p className="relative text-[12px] text-white/38">BLive Business Client Portal</p>
+        <p className="relative text-[12px] text-white/38">BLive NXT Business Client Portal</p>
       </section>
 
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10 lg:px-14">
@@ -163,7 +167,7 @@ function BusinessPortalAccess() {
             <p className="mt-3 text-[14px] leading-6 text-[#716c75]">
               {mode === "create"
                 ? "Use the work email from your accepted quotation to create the company’s primary login."
-                : "Sign in with the primary work email connected to your BLive fleet."}
+                : "Sign in with the primary work email connected to your BLive NXT fleet."}
             </p>
 
             {isAuthenticated && session?.state === "invitation_required" && (
@@ -247,7 +251,7 @@ function BusinessPortalAccess() {
             </div>
           </div>
           <p className="mt-5 text-center text-[12px] leading-5 text-[#716c75]">
-            Need access help? Contact BLive at 080-4719-0022.
+            Need access help? Contact BLive NXT at 080-4719-0022.
           </p>
         </div>
       </section>

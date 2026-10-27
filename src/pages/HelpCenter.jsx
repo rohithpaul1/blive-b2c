@@ -98,7 +98,7 @@ const HelpCenter = () => {
           />
           <div className="flex flex-col gap-y-[4px]">
             <p className="text-[17px] font-bold text-[#212121] md:text-[18px]">
-              Contact BLive support
+              Contact BLive NXT support
             </p>
             <p className="text-[14px] leading-[1.45] text-[#4a4a4a]">
               Talk to us about any question or feedback. Customer satisfaction is our highest priority.

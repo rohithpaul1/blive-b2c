@@ -50,7 +50,7 @@ function BusinessVehicle() {
   const shareVehicle = async () => {
     const shareData = {
       title: `${model?.modelName || "Vehicle"} for business rental`,
-      text: `View ${model?.modelName || "this vehicle"} for a BLive business fleet.`,
+      text: `View ${model?.modelName || "this vehicle"} for a BLive NXT business fleet.`,
       url: window.location.href,
     };
     try {
@@ -114,7 +114,7 @@ function BusinessVehicle() {
                       Business fleet model
                     </span>
                     <p className="mt-7 text-[12px] font-bold uppercase tracking-[0.1em] text-[#716c75]">
-                      {brand?.name || model.manufacturer || "BLive catalogue"}
+                      {brand?.name || model.manufacturer || "BLive NXT catalogue"}
                     </p>
                     <h1 className="mt-2 text-[38px] font-black leading-[1.04] tracking-[-0.045em] sm:text-[50px]">
                       {model.modelName}

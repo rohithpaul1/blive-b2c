@@ -4,14 +4,14 @@ export const faqData = [
     tabs: ["All", "Upcoming", "Past", "Cancelled"],
     questions: {
       All: [
-        { q: "What types of rental plans are available on BLive Rental platform?",
-          a: "BLive offers standardized rental plans: Daily, Weekly, and Monthly. Each plan includes specific duration, daily/weekly rates, kilometer limits, per-kilometer charges, and deposit amounts. All charges are inclusive of GST and operate on a prepaid billing mode." },
+        { q: "What types of rental plans are available on the BLive NXT platform?",
+          a: "BLive NXT offers standardized rental plans: Daily, Weekly, and Monthly. Each plan includes specific duration, daily/weekly rates, kilometer limits, per-kilometer charges, and deposit amounts. All charges are inclusive of GST and operate on a prepaid billing mode." },
         { q: "How long do I have to complete my booking after selecting a vehicle?",
           a: "Once you select a vehicle, it's reserved for 10 minutes during the booking process. If payment is not completed within this time, the vehicle will be released and made available to other customers." },
         { q: "Can I extend my rental period after booking?",
           a: "Yes, you can request a rental extension through the mobile app or website. The system will check vehicle availability for the extended period, calculate additional charges, and process payment for the extension. You'll receive confirmation once the extension is approved." },
         { q: "What pickup options are available for my rental?",
-          a: "BLive offers two pickup options: Hub Pickup (collect from designated BLive hubs) and Doorstep Delivery (vehicle delivered to your location within a 5km radius from the nearest hub). You can select your preferred option during booking based on availability." },
+          a: "BLive NXT offers two pickup options: Hub Pickup (collect from designated BLive NXT hubs) and Doorstep Delivery (vehicle delivered to your location within a 5km radius from the nearest hub). You can select your preferred option during booking based on availability." },
         { q: "What happens if I don't show up for my scheduled pickup?",
           a: "If you don't arrive for your scheduled pickup, the system will automatically cancel your booking after a grace period. You'll receive notifications before cancellation, and refund processing will follow standard cancellation policies." },
       ],
@@ -48,7 +48,7 @@ export const faqData = [
           a: "Yes, but cancellation after vehicle preparation may incur additional charges to cover operational costs. The exact charges will be displayed when you initiate the cancellation process." },
         { q: "What if I need to cancel due to an emergency?",
           a: "For genuine emergencies, contact our support team immediately. We evaluate emergency cancellations on a case-by-case basis and may waive or reduce cancellation charges depending on the circumstances." },
-        { q: "Will I be notified if BLive cancels my booking?",
+        { q: "Will I be notified if BLive NXT cancels my booking?",
           a: "Yes, if we need to cancel your booking due to vehicle unavailability or operational issues, you'll receive immediate notification via SMS and email. We'll offer alternative vehicles when possible or process a full refund." },
       ]
     }
@@ -58,16 +58,16 @@ export const faqData = [
     tabs: ["All", "Upcoming", "Past", "Cancelled"],
     questions: {
       All: [
-        { q: "How can I find the nearest BLive hub to my location?",
+        { q: "How can I find the nearest BLive NXT hub to my location?",
           a: "Use the hub locator feature in the mobile app or website. Enter your current location or preferred area, and the system will display nearby hubs with distances, operating hours, and available vehicles. You can also filter by specific vehicle types or pickup options." },
-        { q: "What are the typical operating hours for BLive hubs?",
+        { q: "What are the typical operating hours for BLive NXT hubs?",
           a: "Hub operating hours vary by location, but most hubs operate during standard business hours with extended hours for high-demand locations. Specific operating hours are displayed in the hub details when you search for vehicles or select pickup locations." },
         { q: "Do all hubs offer the same services?",
           a: "While all hubs support vehicle pickup and basic handover services, specific amenities and services may vary. Some hubs may have additional facilities like charging stations, safety equipment, or extended service hours. Check individual hub details for specific offerings." },
         { q: "Can I visit a hub before booking to inspect vehicles?",
           a: "Hub visits for vehicle inspection before booking are subject to hub availability and operations. Contact the specific hub or customer support to arrange pre-booking inspections. However, all vehicles undergo thorough inspection before handover." },
         { q: "Are there any restrictions on which hubs I can use?",
-          a: "You can use any BLive hub within your operational area. However, doorstep delivery is limited to a 5km radius from the nearest hub. During booking, only accessible hubs for your location will be displayed." },
+          a: "You can use any BLive NXT hub within your operational area. However, doorstep delivery is limited to a 5km radius from the nearest hub. During booking, only accessible hubs for your location will be displayed." },
       ],
       Upcoming: [
         { q: "Will I receive directions to my selected hub?",
@@ -78,8 +78,8 @@ export const faqData = [
           a: "Hub location changes may be possible subject to availability and operational constraints. Contact customer support to check if your desired hub change can be accommodated. Changes close to pickup time may incur additional charges." },
         { q: "What if I arrive early or late for my scheduled hub pickup?",
           a: "While we recommend arriving during your scheduled time slot, minor variations are usually accommodated subject to hub capacity. Significant delays may require rescheduling to the next available slot." },
-        { q: "Is parking available at BLive hubs?",
-          a: "Most BLive hubs provide customer parking facilities. Specific parking information is included in the hub details and pickup instructions. If parking is limited, alternative arrangements or nearby parking options will be communicated." },
+        { q: "Is parking available at BLive NXT hubs?",
+          a: "Most BLive NXT hubs provide customer parking facilities. Specific parking information is included in the hub details and pickup instructions. If parking is limited, alternative arrangements or nearby parking options will be communicated." },
       ],
       Past: [
         { q: "Can I rate my experience at a specific hub?",
@@ -113,7 +113,7 @@ export const faqData = [
     questions: {
       General: [
         {
-          q: "What is BLive's cancellation policy for B2C rentals?",
+          q: "What is BLive NXT's cancellation policy for B2C rentals?",
           a: "Cancellation policies vary by rental plan and timing. Generally, cancellations made well in advance incur minimal charges, while last-minute cancellations may incur higher fees. Specific terms are displayed during booking and in your booking confirmation."
         },
         {
@@ -140,7 +140,7 @@ export const faqData = [
         },
         {
           q: "What if I need to cancel due to vehicle breakdown or technical issues?",
-          a: "If cancellation is due to issues on BLive's side (vehicle breakdown, technical problems), you'll receive a full refund regardless of timing. We may also offer alternative vehicles or compensation for any inconvenience caused."
+          a: "If cancellation is due to issues on BLive NXT's side (vehicle breakdown, technical problems), you'll receive a full refund regardless of timing. We may also offer alternative vehicles or compensation for any inconvenience caused."
         },
         {
           q: "Can I modify my booking instead of cancelling?",
@@ -216,8 +216,8 @@ export const faqData = [
         { q: "What if I notice unauthorized charges on my account?", a: "Report unauthorized charges immediately through customer support or payment dispute system. We'll investigate promptly and block your account if necessary to prevent further unauthorized transactions while resolving the issue." }
       ],
       "Security & Compliance": [
-        { q: "How secure are my payment details on BLive platform?", a: "BLive maintains PCI DSS Level 1 compliance for all payment transactions. Your payment information is encrypted in transit and at rest, with limited access controls and comprehensive audit logging for all financial transactions." },
-        { q: "Do you store my credit card or banking information?", a: "Payment information is securely tokenized and stored through PCI-compliant payment processors. BLive does not directly store sensitive payment details like full card numbers or banking credentials on our systems." },
+        { q: "How secure are my payment details on the BLive NXT platform?", a: "BLive NXT maintains PCI DSS Level 1 compliance for all payment transactions. Your payment information is encrypted in transit and at rest, with limited access controls and comprehensive audit logging for all financial transactions." },
+        { q: "Do you store my credit card or banking information?", a: "Payment information is securely tokenized and stored through PCI-compliant payment processors. BLive NXT does not directly store sensitive payment details like full card numbers or banking credentials on our systems." },
         { q: "Can I set spending limits on my account?", a: "Direct spending limits are not currently available, but you can manage expenses by reviewing estimated charges during booking and monitoring your transaction history in the account dashboard." },
         { q: "What if I suspect fraudulent activity on my account?", a: "Contact customer support immediately if you suspect fraudulent activity. We'll investigate all transactions, freeze the account if necessary, and work with you to secure your account and process any warranted refunds." },
         { q: "How do I update my payment methods?", a: "Payment methods can be updated through your account settings in the mobile app or website. You can add, remove, or modify payment preferences with proper verification." }
@@ -229,28 +229,28 @@ export const faqData = [
     tabs: ["Account Creation & KYC", "Account Security", "Data Privacy & Compliance", "Account Management"],
     questions: {
       "Account Creation & KYC": [
-        { q: "What is the KYC verification process?", a: "BLive's 60-second Aadhaar, driving license and local ID verification. The entire process is designed to complete within 60 seconds." },
+        { q: "What is the KYC verification process?", a: "BLive NXT's 60-second Aadhaar, driving license and local ID verification. The entire process is designed to complete within 60 seconds." },
         { q: "What documents are required for KYC verification?", a: "You need a government-issued photo ID (Aadhaar card preferred, or driving license, local ID). The document should be clear, valid, and match your profile information. Additional verification may be required for tourists or international visitors." },
         { q: "How long is KYC verification valid?", a: "KYC verification is typically valid for the lifetime of your account unless there are significant changes to regulatory requirements or your personal information. Re-verification may be required for enhanced security or compliance updates." },
         { q: "Can tourists or international visitors complete KYC?", a: "Yes, international tourists can complete KYC using valid international IDs like local ID. The system routes tourist KYC to specialized verification processes with local ID database validation." }
       ],
       "Account Security": [
-        { q: "How is my personal information protected?", a: "All personal information is encrypted at rest and in transit with limited access controls and comprehensive audit logging. BLive complies with GDPR for international users and maintains strict data privacy standards for all customer information." },
+        { q: "How is my personal information protected?", a: "All personal information is encrypted at rest and in transit with limited access controls and comprehensive audit logging. BLive NXT complies with GDPR for international users and maintains strict data privacy standards for all customer information." },
         { q: "What information is required for account registration?", a: "Basic registration requires phone number, email address, personal details for KYC, emergency contact information, and rental notification preferences. All information is used solely for rental services and regulatory compliance." },
         { q: "Can I change my account information after registration?", a: "Yes, you can update most account information including contact details and preferences. However, changes to KYC-related information may require re-verification. Update your information through account settings or contact customer support." },
         { q: "How do I reset my password or recover my account?", a: "Use the 'Forgot Password' option to reset via registered email or phone number. Account recovery follows secure verification processes to protect your account. Contact customer support if you have trouble accessing your account." },
         { q: "What happens if I lose access to my registered phone number?", a: "Contact customer support immediately with alternative identification. Account recovery without access to registered phone requires additional verification steps to ensure account security and prevent unauthorized access." }
       ],
       "Data Privacy & Compliance": [
-        { q: "How long is my data retained by BLive?", a: "Rental records and transaction data are retained according to regulatory requirements and business needs. KYC documents have a 7-year retention policy for compliance. Location data is anonymized after rental completion with your consent." },
+        { q: "How long is my data retained by BLive NXT?", a: "Rental records and transaction data are retained according to regulatory requirements and business needs. KYC documents have a 7-year retention policy for compliance. Location data is anonymized after rental completion with your consent." },
         { q: "Can I delete my account and data?", a: "Yes, you can request account deletion through customer support. We'll retain minimum data required for legal compliance but will delete or anonymize personal data as per privacy policies and regulatory requirements." },
-        { q: "Who has access to my personal information?", a: "Access to personal information is strictly limited to authorized BLive personnel who need it for service delivery, compliance, or support. We maintain comprehensive audit logs of all data access and never share personal information with third parties without consent." },
-        { q: "How do you handle data security breaches?", a: "BLive has comprehensive security incident response procedures. In case of any data breach, affected users are notified immediately, and we work with security experts and regulatory authorities to investigate and prevent future incidents." },
+        { q: "Who has access to my personal information?", a: "Access to personal information is strictly limited to authorized BLive NXT personnel who need it for service delivery, compliance, or support. We maintain comprehensive audit logs of all data access and never share personal information with third parties without consent." },
+        { q: "How do you handle data security breaches?", a: "BLive NXT has comprehensive security incident response procedures. In case of any data breach, affected users are notified immediately, and we work with security experts and regulatory authorities to investigate and prevent future incidents." },
         { q: "Do you share my data with third parties?", a: "We only share data with third-party service providers necessary for service delivery (payment processors, verification services) under strict confidentiality agreements. We never sell personal data or share it for marketing purposes." }
       ],
       "Account Management": [
         { q: "How do I update my emergency contact information?", a: "Emergency contact information can be updated through account settings. This information is crucial for safety during rentals, so ensure it's always current and accessible. Multiple emergency contacts can be added for redundancy." },
-        { q: "Can I have multiple accounts with BLive?", a: "Each individual should maintain only one BLive account for identity verification and security purposes. Multiple accounts may violate terms of service and can cause issues with KYC compliance and rental history tracking." },
+        { q: "Can I have multiple accounts with BLive NXT?", a: "Each individual should maintain only one BLive NXT account for identity verification and security purposes. Multiple accounts may violate terms of service and can cause issues with KYC compliance and rental history tracking." },
         { q: "What notification preferences can I set?", a: "You can customize notifications for booking confirmations, vehicle ready alerts, rental reminders, promotional offers, and emergency communications. Preferences can be set for SMS, email, and push notifications separately." },
         { q: "How do I report suspicious activity on my account?", a: "Report any suspicious activity immediately through customer support or the security section in your account settings. Include details about the suspicious activity, and we'll investigate promptly while securing your account." },
         { q: "Can I temporarily deactivate my account?", a: "Account deactivation options may be available through customer support. Deactivated accounts retain data for potential reactivation but disable active services. Contact customer support to discuss temporary deactivation and reactivation procedures." }

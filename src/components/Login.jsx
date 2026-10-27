@@ -162,7 +162,7 @@ const Login = () => {
                   Login or Sign up to continue booking
                 </p>
                 <p className="mt-[4px] text-[14px] text-[#3A3A3A]">
-                  Get started with BLive EZY—just verify your Mobile Number.
+                  Get started with BLive NXT—just verify your mobile number.
                 </p>
               </div>
               <img

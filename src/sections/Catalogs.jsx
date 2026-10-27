@@ -383,7 +383,7 @@ const Catalogs = () => {
       <p className="mt-[16px] max-w-[720px] text-pretty text-center text-[14px] font-medium leading-[1.55] text-[#4a4a4a] sm:mt-[20px] sm:text-[18px]">
         {isSubscription
           ? "Choose how long you want to start. Your subscription then renews automatically until you cancel."
-          : "Day trip, weekend escape, or city errand. BLive EZY fits your life, without the cost of ownership."}
+          : "Day trip, weekend escape, or city errand. BLive NXT fits your life, without the cost of ownership."}
       </p>
 
       {/* Tabs */}

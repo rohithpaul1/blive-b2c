@@ -25,7 +25,7 @@ const HowItWorks = () => {
     <div className="mx-auto mt-[64px] flex w-full flex-col items-center px-[20px] md:mt-[120px] md:w-[90%] md:px-0">
       <div className="max-w-[720px]">
         <h2 className="text-center text-[22px] font-bold leading-[1.2] text-[#0F0F0F] md:text-[36px]">
-          The EZY Way to Ride
+          The BLive NXT Way to Ride
         </h2>
         <p className="mt-[8px] text-center text-[14px] font-medium text-[#6a6a6a] md:mt-[20px] md:text-[18px]">
           From booking to riding, we make going electric simple.

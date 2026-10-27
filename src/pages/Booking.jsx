@@ -148,12 +148,13 @@ const Booking = () => {
   // Subscription "pay today" split + ongoing mechanics (see Price Details).
   const subDeposit = Number(_pb.security_deposit ?? 0) || 0;
   const subRecurring = Number(_pb.recurring_charge ?? 0) || 0;
-  // Wallet top-up = opening wallet balance to fund, minus what the rider
-  // already holds. Fall back to the first period's charge when the quote
-  // doesn't carry an explicit opening balance.
-  const subOpeningBalance = openingWalletBalance > 0 ? openingWalletBalance : subRecurring;
-  const subWalletTopUp = Math.max(0, subOpeningBalance - walletAvailable);
   const subMinBalance = Number(_pb.minimum_wallet_balance ?? 0) || 0;
+  // Wallet top-up = spendable wallet funding for the first cycle (deposit is
+  // shown separately and held, not spent). Backend sends wallet_funding;
+  // fall back to first cycle + min balance - existing wallet when absent.
+  const subWalletTopUp = Number(
+    _pb.wallet_funding ?? Math.max(0, subRecurring + subMinBalance - walletAvailable),
+  ) || 0;
   const _subRate =
     _pb.ratePlan ?? selectedProduct?.calculationData?.ratePlan ?? currentPlanType;
   const subUnit = planUnit(_subRate);
@@ -529,7 +530,7 @@ const Booking = () => {
 
           amount: Number(response.data.amount ?? paymentData.amount) * 100,
           currency: "INR",
-          name: "Blive EV Rental",
+          name: "BLive NXT EV Rental",
           description: `Payment for ${selectedProduct?.vehicleName} rental`,
           order_id: response.data.orderId,
           handler: async (paymentResponse) => {
@@ -1609,6 +1610,16 @@ const Booking = () => {
                               ₹{formattedAmount(subDeposit)}
                             </p>
                           </div>
+                          {couponSavings() > 0 && (
+                            <div className="flex items-center justify-between">
+                              <p className="text-[14px] text-[#1ca05a]">
+                                Coupon {appliedPromocode?.promocode ?? ""} · first {subUnit || "cycle"} credit
+                              </p>
+                              <p className="text-[14px] font-medium text-[#1ca05a]">
+                                − ₹{formattedCouponSavings()}
+                              </p>
+                            </div>
+                          )}
                           {showOnboardingFee && (
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-x-[4px]">
@@ -1872,7 +1883,7 @@ const Booking = () => {
                   )}
                   </section>
 
-                  {!isSubscription && <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
+                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
                     <h2 className="text-[20px] font-bold text-[#222222]">
                       Payment & Offers
                     </h2>
@@ -1905,7 +1916,12 @@ const Booking = () => {
                         Apply coupon
                       </button>
                     )}
-                  </section>}
+                    {isSubscription && (
+                      <p className="mt-[10px] text-[12px] text-[#717171]">
+                        On subscriptions the discount applies to your first {subUnit || "cycle"} and is credited to your wallet.
+                      </p>
+                    )}
+                  </section>
 
                   <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
                     <h2 className="text-[20px] font-bold text-[#222222]">

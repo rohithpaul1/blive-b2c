@@ -85,7 +85,7 @@ const PayLink = () => {
         ) : data?.state === "not_found" ? (
           <div className="rounded-[16px] bg-white shadow-md p-[24px] text-center">
             <h1 className="text-[22px] font-bold text-[#222222]">Link not found</h1>
-            <p className="mt-[8px] text-[#555555]">This payment link isn't valid. Please contact b:live support.</p>
+            <p className="mt-[8px] text-[#555555]">This payment link isn't valid. Please contact BLive NXT support.</p>
           </div>
         ) : (
           <div className="rounded-[16px] bg-white shadow-md p-[24px]">

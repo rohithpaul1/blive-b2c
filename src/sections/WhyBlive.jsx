@@ -13,13 +13,13 @@ const WhyBlive = () => {
     {
       icon: "/images/check-verified.svg",
       title: "Easy, fast booking",
-      text: "Choose your EV in minutes, complete verification online, and collect it from the most convenient BLive hub.",
+      text: "Choose your EV in minutes, complete verification online, and collect it from the most convenient BLive NXT hub.",
     },
   ];
 
   return (
     <section className="flex flex-col items-center justify-center bg-[#0f0f0f] px-[clamp(20px,8vw,120px)] py-[64px] text-white md:py-[88px]">
-      <h2 className="text-center text-[22px] font-bold md:text-[44px]">Why BLive?</h2>
+      <h2 className="text-center text-[22px] font-bold md:text-[44px]">Why BLive NXT?</h2>
       <p className="mt-[14px] max-w-[720px] text-center text-[15px] text-[#d2d2d2]">
         Your trusted partner for effortless and eco-friendly EV rentals.
       </p>

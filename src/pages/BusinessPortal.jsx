@@ -603,14 +603,14 @@ function DocumentsView({ documents }) {
     setWorkingId(row.id);
     try {
       await requestRenewal({ contractId: row.id });
-      toast.success("Renewal request sent to the BLive commercial team");
+      toast.success("Renewal request sent to the BLive NXT commercial team");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "We could not send the renewal request.");
     } finally { setWorkingId(null); }
   };
   return (
     <div className="space-y-6">
-      <SectionHeader eyebrow="Commercial records" title="Documents" description="Company agreements, invoices, and KYB files from the same records used by BLive operations." />
+      <SectionHeader eyebrow="Commercial records" title="Documents" description="Company agreements, invoices, and KYB files from the same records used by BLive NXT operations." />
       <div className="flex gap-1 overflow-x-auto rounded-[12px] border border-[#e1dee4] bg-white p-1.5">
         {Object.entries(labels).map(([value, label]) => <button key={value} type="button" onClick={() => setSection(value)} className={`min-h-9 shrink-0 rounded-[8px] px-4 text-[12px] font-extrabold ${section === value ? "bg-[#eee9f4] text-[#513871]" : "text-[#77717a] hover:bg-[#f7f5f8]"}`}>{label}<span className="ml-2 text-[12px] opacity-60">{documents?.[value]?.length ?? 0}</span></button>)}
       </div>
@@ -635,7 +635,7 @@ function DocumentsView({ documents }) {
             );
           })}
         </div>
-      ) : <EmptyState icon={FileText} title={`No ${labels[section].toLowerCase()} available`} description="Documents will appear automatically when BLive operations adds them to your company record." />}
+      ) : <EmptyState icon={FileText} title={`No ${labels[section].toLowerCase()} available`} description="Documents will appear automatically when BLive NXT operations adds them to your company record." />}
     </div>
   );
 }
@@ -798,7 +798,7 @@ function RequestVehiclesModal({ catalog, onClose, seed }) {
     setWorking(true);
     try {
       const result = await requestVehicles({ ...form, durationMonths: Number(form.durationMonths), notes: form.notes.trim() || undefined, lines: lines.map((line) => ({ modelName: line.modelName, quantity: Number(line.quantity) })) });
-      toast.success(`${result.number} was sent to the BLive team`);
+      toast.success(`${result.number} was sent to the BLive NXT team`);
       onClose();
     } catch (error) { toast.error(error instanceof Error ? error.message : "We could not send this request."); }
     finally { setWorking(false); }
@@ -880,7 +880,7 @@ function BusinessPortal() {
       <div className="min-w-0">
         <header className="sticky top-0 z-40 flex h-[68px] items-center justify-between border-b border-[#e4e1e6] bg-white/95 px-4 backdrop-blur sm:px-6 lg:h-[76px] lg:px-8">
           <div className="flex min-w-0 items-center gap-3 lg:hidden"><button type="button" aria-label="Open navigation" onClick={() => setMobileMenu(true)} className="flex size-10 items-center justify-center rounded-[10px] border border-[#e1dde3]"><Menu className="size-5" /></button><img src="/images/BliveNxtLogo.svg" alt="b:live NXT" className="h-10 w-auto" /></div>
-          <div className="hidden lg:block"><p className="text-[12px] font-bold text-[#716c75]">BLive Business Portal</p><h2 className="mt-1 text-[14px] font-black">{NAVIGATION.find((item) => item.id === active)?.label}</h2></div>
+          <div className="hidden lg:block"><p className="text-[12px] font-bold text-[#716c75]">BLive NXT Business Portal</p><h2 className="mt-1 text-[14px] font-black">{NAVIGATION.find((item) => item.id === active)?.label}</h2></div>
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => openRequest()} className="hidden min-h-10 items-center gap-2 rounded-[10px] border border-[#dcd7e0] bg-white px-4 text-[12px] font-extrabold text-[#4e4356] sm:inline-flex"><Plus className="size-4" /> Request vehicles</button>
             <div className="relative">

@@ -19,7 +19,7 @@ const Hero = () => {
           />
         </div>
         <h1 className="absolute inset-x-[20px] top-[92px] z-30 text-balance text-[20px] font-bold leading-[1.25] text-white [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] md:sr-only">
-          From cafés to co-working spots, discover Bengaluru at your own pace with Ezy Scooters
+          From cafés to co-working spots, explore your city at your own pace on a BLive NXT electric scooter
         </h1>
         {/* <HeroKPICard /> */}
         <SearchBar />

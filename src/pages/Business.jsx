@@ -83,7 +83,7 @@ function Business() {
       unique.set(name, {
         id: String(row?.model?.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-")),
         name,
-        brandName: row?.brand?.name || row?.model?.manufacturer || "BLive fleet",
+        brandName: row?.brand?.name || row?.model?.manufacturer || "BLive NXT fleet",
         image:
           row?.model?.imageUrl ||
           row?.model?.images?.[0] ||
@@ -320,7 +320,7 @@ function Business() {
             <div className="max-w-[650px]">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[12px] font-bold text-white/85">
                 <Building2 className="size-4" aria-hidden="true" />
-                BLive for Business
+                BLive NXT for Business
               </span>
               <h1 className="mt-6 text-[40px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[52px] md:text-[58px]">
                 Choose vehicles
@@ -536,7 +536,7 @@ function Business() {
               <div className="px-5 py-6 sm:px-7 sm:py-7">
             <div className="max-w-[720px]">
               <p className="text-[14px] leading-6 text-[#716c75]">
-                This goes directly to the BLive commercial team. We will review
+                This goes directly to the BLive NXT commercial team. We will review
                 availability and send a quotation before asking for KYB documents.
               </p>
               <div className="mt-5 grid gap-3 rounded-[18px] bg-[#f7f6f8] p-4 sm:grid-cols-3">
@@ -586,7 +586,7 @@ function Business() {
                       href="mailto:contact@blive.co.in"
                       className="flex min-h-[50px] flex-1 items-center justify-center rounded-[13px] bg-[#351a75] px-5 text-[14px] font-bold text-white"
                     >
-                      Contact BLive
+                      Contact BLive NXT
                     </a>
                   </div>
                 </div>
@@ -797,7 +797,7 @@ function Business() {
                         className="mt-0.5 size-4 accent-[#351a75]"
                       />
                       <span className="text-[12px] leading-5 text-[#686368]">
-                        I agree that BLive may contact me about this fleet enquiry and quotation.
+                        I agree that BLive NXT may contact me about this fleet enquiry and quotation.
                       </span>
                     </label>
 
