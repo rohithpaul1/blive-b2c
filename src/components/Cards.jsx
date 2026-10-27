@@ -303,20 +303,21 @@ const Cards = ({
       {cards &&
         (isBusiness ? cards : cards.filter((c) => c.isAvailable)).map((card, i) => {
           const pricing = getPricing(card);
-          const dailyIncludedKm = Number(card.perDayKmLimit) || Number(card.range) || 0;
+          // Only the plan's km limit counts as an allowance; battery range is not a usage allowance.
+          const dailyIncludedKm = Number(card.perDayKmLimit) || 0;
           const selectedQuantity = isBusiness
             ? Number(getSelectedQuantity?.(card) || 0)
             : 0;
 
           const rate = isSubscription ? pricing.cycleRate : pricing.dailyRate;
+          // Spec row is always shown; a missing value reads "—" rather than hiding the row.
+          const specValue = (n, unit) => (Number(n) > 0 ? `${n} ${unit}` : "—");
           const specLine = [
-            card.range ? `${card.range} km range` : null,
-            card.topSpeed ? `${card.topSpeed} km/h top speed` : null,
-            !card.range && Number(card.chargeTime) > 0 ? `${card.chargeTime} hr charge` : null,
-          ]
-            .filter(Boolean)
-            .join(" · ");
-          // At most two grey lines per card: specs (when known), then the km allowance.
+            `Range ${specValue(card.range, "km")}`,
+            `Top speed ${specValue(card.topSpeed, "km/h")}`,
+            `Charge ${specValue(card.chargeTime, "hr")}`,
+          ].join(" · ");
+          // Two grey lines per card: specs, then the km allowance.
           // Per-km and onboarding fees are shown at checkout with the deposit and GST.
           const allowanceLine =
             dailyIncludedKm > 0
@@ -360,7 +361,7 @@ const Cards = ({
                 <h2 className={`truncate text-[16px] font-bold leading-[1.3] md:text-[17px] ${card.isAvailable ? "text-[#222222]" : "text-[#8a8a8a]"}`}>
                   {card.vehicleName}
                 </h2>
-                {specLine && <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{specLine}</p>}
+                <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{specLine}</p>
                 <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">{allowanceLine}</p>
                 {isSubscription && card.isAvailable && (
                   <p className="text-[14px] leading-[1.45] text-[#6a6a6a]">
