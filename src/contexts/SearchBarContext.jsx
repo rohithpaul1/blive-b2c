@@ -4,6 +4,7 @@ import {
   addPlanDuration,
   normaliseDuration,
 } from "../utils/subscription";
+import { normaliseTimeLabel } from "../utils/timeSlots";
 
 const SearchBarContext = createContext();
 
@@ -357,7 +358,8 @@ const SearchBarProvider = ({ children }) => {
     setRentalModeState(mode);
     if (location) sessionStorage.setItem("selectedLocation", location);
     sessionStorage.setItem("selectedPickupDate", pickup.toISOString());
-    sessionStorage.setItem("selectedPickupTime", "10 AM");
+    const pickupTime = normaliseTimeLabel(params.get("pickupTime"));
+    sessionStorage.setItem("selectedPickupTime", pickupTime);
 
     if (mode === RENTAL_MODES.subscription) {
       const duration = normaliseDuration(params.get("duration"));
@@ -373,7 +375,12 @@ const SearchBarProvider = ({ children }) => {
       }
       sessionStorage.setItem("selectedDropoffDate", dropoff.toISOString());
     }
-    sessionStorage.setItem("selectedDropoffTime", "10 AM");
+    sessionStorage.setItem(
+      "selectedDropoffTime",
+      mode === RENTAL_MODES.subscription
+        ? pickupTime
+        : normaliseTimeLabel(params.get("dropoffTime") || pickupTime)
+    );
 
     const plan = params.get("plan");
     if (["daily", "weekly", "monthly"].includes(plan)) {

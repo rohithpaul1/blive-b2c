@@ -18,8 +18,17 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Datepicker from "./Datepicker";
 import LocationDropdown from "./LocationDropdown";
+import TimeSlotPicker from "./TimeSlotPicker";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import { RENTAL_MODES, startingPeriodLabel } from "../utils/subscription";
+import {
+  DEFAULT_TIME,
+  billableDays,
+  firstOpenSlot,
+  labelToMinutes,
+  pickupSlotBlocked,
+  returnSlotBlocked,
+} from "../utils/timeSlots";
 
 const LOCATIONS = [
   { name: "HSR Layout, Bengaluru", detail: "Popular pickup hub" },
@@ -43,6 +52,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
   const [mobileCalendarMonth, setMobileCalendarMonth] = useState(() => startOfMonth(new Date()));
   const [mobileDateStage, setMobileDateStage] = useState("pickup");
   const searchContainerRef = useRef(null);
+  const whenTabsRef = useRef(null);
+  const timeSectionRef = useRef(null);
   const navigate = useNavigate();
   const {
     selectedPickup,
@@ -181,10 +192,14 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       mode: rentalMode,
       location: selectedLocation,
       pickup: inputDate(selectedPickup?.date),
+      pickupTime: selectedPickup?.time || DEFAULT_TIME,
       plan: planType,
       ...(isSubscription
         ? { duration: String(subscriptionDuration) }
-        : { dropoff: inputDate(selectedDropoff?.date) }),
+        : {
+            dropoff: inputDate(selectedDropoff?.date),
+            dropoffTime: selectedDropoff?.time || DEFAULT_TIME,
+          }),
     });
     navigate(`/search?${params.toString()}`);
   };
@@ -220,6 +235,53 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     autoAdjustPlanTypeFromDates(selectedPickup?.date, nextDate);
   };
 
+  const setPickupTime = (time) => {
+    setSelectedPickup((previous) => ({ ...previous, time }));
+    sessionStorage.setItem("selectedPickupTime", time);
+  };
+
+  const setDropoffTime = (time) => {
+    setSelectedDropoff((previous) => ({ ...previous, time }));
+    sessionStorage.setItem("selectedDropoffTime", time);
+  };
+
+  const scrollIntoSheet = (ref) => {
+    // Wait a frame so the new stage has rendered before scrolling to it.
+    requestAnimationFrame(() =>
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    );
+  };
+
+  const isPickupSlotBlocked = (date) => (minutes) => Boolean(pickupSlotBlocked(date, minutes));
+  const isReturnSlotBlocked = (pickup, returnDate) => (minutes) =>
+    Boolean(returnSlotBlocked(pickup, returnDate, minutes));
+
+  // Keep the pickup time bookable for the chosen date (e.g. today after 10 AM).
+  const pickupTimeFor = (date, time = selectedPickup?.time) => {
+    const blocked = isPickupSlotBlocked(date);
+    const minutes = labelToMinutes(time);
+    if (minutes !== null && !blocked(minutes)) return time;
+    return firstOpenSlot(blocked) || time || DEFAULT_TIME;
+  };
+
+  const selectMobilePickupTime = (time) => {
+    setPickupTime(time);
+    if (isSubscription) {
+      // A subscription ends at the same time of day it starts.
+      setDropoffTime(time);
+      return;
+    }
+    // Default the return to the same time: that keeps the rental to whole days.
+    const pickup = { date: selectedPickup?.date, time };
+    const returnBlocked = isReturnSlotBlocked(pickup, selectedDropoff?.date);
+    const minutes = labelToMinutes(time);
+    setDropoffTime(
+      minutes !== null && !returnBlocked(minutes) ? time : firstOpenSlot(returnBlocked) || time
+    );
+    setMobileDateStage("dropoff");
+    scrollIntoSheet(whenTabsRef);
+  };
+
   const selectLocation = (location) => {
     setSelectedLocation(location);
     sessionStorage.setItem("selectedLocation", location);
@@ -235,8 +297,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     else dropoff.setDate(dropoff.getDate() + 1);
     setSubscriptionDuration(1);
     setSelectedLocation("HSR Layout, Bengaluru");
-    setSelectedPickup({ date: pickup, time: "10 AM" });
-    setSelectedDropoff({ date: dropoff, time: "10 AM" });
+    setSelectedPickup({ date: pickup, time: DEFAULT_TIME });
+    setSelectedDropoff({ date: dropoff, time: DEFAULT_TIME });
     setMobileLocationQuery("");
     setMobileCalendarMonth(startOfMonth(pickup));
     setMobileDateStage("pickup");
@@ -244,6 +306,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     sessionStorage.setItem("selectedLocation", "HSR Layout, Bengaluru");
     sessionStorage.setItem("selectedPickupDate", pickup.toISOString());
     sessionStorage.setItem("selectedDropoffDate", dropoff.toISOString());
+    sessionStorage.setItem("selectedPickupTime", DEFAULT_TIME);
+    sessionStorage.setItem("selectedDropoffTime", DEFAULT_TIME);
   };
 
   const modeSwitch = (mobile = false) => (
@@ -314,32 +378,91 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     return (firstUseful > 0 ? weeks.slice(firstUseful) : weeks).flat();
   }, [mobileCalendarMonth]);
 
+  // Pick a date, then its time: the time chips sit under the calendar, so after
+  // each date tap the sheet scrolls down to them. Picking the pickup time moves
+  // on to the return.
   const handleMobileDateClick = (date) => {
     if (isSubscription) {
       updatePickupDate(date);
+      const time = pickupTimeFor(date, DEFAULT_TIME);
+      setPickupTime(time);
+      setDropoffTime(time);
+      scrollIntoSheet(timeSectionRef);
       return;
     }
 
-    if (mobileDateStage === "pickup") {
+    if (
+      mobileDateStage === "pickup" ||
+      isBefore(startOfDay(date), startOfDay(selectedPickup?.date || new Date()))
+    ) {
       const nextDate = new Date(date);
       nextDate.setHours(10, 0, 0, 0);
       setSelectedPickup((previous) => ({ ...previous, date: nextDate }));
       setSelectedDropoff((previous) => ({ ...previous, date: null }));
       sessionStorage.setItem("selectedPickupDate", nextDate.toISOString());
       sessionStorage.removeItem("selectedDropoffDate");
-      setMobileDateStage("dropoff");
-      return;
-    }
-
-    if (isBefore(startOfDay(date), startOfDay(selectedPickup?.date || new Date()))) {
-      updatePickupDate(date);
-      setMobileDateStage("dropoff");
+      setPickupTime(pickupTimeFor(nextDate, DEFAULT_TIME));
+      setMobileDateStage("pickup");
+      scrollIntoSheet(timeSectionRef);
       return;
     }
 
     updateDropoffDate(date);
-    setMobileDateStage("pickup");
+    const returnBlocked = isReturnSlotBlocked(selectedPickup, date);
+    const wanted = selectedDropoff?.time || selectedPickup?.time || DEFAULT_TIME;
+    const wantedMinutes = labelToMinutes(wanted);
+    setDropoffTime(
+      wantedMinutes !== null && !returnBlocked(wantedMinutes)
+        ? wanted
+        : firstOpenSlot(returnBlocked) || wanted
+    );
+    scrollIntoSheet(timeSectionRef);
   };
+
+  // Opening the sheet on today with a time that has already passed: move to the next open slot.
+  useEffect(() => {
+    if (!mobileOpen || !selectedPickup?.date) return;
+    const next = pickupTimeFor(selectedPickup.date);
+    if (next && next !== selectedPickup.time) {
+      setPickupTime(next);
+      if (isSubscription) setDropoffTime(next);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileOpen, selectedPickup?.date]);
+
+  const pickupTimeLabel = selectedPickup?.time || DEFAULT_TIME;
+  const dropoffTimeLabel = selectedDropoff?.time || pickupTimeLabel;
+  const rentalDays = isSubscription
+    ? 0
+    : billableDays(selectedPickup?.date, pickupTimeLabel, selectedDropoff?.date, dropoffTimeLabel);
+  const daysAtPickupTime = isSubscription
+    ? 0
+    : billableDays(selectedPickup?.date, pickupTimeLabel, selectedDropoff?.date, pickupTimeLabel);
+  const dayCount = (n) => `${n} ${n === 1 ? "day" : "days"}`;
+  const dateTime = (date, time) =>
+    date ? `${formattedDate(date, false)}, ${time}` : "Add date";
+
+  const timePicker =
+    isSubscription || mobileDateStage === "pickup"
+      ? {
+          title: `Pickup time · ${formattedDate(selectedPickup?.date, false)}`,
+          value: pickupTimeLabel,
+          onSelect: selectMobilePickupTime,
+          isBlocked: isPickupSlotBlocked(selectedPickup?.date),
+          warning: null,
+        }
+      : {
+          title: selectedDropoff?.date
+            ? `Return time · ${formattedDate(selectedDropoff.date, false)}`
+            : "Return time",
+          value: dropoffTimeLabel,
+          onSelect: setDropoffTime,
+          isBlocked: isReturnSlotBlocked(selectedPickup, selectedDropoff?.date),
+          warning:
+            selectedDropoff?.date && rentalDays > daysAtPickupTime
+              ? `Returning after ${pickupTimeLabel} adds a day.`
+              : null,
+        };
 
   const isCalendarDaySelected = (date) => {
     if (!date) return false;
@@ -654,7 +777,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-[12px] pb-[118px] pt-[8px] [scrollbar-width:none]">
+            <div className="flex-1 overflow-y-auto px-[12px] pb-[150px] pt-[8px] [scrollbar-width:none]">
               <section
                 className={`overflow-hidden rounded-[20px] border bg-white transition-shadow ${
                   mobileStep === "where"
@@ -742,29 +865,34 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                     <span className="text-[14px] text-[#6a6a6a]">When</span>
                     <span className="text-right text-[14px] font-bold text-[#222222]">
                       {isSubscription
-                        ? formattedDate(selectedPickup?.date, false)
-                        : `${formattedDate(selectedPickup?.date, false)} – ${formattedDate(selectedDropoff?.date, false)}`}
+                        ? dateTime(selectedPickup?.date, pickupTimeLabel)
+                        : `${dateTime(selectedPickup?.date, pickupTimeLabel)} – ${dateTime(selectedDropoff?.date, dropoffTimeLabel)}`}
                     </span>
                   </button>
                 ) : (
                   <div className="p-[20px]">
                     <h2 className="text-[22px] font-bold text-[#222222]">When?</h2>
                     {!isSubscription && (
-                      <div className="mt-[14px] grid grid-cols-2 rounded-full bg-[#ebebeb] p-[3px]">
-                        <button
-                          type="button"
-                          onClick={() => setMobileDateStage("pickup")}
-                          className={`min-h-[40px] rounded-full text-[14px] font-medium ${mobileDateStage === "pickup" ? "bg-white text-[#222222] shadow-[0_1px_4px_rgba(0,0,0,0.12)]" : "text-[#6a6a6a]"}`}
-                        >
-                          Pickup · {formattedDate(selectedPickup?.date, false)}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setMobileDateStage("dropoff")}
-                          className={`min-h-[40px] rounded-full text-[14px] font-medium ${mobileDateStage === "dropoff" ? "bg-white text-[#222222] shadow-[0_1px_4px_rgba(0,0,0,0.12)]" : "text-[#6a6a6a]"}`}
-                        >
-                          Return · {formattedDate(selectedDropoff?.date, false)}
-                        </button>
+                      <div ref={whenTabsRef} className="mt-[14px] grid scroll-mt-[16px] grid-cols-2 rounded-full bg-[#ebebeb] p-[3px]">
+                        {[
+                          ["pickup", "Pickup", dateTime(selectedPickup?.date, pickupTimeLabel)],
+                          ["dropoff", "Return", dateTime(selectedDropoff?.date, dropoffTimeLabel)],
+                        ].map(([stage, label, value]) => (
+                          <button
+                            key={stage}
+                            type="button"
+                            onClick={() => setMobileDateStage(stage)}
+                            aria-pressed={mobileDateStage === stage}
+                            className={`min-h-[52px] rounded-full px-[8px] py-[6px] text-center ${
+                              mobileDateStage === stage
+                                ? "bg-white text-[#222222] shadow-[0_1px_4px_rgba(0,0,0,0.12)]"
+                                : "text-[#6a6a6a]"
+                            }`}
+                          >
+                            <span className="block text-[12px] font-medium text-[#6a6a6a]">{label}</span>
+                            <span className="mt-[1px] block truncate text-[14px] font-bold">{value}</span>
+                          </button>
+                        ))}
                       </div>
                     )}
                     {isSubscription && (
@@ -838,6 +966,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                         );
                       })}
                     </div>
+
+                    <TimeSlotPicker ref={timeSectionRef} {...timePicker} />
                   </div>
                 )}
               </section>
@@ -912,7 +1042,22 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
               </button>
             </div>
 
-            <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between gap-[16px] border-t border-[#e4e1e6] bg-white px-[20px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[12px]">
+            <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#e4e1e6] bg-white px-[20px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[12px]">
+              {mobileStep === "when" && (
+                <div className="mb-[10px] flex items-center justify-between gap-[12px] text-[13px]">
+                  <span className="min-w-0 truncate text-[#555555]">
+                    {isSubscription
+                      ? `Starts ${dateTime(selectedPickup?.date, pickupTimeLabel)}`
+                      : `${dateTime(selectedPickup?.date, pickupTimeLabel)} → ${dateTime(selectedDropoff?.date, dropoffTimeLabel)}`}
+                  </span>
+                  {!isSubscription && selectedDropoff?.date && (
+                    <span className="shrink-0 rounded-full bg-[#f0f0f0] px-[10px] py-[3px] font-bold text-[#222222]">
+                      {dayCount(rentalDays)}
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-[16px]">
               <button
                 type="button"
                 onClick={clearMobileSearch}
@@ -929,6 +1074,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                 {mobileFooterLabel}
                 {mobileFooterLabel === "Next" && <ChevronRight className="size-[18px]" aria-hidden="true" />}
               </button>
+              </div>
             </div>
           </div>,
           document.body
