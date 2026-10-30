@@ -18,6 +18,8 @@ export const franchiseHome = {
   monthlySaving: "₹2,500",
   model: {
     name: "Lectrix NDuro 2.0",
+    // The search page lists only models from this brand (matched on brand or model name).
+    brand: "Lectrix",
     // Side-on transparent PNG of the model, shown on the search page stage.
     cutout: "/images/home/nduro-side.png",
     specs: [

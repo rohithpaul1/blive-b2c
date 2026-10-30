@@ -22,7 +22,7 @@ const clock = (label) => {
 
 const fallbackImage = (e) => {
   e.currentTarget.onerror = null;
-  e.currentTarget.src = "/images/Scooter.png";
+  e.currentTarget.src = "/images/home/nduro-side.png";
 };
 
 const Spec = (props) => {

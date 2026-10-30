@@ -452,7 +452,13 @@ const SearchPage = () => {
         byId.set(card.id, entry);
       });
     });
-    return filteredAndSortedVehicles.map((v) => byId.get(v.id)).filter(Boolean);
+    // This franchise rents only its own brand; other models in the catalog stay hidden.
+    const brand = String(franchiseHome.model.brand || "").toLowerCase();
+    const ownBrand = (m) =>
+      !brand ||
+      String(m.brandName || "").toLowerCase().includes(brand) ||
+      String(m.vehicleName || "").toLowerCase().includes(brand);
+    return filteredAndSortedVehicles.map((v) => byId.get(v.id)).filter((m) => m && ownBrand(m));
   }, [vehicles, rentalMode, filteredAndSortedVehicles]);
 
   const handlePlanPick = (planType) => {
@@ -461,7 +467,7 @@ const SearchPage = () => {
     adjustDropoffDateForPlan(planType);
   };
 
-  const showCatalogTools = vehicles.length > 1;
+  const showCatalogTools = pickerModels.length > 1;
 
   // overflow-x-clip (not hidden) so the sticky filter row sticks to the page scroll
   return (
@@ -539,7 +545,9 @@ const SearchPage = () => {
                 ) : (
                   <div className="rounded-[20px] border border-[#e3e0e8] px-[24px] py-[48px] text-center">
                     <h1 className="font-display m-0 text-[40px] leading-none text-[#0f0d16]">No scooters for these dates</h1>
-                    <p className="m-0 mt-[10px] text-[16px] text-[#5a5562]">Try a different pickup or return date.</p>
+                    <p className="m-0 mt-[10px] text-[16px] text-[#5a5562]">
+                      The {franchiseHome.model.name} isn't listed for these dates yet. Try different dates, or call {franchiseHome.supportPhone}.
+                    </p>
                   </div>
                 )}
               </div>
