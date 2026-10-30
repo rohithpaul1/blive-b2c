@@ -112,17 +112,20 @@ const Login = () => {
                 { Icon: Zap, title: "From ₹150 a day", body: "Subscribe monthly and save 50% on the daily rate." },
                 { Icon: Wrench, title: "Maintenance included", body: "We look after the scooter. You just ride." },
                 { Icon: Headphones, title: "Help, day or night", body: `24/7 support on ${c.supportPhone}.` },
-              ].map(({ Icon, title, body }) => (
-                <li key={title} className="flex items-start gap-[12px]">
-                  <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-white/[0.14]">
-                    <Icon className="size-[17px]" aria-hidden="true" />
-                  </span>
-                  <span>
-                    <span className="block text-[15px] font-bold">{title}</span>
-                    <span className="mt-[2px] block text-[13px] leading-[1.45] text-white/75">{body}</span>
-                  </span>
-                </li>
-              ))}
+              ].map((item) => {
+                const Glyph = item.Icon;
+                return (
+                  <li key={item.title} className="flex items-start gap-[12px]">
+                    <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-white/[0.14]">
+                      <Glyph className="size-[17px]" aria-hidden="true" />
+                    </span>
+                    <span>
+                      <span className="block text-[15px] font-bold">{item.title}</span>
+                      <span className="mt-[2px] block text-[13px] leading-[1.45] text-white/75">{item.body}</span>
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
           <div className="relative flex flex-1 flex-col pb-[30px] md:pb-0">
