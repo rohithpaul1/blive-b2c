@@ -9,16 +9,16 @@ const HomeHero = () => (
     className="home-hero-bg relative px-[clamp(16px,5vw,80px)] pb-[72px] pt-[124px] text-white md:pb-[96px] md:pt-[144px]"
   >
     <div className="mx-auto max-w-[1180px]">
-      <p className="m-0 text-[14px] font-bold text-[#f4b9a8]">
-        {c.brand} {c.franchiseName} · {c.city}
-      </p>
-      <h1 className="font-display m-0 mt-3 max-w-[900px] text-balance text-[clamp(44px,6vw,88px)] leading-[0.95]">
+      <h1 className="font-display m-0 max-w-[900px] text-[clamp(44px,6vw,88px)] leading-[0.95]">
         {c.headline}
       </h1>
+      <p className="m-0 mt-4 text-[17px] text-[#e1dde8]">
+        {c.franchiseName}, a {c.brand} rental hub in {c.city}
+      </p>
       <div className="mt-6 flex flex-wrap gap-x-10 gap-y-3">
         {c.stats.map((s) => (
           <p key={s.label} className="m-0 text-[15px] text-[#d6d2df]">
-            <strong className="text-[22px] text-white">{s.value}</strong> {s.label}
+            <strong className="text-[22px] font-bold tabular-nums text-white">{s.value}</strong> {s.label}
           </p>
         ))}
       </div>

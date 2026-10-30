@@ -26,7 +26,7 @@ const PlanCard = ({ plan }) => (
       </span>
     )}
     <div className="px-6 pt-6">
-      <h3 className={`font-display m-0 text-[34px] ${plan.best ? "pr-[104px]" : ""}`}>{plan.name}</h3>
+      <h3 className={`font-display m-0 text-[36px] leading-none ${plan.best ? "pr-[104px]" : ""}`}>{plan.name}</h3>
       <p className="m-0 mt-0.5 text-[14px] text-[#d6d2df]">
         {c.model.name} · {plan.sub}
       </p>
@@ -45,7 +45,7 @@ const PlanCard = ({ plan }) => (
     <div className="px-6 pb-5">
       <p className="m-0 text-[13px] text-[#d6d2df]">✓ {c.kmPerDay} km a day included</p>
       <p className="m-0 mt-1.5">
-        <span className="text-[30px] font-extrabold">{plan.perDay}</span>
+        <span className="text-[30px] font-black tabular-nums">{plan.perDay}</span>
         <span className="text-[14px] font-bold"> /day</span>
         <span className="text-[13px] text-[#b8b3c4]">
           {"  "}
@@ -68,7 +68,7 @@ const PlanCard = ({ plan }) => (
 const PlanCards = () => (
   <section id="plans" className="bg-[#f1f0f4] px-[clamp(16px,5vw,80px)] py-[64px] md:py-[88px]">
     <div className="mx-auto max-w-[1180px]">
-      <h2 className="font-display m-0 text-[clamp(38px,5vw,52px)] leading-none text-[#0f0d16]">
+      <h2 className="font-display m-0 text-[clamp(40px,5vw,60px)] leading-[0.95] text-[#0f0d16]">
         One scooter. Pick how long.
       </h2>
       <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
