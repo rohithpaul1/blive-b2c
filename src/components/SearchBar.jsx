@@ -711,24 +711,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               onReturnTime={setDropoffTime}
               isPickupBlocked={isPickupSlotBlocked(selectedPickup?.date)}
               isReturnBlocked={isReturnSlotBlocked(selectedPickup, selectedDropoff?.date)}
-              durationField={
-                <label className="flex min-h-[58px] cursor-pointer items-center gap-[10px] rounded-[12px] border border-[#dedce1] bg-white px-[14px]">
-                  <Clock3 className="size-[19px] shrink-0 text-[#c44536]" aria-hidden="true" />
-                  <select
-                    aria-label="Expected subscription duration"
-                    value={subscriptionDuration}
-                    onChange={(event) => setSubscriptionDuration(event.target.value)}
-                    className="w-full appearance-none bg-transparent text-[15px] font-medium text-[#1c1a22] outline-none"
-                  >
-                    {SUBSCRIPTION_DURATIONS.map((duration) => (
-                      <option key={duration} value={duration}>
-                        About {duration} {duration === 1 ? "month" : "months"}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="size-[16px] shrink-0 text-[#6a6573]" aria-hidden="true" />
-                </label>
-              }
+              duration={subscriptionDuration}
+              durations={SUBSCRIPTION_DURATIONS}
+              onDuration={setSubscriptionDuration}
             />
           ) : (
           <>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { addMonths, format, isBefore, isSameDay, startOfDay, startOfMonth } from "date-fns";
-import { CalendarDays, ChevronLeft, ChevronRight, ChevronDown, Clock3 } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, ChevronDown, Clock3 } from "lucide-react";
 import {
   HUB_CLOSE_MINUTES,
   HUB_OPEN_MINUTES,
@@ -163,6 +163,8 @@ const SlotList = ({ title, value, isBlocked, onPick }) => {
   );
 };
 
+const durationLabel = (months) => `About ${months} ${Number(months) === 1 ? "month" : "months"}`;
+
 const segment = (active) =>
   `flex min-h-[56px] items-center gap-[10px] px-[14px] text-left text-[16px] font-medium text-[#191919] transition-colors hover:bg-[#fafafa] ${
     active ? "relative z-[1] rounded-[8px] outline outline-2 -outline-offset-2 outline-[#c44536]" : ""
@@ -178,7 +180,9 @@ export default function HubDateTimeFields({
   onReturnTime,
   isPickupBlocked,
   isReturnBlocked,
-  durationField,
+  duration,
+  durations = [],
+  onDuration,
 }) {
   // open: null | "dates" | "pickupTime" | "returnTime"; stage: which date the calendar is choosing.
   const [open, setOpen] = useState(null);
@@ -272,9 +276,52 @@ export default function HubDateTimeFields({
     <div ref={rootRef} className="relative col-span-2 grid grid-cols-2 gap-[10px]">
       {field("pickup")}
       {isSubscription ? (
-        <div className="min-w-0">
+        <div className="relative min-w-0">
           <p className="mb-[6px] text-[13px] font-bold text-[#1c1a22]">How long?</p>
-          {durationField}
+          <div className="rounded-[8px] border border-[#d9d9d9] bg-white">
+            <button
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={open === "duration"}
+              onClick={() => setOpen((o) => (o === "duration" ? null : "duration"))}
+              className={`${segment(open === "duration")} w-full`}
+            >
+              <Clock3 className="size-[20px] shrink-0 text-[#191919]" aria-hidden="true" />
+              <span className="truncate">{durationLabel(duration)}</span>
+              <ChevronDown className="ml-auto size-[16px] shrink-0 text-[#6a6573]" aria-hidden="true" />
+            </button>
+          </div>
+          {open === "duration" && (
+            <div className="absolute left-0 right-0 top-full z-[60] mt-[8px] overflow-hidden rounded-[12px] bg-white py-[8px] shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
+              <p className="px-[16px] pb-[6px] pt-[4px] text-[13px] text-[#5a5562]">
+                Roughly how long will you ride? You can extend or stop later.
+              </p>
+              <ul role="listbox" aria-label="Expected subscription duration">
+                {durations.map((months) => {
+                  const selected = Number(duration) === Number(months);
+                  return (
+                    <li key={months}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        onClick={() => {
+                          onDuration(months);
+                          setOpen(null);
+                        }}
+                        className={`flex min-h-[48px] w-full items-center justify-between px-[16px] text-left text-[16px] transition-colors hover:bg-[#f2f2f2] ${
+                          selected ? "font-bold text-[#191919]" : "font-medium text-[#191919]"
+                        }`}
+                      >
+                        {durationLabel(months)}
+                        {selected && <Check className="size-[18px] text-[#191919]" aria-hidden="true" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       ) : (
         field("return")
