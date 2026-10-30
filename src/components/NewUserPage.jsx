@@ -90,7 +90,7 @@ const NewUserPage = ({ setShowNewUserPage, setShowLoginPage, onSuccess }) => {
                         }}
                         className={`w-full h-[48px] font-bold text-[#FDFDFD] rounded-[24px] py-[13px] px-[24px] ${
                         (firstName && lastName)
-                            ? "bg-[#000000] cursor-pointer"
+                            ? "bg-[#c44536] cursor-pointer hover:bg-[#a8392b]"
                             : "bg-[#CBCBCB] cursor-not-allowed"
                         }`}
                     >

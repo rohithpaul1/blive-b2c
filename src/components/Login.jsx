@@ -10,6 +10,8 @@ import SpanLoader from "./SpanLoader";
 import { useNavigate } from "react-router-dom";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { SIMULATE_OTP } from "../config/env";
+import { Headphones, Wrench, X, Zap } from "lucide-react";
+import { franchiseHome as c } from "../config/franchiseHome";
 
 const Login = () => {
   const [isOTPSent, setIsOTPSent] = useState(false);
@@ -93,91 +95,61 @@ const Login = () => {
         />
       ) : (
         <div className="flex self-end md:self-center w-full md:w-[1000px] md:max-w-none max-h-[92%] rounded-t-[24px] md:rounded-[16px] overflow-hidden login-shadow bg-white">
-          <div className="hidden md:flex flex-col w-[460px] bg-[#F7F7F7] h-full pt-[50px] px-[52px] gap-y-[30px]">
-            <div className="flex gap-x-[15px] items-start">
-              <div className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center flex-shrink-0 text-xl">
-                🛵
-              </div>
-              <div className="flex flex-col gap-y-[8px]">
-                <p className="font-bold text-[18px] text-[#222222]">
-                  Diverse EV Selection
-                </p>
-                <p className="text-[14px] text-[#3A3A3A] mr-4">
-                  From budget-friendly city commuters to premium long-range EVs
-                  — find the perfect ride for your needs and budget.
-                </p>
-              </div>
+          {/* Franchise panel: city lockup, headline, the NDuro on the stage, three promises. */}
+          <div className="sixt-stage hidden w-[440px] shrink-0 flex-col px-[40px] pb-[36px] pt-[40px] text-white md:flex">
+            <div className="flex items-center gap-[12px]">
+              <span className="font-display text-[26px] leading-[0.85] tracking-[0.06em] text-[#f4b9a8]">{c.city}</span>
+              <span aria-hidden="true" className="h-[22px] w-px bg-white/30" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75">{c.franchiseName}</span>
             </div>
-            <div className="flex gap-x-[15px] items-start">
-              <div className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center flex-shrink-0 text-xl">
-                💸
-              </div>
-              <div className="flex flex-col gap-y-[8px]">
-                <p className="font-bold text-[18px] text-[#222222]">
-                  Transparent & Affordable Pricing
-                </p>
-                <p className="text-[14px] text-[#3A3A3A] mr-4">
-                  No hidden fees. Just simple, competitive rates so you can ride
-                  worry-free.
-                </p>
-              </div>
+            <p className="font-display m-0 mt-[22px] text-[40px] leading-[0.95]">Your ride is one step away.</p>
+            <div className="relative mt-[18px] flex h-[220px] items-end justify-center">
+              <span aria-hidden="true" className="absolute bottom-[6%] left-1/2 h-[10%] w-[70%] -translate-x-1/2 rounded-[50%] bg-black/55 blur-[14px]" />
+              <img className="relative h-full w-full object-contain object-bottom" src={c.model.cutout || "/images/home/nduro-side.png"} alt={c.model.name} />
             </div>
-            <div className="flex gap-x-[15px] items-start">
-              <div className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center flex-shrink-0 text-xl">
-                ⚡️
-              </div>
-              <div className="flex flex-col gap-y-[8px]">
-                <p className="font-bold text-[18px] text-[#222222]">
-                  Quick & Easy Booking
-                </p>
-                <p className="text-[14px] text-[#3A3A3A] mr-4">
-                  Book your EV in minutes — anytime, anywhere.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-x-[15px] items-start">
-              <div className="bg-white rounded-full p-2 w-10 h-10 flex items-center justify-center flex-shrink-0 text-xl">
-                🛠️
-              </div>
-              <div className="flex flex-col gap-y-[8px]">
-                <p className="font-bold text-[18px] text-[#222222]">
-                  All-Inclusive Experience
-                </p>
-                <p className="text-[14px] text-[#3A3A3A] mr-4">
-                  Insurance, servicing, and roadside assistance included. You
-                  ride, we handle the rest.
-                </p>
-              </div>
-            </div>
-            <img
-              className="w-2/3 self-center"
-              src="/images/ScooterLogin.png"
-              alt="Scooter Image"
-            />
+            <ul className="m-0 mt-auto flex list-none flex-col gap-[14px] p-0 pt-[22px]">
+              {[
+                { Icon: Zap, title: "From ₹150 a day", body: "Subscribe monthly and save 50% on the daily rate." },
+                { Icon: Wrench, title: "Maintenance included", body: "We look after the scooter. You just ride." },
+                { Icon: Headphones, title: "Help, day or night", body: `24/7 support on ${c.supportPhone}.` },
+              ].map(({ Icon, title, body }) => (
+                <li key={title} className="flex items-start gap-[12px]">
+                  <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-white/[0.14]">
+                    <Icon className="size-[17px]" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block text-[15px] font-bold">{title}</span>
+                    <span className="mt-[2px] block text-[13px] leading-[1.45] text-white/75">{body}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="relative flex flex-1 flex-col pb-[30px] md:pb-0">
             <div className="py-[24px] px-[32px] flex items-center justify-between header-shadow w-full">
               <div className="flex flex-col">
                 <p className="text-[24px] font-bold text-[#212121]">
-                  Login or Sign up to continue booking
+                  {selectedProduct ? "Log in to finish your booking" : "Log in or sign up"}
                 </p>
                 <p className="mt-[4px] text-[14px] text-[#3A3A3A]">
-                  Get started with BLive NXT—just verify your mobile number.
+                  We'll text a one-time code to your mobile. No password needed.
                 </p>
               </div>
-              <img
+              <button
+                type="button"
                 onClick={() => setShowLoginPage(false)}
-                className="cursor-pointer w-[24px] aspect-square"
-                src="/images/Close.png"
-                alt="Close Icon"
-              />
+                aria-label="Close"
+                className="flex size-[40px] shrink-0 items-center justify-center rounded-full hover:bg-[#f2f2f2]"
+              >
+                <X className="size-[22px] text-[#212121]" aria-hidden="true" />
+              </button>
             </div>
             {selectedProduct && (
               <div className="mt-[24px] flex items-center gap-x-[12px] mx-[32px] rounded-[16px] border border-[#EDEDED] py-[12px] px-[16px] bg-white">
                 <img
-                  className="w-[64px] h-[64px] rounded-[8px] object-cover"
-                  src={selectedProduct.imgUrl}
-                  alt="Scooter Book Image"
+                  className="h-[64px] w-[84px] rounded-[8px] bg-[#f2f1f4] object-contain"
+                  src={c.model.cutout || selectedProduct.imgUrl}
+                  alt=""
                 />
                 <div className="flex flex-col">
                   <p className="font-bold text-[18px] text-[#484848]">
@@ -222,19 +194,22 @@ const Login = () => {
                     setPhoneNumber(onlyNums);
                   }}
                   placeholder="0000000000"
-                  className="rounded-[8px] w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[14px] text-[#222222]"
+                  className="rounded-[8px] w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[16px] tracking-[0.04em] text-[#222222] focus:border-[#c44536] focus:bg-white"
                   type="text"
                   inputMode="numeric"
                 />
               </div>
             </div>
             <button
-              disabled={sender}
+              disabled={sender || phoneNumber.length !== 10}
               onClick={handleSendOTP}
-              className="mt-[24px] mx-[32px] cursor-pointer bg-[#000000] py-[13px] px-[24px] rounded-[24px] text-[#FDFDFD] font-bold"
+              className="mt-[24px] mx-[32px] rounded-[24px] bg-[#c44536] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:bg-[#CBCBCB]"
             >
-              Continue
+              {sender ? "Sending code…" : "Get code"}
             </button>
+            <p className="mx-[32px] mt-[14px] text-[12px] leading-[1.5] text-[#717171]">
+              By continuing you agree to receive a one-time code by SMS. Standard messaging rates may apply.
+            </p>
           </div>
         </div>
       )}
