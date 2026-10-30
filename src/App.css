@@ -295,3 +295,35 @@ input[type="range"]::-webkit-slider-runnable-track {
     accent-color: var(--blive-purple);
   }
 }
+
+/* ---- Homepage, Direction A (Jaipur terracotta) ---- */
+.font-display {
+  font-family: "Barlow Condensed", "Satoshi", sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+}
+.home-hero-bg {
+  background-image: linear-gradient(90deg, rgba(15, 13, 22, 0.88) 0%, rgba(15, 13, 22, 0.55) 55%, rgba(15, 13, 22, 0.25) 100%),
+    url("/images/home/jaipur.webp");
+  background-size: cover;
+  background-position: center 40%;
+}
+.home-spot {
+  background: radial-gradient(ellipse 75% 50% at 50% 52%, #55506a 0%, #24202f 55%, #0f0d16 100%);
+}
+.home-tile-city,
+.home-tile-bike {
+  background-size: cover;
+  background-position: center;
+}
+.home-tile-city {
+  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), url("/images/home/jaipur.webp");
+}
+.home-tile-bike {
+  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), url("/images/home/nduro-floor.webp");
+}
+.home-a a { text-decoration: none; }
+.home-faq summary::-webkit-details-marker { display: none; }
+.home-faq[open] .home-faq-icon { transform: rotate(45deg); }
+.home-faq-icon { transition: transform 0.2s ease; }
