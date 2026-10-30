@@ -476,6 +476,7 @@ const SearchPage = () => {
         onSearchPage={true}
         expanded={true}
         onSearchTrigger={handleSearchTrigger}
+        singleHub
       />
       <main className="px-[16px] pb-[72px] pt-[96px] sm:px-[28px] md:px-[clamp(32px,6vw,96px)] md:pb-[88px] md:pt-[108px]">
         {isLoading ? (
@@ -541,6 +542,7 @@ const SearchPage = () => {
                     pickup={selectedPickup}
                     dropoff={selectedDropoff}
                     cutout={pickerModels.length === 1 ? franchiseHome.model.cutout : null}
+                    features={pickerModels.length === 1 ? franchiseHome.model.features : []}
                   />
                 ) : (
                   <div className="rounded-[20px] border border-[#e3e0e8] px-[24px] py-[48px] text-center">

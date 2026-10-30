@@ -16,7 +16,7 @@ const compactRupees = (value) =>
     maximumFractionDigits: 1,
   }).format(Number(value || 0));
 
-const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false }) => {
+const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, singleHub = false }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const {
@@ -60,7 +60,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false }) 
           />
           {onSearchPage && (
             <div className="col-span-3 row-start-1 flex w-full justify-self-center md:col-span-1 md:col-start-2 md:mt-0">
-              <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} />
+              <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} singleHub={singleHub} />
             </div>
           )}
           {isBusinessWebsite ? (

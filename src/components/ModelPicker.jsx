@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { Gauge, Headphones, Route, Wrench, Zap } from "lucide-react";
+import { BatteryCharging, Bluetooth, Gauge, Headphones, Package, Route, SlidersHorizontal, Undo2, User, Weight, Wrench, Zap } from "lucide-react";
 import useRentNow from "../hooks/useRentNow";
 import { planUnit } from "../utils/subscription";
 
@@ -69,6 +69,33 @@ const byline = (model) =>
     ? "Electric scooter"
     : `${model.brandName} · Electric scooter`;
 
+const FEATURE_ICONS = {
+  range: Route,
+  speed: Gauge,
+  battery: BatteryCharging,
+  storage: Package,
+  modes: SlidersHorizontal,
+  reverse: Undo2,
+  bluetooth: Bluetooth,
+  weight: Weight,
+  seats: User,
+};
+
+// Sixt's spec row: plain icon + label pairs, no chip boxes.
+const FeatureRow = ({ features }) => (
+  <ul className="m-0 flex list-none flex-wrap justify-center gap-x-[22px] gap-y-[10px] p-0">
+    {features.map((f) => {
+      const Glyph = FEATURE_ICONS[f.icon] || Zap;
+      return (
+        <li key={f.label} className="flex items-center gap-[8px] text-[15px] font-medium text-white">
+          <Glyph className="size-[18px] shrink-0" aria-hidden="true" />
+          {f.label}
+        </li>
+      );
+    })}
+  </ul>
+);
+
 const specChips = (model) =>
   [
     model.range > 0 && { icon: Route, label: `${model.range} km range` },
@@ -136,7 +163,7 @@ function ModelCard({ model, planType, selected, onSelect, pricingFor, best }) {
   );
 }
 
-export default function ModelPicker({ models, selectedPlanType, onPlanChange, pickup, dropoff, cutout = null }) {
+export default function ModelPicker({ models, selectedPlanType, onPlanChange, pickup, dropoff, cutout = null, features = [] }) {
   const { rentNow, pricingFor, isSubscription } = useRentNow();
   const [modelId, setModelId] = useState(() => (models.find((m) => m.isAvailable) || models[0])?.id);
   const [busy, setBusy] = useState(false);
@@ -238,14 +265,16 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
           <div className="flex flex-1 items-center py-[12px]">
             <VehicleArt src={art} alt={model.vehicleName} size="stage" />
           </div>
-          <div className="flex flex-wrap justify-center gap-[8px]">
-            {model.isAvailable && model.availableCount <= 2 && (
-              <span className="rounded-full bg-[#c44536] px-[12px] py-[6px] text-[13px] font-semibold">Only {model.availableCount} left</span>
-            )}
-            {specChips(model).map((c) => (
-              <Spec key={c.label} icon={c.icon}>{c.label}</Spec>
-            ))}
-          </div>
+          {model.isAvailable && model.availableCount <= 2 && (
+            <span className="mb-[14px] self-center rounded-full bg-[#c44536] px-[12px] py-[6px] text-[13px] font-semibold">
+              Only {model.availableCount} left
+            </span>
+          )}
+          {features.length > 0 ? (
+            <FeatureRow features={features} />
+          ) : (
+            <FeatureRow features={specChips(model).map((c) => ({ icon: c.icon === Route ? "range" : c.icon === Gauge ? "speed" : "battery", label: c.label }))} />
+          )}
         </div>
 
         <div className="flex flex-col gap-[14px] px-[20px] py-[24px] md:px-[36px] md:py-[32px]">

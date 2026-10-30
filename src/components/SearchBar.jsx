@@ -556,7 +556,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
           {onSearchPage ? (
             <>
               <span className="block truncate text-[14px] font-bold text-[#262626]">
-                {selectedLocation}
+                {singleHub ? "Your dates" : selectedLocation}
               </span>
               <span className="block truncate text-[12px] text-[#686868]">
                 {isSubscription ? "Subscription" : "Fixed rental"} · {searchSummary}
@@ -575,6 +575,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
 
       {onSearchPage && !desktopExpanded && (
         <div className="hidden min-h-[54px] w-full items-center rounded-full border border-[#dedce1] bg-white p-[5px] pl-[8px] shadow-[0_5px_18px_rgba(24,18,32,0.12)] transition-shadow hover:shadow-[0_7px_22px_rgba(24,18,32,0.16)] md:flex">
+          {!singleHub && (
+          <>
           <button
             type="button"
             onClick={() => openDesktopSearch("location")}
@@ -586,14 +588,18 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             </span>
           </button>
           <span className="h-[26px] w-px shrink-0 bg-[#e4e1e6]" aria-hidden="true" />
+          </>
+          )}
           <button
             type="button"
-            onClick={() => openDesktopSearch("dates")}
+            onClick={() => openDesktopSearch(singleHub ? "mode" : "dates")}
             className="min-w-0 flex-1 rounded-full px-[12px] py-[8px] text-left hover:bg-[#f7f6f8]"
           >
             <span className="block truncate text-[13px] font-bold text-[#29262b]">
               {isSubscription
                 ? `Starts ${formattedDate(selectedPickup?.date, false)}`
+                : singleHub
+                ? `${formattedDate(selectedPickup?.date, false)}, ${selectedPickup?.time || DEFAULT_TIME} – ${formattedDate(selectedDropoff?.date, false)}, ${selectedDropoff?.time || DEFAULT_TIME}`
                 : searchSummary}
             </span>
           </button>
@@ -612,7 +618,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
           <button
             type="button"
             onClick={handleRentNow}
-            className="flex size-[44px] shrink-0 items-center justify-center rounded-full bg-[#351a75] text-white transition-colors hover:bg-[#2c155f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#351a75]"
+            className={`flex size-[44px] shrink-0 items-center justify-center rounded-full text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+              singleHub ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]" : "bg-[#351a75] hover:bg-[#2c155f] focus-visible:outline-[#351a75]"
+            }`}
             aria-label="Search vehicles"
           >
             <Search className="size-[18px]" aria-hidden="true" />
@@ -791,6 +799,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
         </div>
       </div>
 
+      {!singleHub && (
       <LocationDropdown
         showLocation={showLocation}
         setShowLocation={setShowLocation}
@@ -798,6 +807,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
         locationPermissionGranted={locationPermissionGranted}
         getUserLocation={getUserLocation}
       />
+      )}
+      {!singleHub && (
       <Datepicker
         showDatepicker={showDatepicker}
         setShowDatepicker={setShowDatepicker}
@@ -808,6 +819,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
         selectionStage={desktopDateStage}
         setSelectionStage={setDesktopDateStage}
       />
+      )}
       </div>
 
       {mobileOpen &&
