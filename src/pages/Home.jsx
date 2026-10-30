@@ -2,7 +2,6 @@ import Navbar from "../sections/Navbar";
 import HomeHero from "../sections/home/HomeHero";
 import PlanCards, { SubscribeBand } from "../sections/home/PlanCards";
 import { ScooterSpotlight, BenefitTiles, HomeSteps } from "../sections/home/ScooterSpotlight";
-import PlanPicker from "../sections/home/PlanPicker";
 import { RiderQuote, MoreBlive, HomeFaq, HomeFooter } from "../sections/home/HomeClosing";
 import { useEffect, useContext } from "react";
 import { ProductContext } from "../contexts/ProductContext";
@@ -34,7 +33,6 @@ const Home = () => {
             <ScooterSpotlight />
             <BenefitTiles />
             <HomeSteps />
-            <PlanPicker />
             <RiderQuote />
             <MoreBlive />
             <HomeFaq />
