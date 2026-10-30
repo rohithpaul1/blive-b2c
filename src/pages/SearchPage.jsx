@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, useMemo, useCallback } from "react";
 import Navbar from "../sections/Navbar";
-import Cards from "../components/Cards";
+import ModelPicker from "../components/ModelPicker";
+import { franchiseHome } from "../config/franchiseHome";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import Pagination from "../components/Pagination";
 import Loader from "../components/Loader";
@@ -58,7 +59,8 @@ const SearchPage = () => {
   });
 
   const {
-    selectedLocation,
+    selectedPickup,
+    selectedDropoff,
     adjustDropoffDateForPlan,
     updateCurrentPlanType,
     rentalMode,
@@ -428,8 +430,37 @@ const SearchPage = () => {
     };
   }, [fromCatalogSelection, planTypes]); // Dependencies to ensure we have current values
 
-  const availableCount = (filteredAndSortedVehicles || []).filter((v) => v.isAvailable).length;
-  const unavailableCount = (filteredAndSortedVehicles || []).length - availableCount;
+  // One entry per model with every plan it offers, in the filtered and sorted order.
+  const pickerModels = useMemo(() => {
+    const byId = new Map();
+    ["daily", "weekly", "monthly"].forEach((planType) => {
+      transformVehicleData(vehicles, planType).forEach((card) => {
+        const entry = byId.get(card.id) || { ...card, plans: {} };
+        entry.plans[planType] = {
+          price: card.price,
+          card: {
+            price: card.price,
+            actualPrice: card.actualPrice,
+            planId: card.planId,
+            planName: card.planName,
+            onboardingFee: card.onboardingFee,
+            openingWalletBalance: card.openingWalletBalance,
+            billingPolicy: card.billingPolicy,
+          },
+        };
+        byId.set(card.id, entry);
+      });
+    });
+    return filteredAndSortedVehicles.map((v) => byId.get(v.id)).filter(Boolean);
+  }, [vehicles, rentalMode, filteredAndSortedVehicles]);
+
+  const handlePlanPick = (planType) => {
+    setSelectedPlanType(planType);
+    updateCurrentPlanType(planType);
+    adjustDropoffDateForPlan(planType);
+  };
+
+  const showCatalogTools = vehicles.length > 1;
 
   // overflow-x-clip (not hidden) so the sticky filter row sticks to the page scroll
   return (
@@ -446,6 +477,7 @@ const SearchPage = () => {
           <>
             {/* Phones: one swipeable row of filter chips pinned under the search bar, then a short count. */}
             <div className="flex flex-col">
+              {showCatalogTools && (
               <div className={`sticky top-[82px] ${showSortDropdown || showFiltersPage ? "z-[60]" : "z-30"} order-first -mx-[16px] border-b border-[#ebebeb] bg-white px-[16px] pb-[12px] md:static md:order-none md:mx-0 md:mt-[20px] md:border-[#ededed] md:bg-transparent md:px-0 md:pb-[18px]`}>
                 <div className="relative">
                   <div className="-mx-[16px] flex items-center gap-[8px] overflow-x-auto px-[16px] [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
@@ -491,36 +523,25 @@ const SearchPage = () => {
                   />
                 )}
               </div>
+              )}
 
-              <div className="mt-[12px] flex flex-col gap-[6px] md:mt-0">
-                <span className="hidden text-[12px] font-bold uppercase tracking-[0.12em] text-[#6d5a9b] md:block">
-                  {isSubscription ? "Subscriptions" : "Fixed rentals"}
-                </span>
-                <div className="flex flex-col gap-[4px] sm:flex-row sm:items-end sm:justify-between">
-                  <h1 className="text-[14px] text-[#6a6a6a] md:text-[24px] md:font-bold md:text-[#1f1f1f]">
-                    <span className="md:hidden">
-                      <b className="font-bold text-[#222222]">
-                        {availableCount} {availableCount === 1 ? "vehicle" : "vehicles"}
-                      </b>{" "}
-                      available{unavailableCount > 0 ? ` · ${unavailableCount} not available` : ""}
-                    </span>
-                    <span className="hidden md:inline">
-                      {availableCount} {availableCount === 1 ? "vehicle" : "vehicles"} available in {selectedLocation}
-                    </span>
-                  </h1>
-                  <p className="hidden text-[14px] text-[#6b6b6b] md:block">
-                    {isSubscription
-                      ? "Choose how long you expect to ride. Billing renews automatically until you cancel."
-                      : "Choose a vehicle now. You can confirm pickup and extras next."}
-                  </p>
-                </div>
+              <div className="mt-[16px] md:mt-[24px]">
+                {pickerModels.length > 0 ? (
+                  <ModelPicker
+                    models={pickerModels}
+                    selectedPlanType={selectedPlanType}
+                    onPlanChange={handlePlanPick}
+                    pickup={selectedPickup}
+                    dropoff={selectedDropoff}
+                    gallery={pickerModels.length === 1 ? franchiseHome.model.gallery : []}
+                  />
+                ) : (
+                  <div className="rounded-[20px] border border-[#e3e0e8] px-[24px] py-[48px] text-center">
+                    <h1 className="font-display m-0 text-[40px] leading-none text-[#0f0d16]">No scooters for these dates</h1>
+                    <p className="m-0 mt-[10px] text-[16px] text-[#5a5562]">Try a different pickup or return date.</p>
+                  </div>
+                )}
               </div>
-            <div className="mt-[16px] grid w-full grid-cols-1 gap-x-[20px] gap-y-[32px] sm:grid-cols-2 md:mt-[30px] xl:grid-cols-3 xl:gap-x-[28px] xl:gap-y-[40px]">
-              <Cards
-                cards={filteredAndSortedVehicles}
-                selectedPlanType={selectedPlanType}
-              />
-            </div>
             {maxPages > 1 && (
               <Pagination
                 selectedPage={selectedPage}
