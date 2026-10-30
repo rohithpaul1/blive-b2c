@@ -15,13 +15,6 @@ const HomeHero = () => (
       <p className="m-0 mt-4 text-[17px] text-[#e1dde8]">
         {c.franchiseName}, a {c.brand} rental hub in {c.city}
       </p>
-      <div className="mt-6 flex flex-wrap gap-x-10 gap-y-3">
-        {c.stats.map((s) => (
-          <p key={s.label} className="m-0 text-[15px] text-[#d6d2df]">
-            <strong className="text-[22px] font-bold tabular-nums text-white">{s.value}</strong> {s.label}
-          </p>
-        ))}
-      </div>
     </div>
     <div id="hero-search" className="relative mx-auto mt-8 max-w-[1180px] md:mt-12">
       <SearchBar singleHub />
