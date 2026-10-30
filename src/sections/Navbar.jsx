@@ -51,14 +51,30 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
               : "flex justify-between"
           }`}
         >
-          <img
+          {/* Co-branded lockup: BLive NXT mark | city wordmark over the franchise name. */}
+          <button
+            type="button"
             onClick={() => navigate(isBusinessWebsite ? "/business" : "/home")}
-            className={`h-[44px] w-auto cursor-pointer md:h-[52px] ${
+            aria-label={isBusinessWebsite ? "b:live NXT home" : `b:live NXT ${franchiseHome.city} home`}
+            className={`flex shrink-0 items-center gap-[10px] md:gap-[14px] ${
               onSearchPage ? "col-start-1 row-start-1 max-md:hidden" : ""
             }`}
-            src="/images/BliveNxtLogo.svg"
-            alt="b:live NXT"
-          />
+          >
+            <img className="h-[40px] w-auto md:h-[50px]" src="/images/BliveNxtLogo.svg" alt="" />
+            {!isBusinessWebsite && (
+              <>
+                <span aria-hidden="true" className="h-[30px] w-px bg-[#e2d3ce] md:h-[38px]" />
+                <span className="flex flex-col items-start leading-none">
+                  <span className="font-display text-[24px] leading-[0.85] tracking-[0.06em] text-[#c44536] md:text-[30px]">
+                    {franchiseHome.city}
+                  </span>
+                  <span className="mt-[5px] hidden text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#7a727d] sm:block">
+                    {franchiseHome.franchiseName}
+                  </span>
+                </span>
+              </>
+            )}
+          </button>
           {onSearchPage && (
             // Phones: the logo is hidden on results, so a back button leads the row.
             <button
