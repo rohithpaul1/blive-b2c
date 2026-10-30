@@ -313,3 +313,16 @@ input[type="range"]::-webkit-slider-runnable-track {
 .home-faq summary::-webkit-details-marker { display: none; }
 .home-faq[open] .home-faq-icon { transform: rotate(45deg); }
 .home-faq-icon { transition: transform 0.2s ease; }
+
+/* Vehicle stage, after Sixt's result cards: dark top and foot, a steel-grey floor
+   light behind the vehicle. The warm variant adds the copper glow of a featured card. */
+.sixt-stage {
+  background: linear-gradient(180deg, #0e1013 0%, #1f2428 22%, #59616a 46%, #9aa3ab 60%, #6b737b 76%, #191c20 100%);
+}
+.sixt-stage-warm {
+  background: radial-gradient(70% 38% at 88% 0%, rgba(158, 82, 52, 0.75) 0%, rgba(158, 82, 52, 0) 100%),
+    linear-gradient(180deg, #0e1013 0%, #1f2428 22%, #59616a 46%, #9aa3ab 60%, #6b737b 76%, #191c20 100%);
+}
+.sixt-band {
+  background: linear-gradient(90deg, #3b2721 0%, #6e3c25 50%, #3b2721 100%);
+}

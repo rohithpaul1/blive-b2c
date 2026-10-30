@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { Gauge, Headphones, Info, Route, Wrench, Zap } from "lucide-react";
+import { Gauge, Headphones, Route, Wrench, Zap } from "lucide-react";
 import useRentNow from "../hooks/useRentNow";
 import { planUnit } from "../utils/subscription";
 
@@ -28,10 +28,38 @@ const fallbackImage = (e) => {
 const Spec = (props) => {
   const { icon: Glyph, children } = props;
   return (
-    <span className="inline-flex items-center gap-[6px] rounded-full bg-white/[0.12] px-[12px] py-[6px] text-[13px] font-semibold text-white">
+    <span className="inline-flex items-center gap-[6px] rounded-full bg-white/[0.16] px-[12px] py-[6px] text-[13px] font-semibold text-white backdrop-blur-[2px]">
       <Glyph className="size-[15px]" aria-hidden="true" />
       {children}
     </span>
+  );
+};
+
+// A transparent PNG (or the model's cutoutUrl) floats on the stage with a floor shadow,
+// like Sixt's cars. Anything else is a photo, faded at the edges so it has no box.
+const isCutout = (src) => /\.png($|\?)/i.test(String(src || ""));
+
+const VehicleArt = ({ src, alt, size = "card" }) => {
+  const tall = size === "stage" ? "h-[clamp(220px,30vw,360px)]" : "h-[210px]";
+  if (isCutout(src)) {
+    return (
+      <div className={`relative flex w-full items-end justify-center ${tall}`}>
+        <span
+          aria-hidden="true"
+          className="absolute bottom-[4%] left-1/2 h-[9%] w-[72%] -translate-x-1/2 rounded-[50%] bg-black/55 blur-[14px]"
+        />
+        <img src={src} alt={alt} loading="lazy" onError={fallbackImage} className="relative h-full w-full object-contain object-bottom" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      onError={fallbackImage}
+      className={`w-full object-cover ${tall} [mask-image:radial-gradient(ellipse_62%_58%_at_50%_52%,#000_45%,transparent_100%)]`}
+    />
   );
 };
 
@@ -48,47 +76,69 @@ const specChips = (model) =>
     model.perDayKmLimit > 0 && { icon: Zap, label: `${model.perDayKmLimit} km a day` },
   ].filter(Boolean);
 
-function ModelCard({ model, planType, selected, onSelect, pricingFor }) {
+function ModelCard({ model, planType, selected, onSelect, pricingFor, best }) {
   const plan = model.plans[planType] || model.plans[Object.keys(model.plans)[0]];
   const pricing = plan ? pricingFor(plan.price, planType) : null;
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      aria-pressed={selected}
-      className={`home-spot relative flex min-h-[420px] flex-col overflow-hidden rounded-[20px] p-[22px] text-left text-white transition-shadow ${
-        selected ? "shadow-[0_0_0_3px_#c44536]" : "hover:shadow-[0_0_0_2px_rgba(255,255,255,0.25)]"
-      } ${model.isAvailable ? "" : "opacity-60"}`}
-    >
-      <span className="font-display text-[30px] leading-none">{model.vehicleName}</span>
-      <span className="mt-[6px] text-[14px] text-[#d6d2df]">{byline(model)}</span>
-      <span className="mt-[14px] flex flex-wrap gap-[6px]">
-        {specChips(model).map((s) => (
-          <Spec key={s.label} icon={s.icon}>{s.label}</Spec>
-        ))}
-      </span>
-      <img src={model.imgUrl} alt="" loading="lazy" onError={fallbackImage} className="my-[18px] h-[180px] w-full rounded-[14px] object-cover" />
-      <span className="mt-auto text-[14px] text-[#d6d2df]">
-        {model.isAvailable ? (
-          pricing && (
-            <>
-              <b className="text-[28px] font-extrabold tabular-nums text-white">₹{inr(pricing.perUnit)}</b>
-              <b className="text-[14px] text-white"> /{pricing.unit}</b>
-              {pricing.days ? <span className="tabular-nums">  ₹{inr(pricing.total)} total</span> : null}
-            </>
-          )
-        ) : (
-          "Not available for your dates"
-        )}
-      </span>
-    </button>
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={selected}
+        className={`sixt-stage ${best ? "sixt-stage-warm" : ""} relative flex min-h-[540px] w-full flex-col overflow-hidden rounded-[16px] text-left text-white outline-offset-[4px] transition-[outline-color] ${
+          selected ? "outline outline-[3px] outline-[#c44536]" : "outline outline-[3px] outline-transparent hover:outline-white/30"
+        } ${model.isAvailable ? "" : "opacity-60"}`}
+      >
+        <span className="px-[22px] pt-[22px]">
+          <span className="font-display block text-[34px] leading-none">{model.vehicleName}</span>
+          <span className="mt-[8px] block text-[16px] text-white/90">{byline(model)}</span>
+          <span className="mt-[14px] flex flex-wrap gap-[6px]">
+            {best && <span className="rounded-full bg-[#c44536] px-[12px] py-[6px] text-[13px] font-semibold">Best value</span>}
+            {specChips(model).map((c) => (
+              <Spec key={c.label} icon={c.icon}>{c.label}</Spec>
+            ))}
+          </span>
+        </span>
+        <span className="flex flex-1 items-center px-[16px]">
+          <VehicleArt src={model.cutoutUrl || model.imgUrl} alt="" />
+        </span>
+        <span className="block px-[22px] pb-[18px]">
+          {model.perDayKmLimit > 0 && (
+            <span className="flex items-center gap-[8px] text-[15px]">
+              <span aria-hidden="true" className="text-[#7dd3a0]">✓</span>
+              {model.perDayKmLimit} km a day included
+            </span>
+          )}
+          <span className="mt-[8px] block">
+            {model.isAvailable && pricing ? (
+              <>
+                <span className="text-[18px] font-bold">₹</span>
+                <span className="text-[34px] font-extrabold leading-none tabular-nums">{inr(pricing.perUnit)}</span>
+                <span className="text-[17px] font-bold"> /{pricing.unit}</span>
+                {pricing.days ? <span className="ml-[10px] text-[15px] tabular-nums text-white/70">₹{inr(pricing.total)} total</span> : null}
+              </>
+            ) : (
+              <span className="text-[16px] font-semibold">Not available for your dates</span>
+            )}
+          </span>
+        </span>
+        <span className="sixt-band block px-[22px] py-[14px] text-center text-[15px] font-bold underline underline-offset-[4px]">
+          Subscribe and save up to 50%
+        </span>
+      </button>
+      {selected && (
+        <span
+          aria-hidden="true"
+          className="absolute -bottom-[14px] left-[48px] h-0 w-0 border-x-[10px] border-t-[10px] border-x-transparent border-t-[#c44536]"
+        />
+      )}
+    </div>
   );
 }
 
-export default function ModelPicker({ models, selectedPlanType, onPlanChange, pickup, dropoff, gallery = [] }) {
+export default function ModelPicker({ models, selectedPlanType, onPlanChange, pickup, dropoff, cutout = null }) {
   const { rentNow, pricingFor, isSubscription } = useRentNow();
   const [modelId, setModelId] = useState(() => (models.find((m) => m.isAvailable) || models[0])?.id);
-  const [imageIndex, setImageIndex] = useState(0);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -111,8 +161,11 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
 
   if (!model) return null;
 
-  const images = gallery.length ? gallery : [{ src: model.imgUrl, alt: model.vehicleName }];
-  const current = images[Math.min(imageIndex, images.length - 1)];
+  const art = cutout || model.cutoutUrl || model.imgUrl;
+  // Cheapest available model for the chosen plan gets the Best value tag.
+  const cheapestId = models
+    .filter((m) => m.isAvailable && m.plans[planType])
+    .reduce((best, m) => (!best || Number(m.plans[planType].price) < Number(best.plans[planType].price) ? m : best), null)?.id;
   const selectedPlan = model.plans[planType];
   const pricing = pricingFor(selectedPlan?.price, planType);
   const single = models.length === 1;
@@ -163,57 +216,35 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
       </header>
 
       {!single && (
-        <div className="grid grid-cols-1 gap-[20px] sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-[24px] sm:grid-cols-2 xl:grid-cols-3">
           {models.map((m) => (
             <ModelCard
               key={m.id}
               model={m}
               planType={planType}
               selected={m.id === model.id}
-              onSelect={() => {
-                setModelId(m.id);
-                setImageIndex(0);
-              }}
+              onSelect={() => setModelId(m.id)}
               pricingFor={pricingFor}
+              best={m.id === cheapestId}
             />
           ))}
         </div>
       )}
 
       <div className="grid overflow-hidden rounded-[24px] border border-[#e3e0e8] bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-        <div className="home-spot flex flex-col px-[20px] pb-[24px] pt-[28px] text-white md:px-[32px] md:pt-[36px]">
+        <div className="sixt-stage flex min-h-[480px] flex-col px-[20px] pb-[26px] pt-[30px] text-white md:px-[32px] md:pt-[40px]">
           <h2 className="font-display m-0 text-center text-[clamp(34px,4vw,48px)] leading-none">{model.vehicleName}</h2>
-          <p className="m-0 mt-[8px] text-center text-[15px] text-[#d6d2df]">
-            {byline(model)} · Maintenance included
-          </p>
-          <img
-            src={current.src}
-            alt={current.alt || model.vehicleName}
-            onError={fallbackImage}
-            className="mt-[22px] aspect-[3/2] w-full rounded-[18px] object-cover"
-          />
-          {images.length > 1 && (
-            <div className="mt-[12px] grid grid-cols-6 gap-[8px]" role="group" aria-label="Photos">
-              {images.map((img, i) => (
-                <button
-                  key={img.src}
-                  type="button"
-                  aria-label={img.caption || img.alt}
-                  aria-pressed={i === imageIndex}
-                  onClick={() => setImageIndex(i)}
-                  className={`overflow-hidden rounded-[10px] ${i === imageIndex ? "ring-2 ring-white" : "opacity-60 hover:opacity-100"}`}
-                >
-                  <img src={img.src} alt="" loading="lazy" className="block aspect-square w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-          {current.caption && <p className="m-0 mt-[10px] text-center text-[14px] font-semibold">{current.caption}</p>}
-          <div className="mt-auto flex flex-wrap justify-center gap-[8px] pt-[22px]">
-            {specChips(model).map((s) => (
-              <Spec key={s.label} icon={s.icon}>{s.label}</Spec>
+          <p className="m-0 mt-[10px] text-center text-[17px] text-white/90">{byline(model)} · Maintenance included</p>
+          <div className="flex flex-1 items-center py-[12px]">
+            <VehicleArt src={art} alt={model.vehicleName} size="stage" />
+          </div>
+          <div className="flex flex-wrap justify-center gap-[8px]">
+            {model.isAvailable && model.availableCount <= 2 && (
+              <span className="rounded-full bg-[#c44536] px-[12px] py-[6px] text-[13px] font-semibold">Only {model.availableCount} left</span>
+            )}
+            {specChips(model).map((c) => (
+              <Spec key={c.label} icon={c.icon}>{c.label}</Spec>
             ))}
-            {model.isAvailable && model.availableCount <= 2 && <Spec icon={Info}>Only {model.availableCount} left</Spec>}
           </div>
         </div>
 

@@ -18,6 +18,8 @@ export const franchiseHome = {
   monthlySaving: "₹2,500",
   model: {
     name: "Lectrix NDuro 2.0",
+    // Side-on transparent PNG of the model, shown on the search page stage.
+    cutout: "/images/home/nduro-side.png",
     specs: [
       { value: "90 km", label: "range per battery" },
       { value: "65 km/h", label: "top speed" },

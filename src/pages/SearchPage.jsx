@@ -14,6 +14,7 @@ import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
 
 const VEHICLE_IMAGES = {
+  Lectrix: "/images/home/nduro-side.png",
   Ather: "/images/Scooter (1).png",
   Ola: "/images/Scooter (3).png",
   TVS: "/images/Scooter (2).png",
@@ -533,7 +534,7 @@ const SearchPage = () => {
                     onPlanChange={handlePlanPick}
                     pickup={selectedPickup}
                     dropoff={selectedDropoff}
-                    gallery={pickerModels.length === 1 ? franchiseHome.model.gallery : []}
+                    cutout={pickerModels.length === 1 ? franchiseHome.model.cutout : null}
                   />
                 ) : (
                   <div className="rounded-[20px] border border-[#e3e0e8] px-[24px] py-[48px] text-center">
