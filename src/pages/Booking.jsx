@@ -6,14 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import OTPPanel from "../components/OTPPanel";
-import ToggleButton from "../components/ToggleButton";
 import { isValidAadharNumber } from "../utils/validators";
 import toast from "react-hot-toast";
 import PromocodePage from "../components/PromocodePage";
 import WhatToExpect from "../components/WhatToExpect";
 import CancellationBar from "../components/CancellationBar";
 import DateChangeModal from "../components/DateChangeModal";
-import HubDropdown from "../components/HubDropdown";
 import TermsAndConditionsModal from "../components/TermsAndConditionsModal";
 import { getAPI, postAPI } from "../caller/axiosUrls";
 import { RAZORPAY_KEY_ID, SIMULATE_PAYMENT } from "../config/env";
@@ -44,14 +42,14 @@ const Booking = () => {
   const [, setVerifiedAadhar] = useState(true);
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [showPromocodePage, setShowPromocodePage] = useState(false);
-  const [requiredDoorstepDelivery, setRequiredDoorstepDelivery] =
-    useState(false);
+  // Single hub: doorstep delivery is off and there is no address form.
+  const [requiredDoorstepDelivery] = useState(false);
   const [hubLocations, setHubLocations] = useState([]);
-  const [hubsLoading, setHubsLoading] = useState(true);
+  const [, setHubsLoading] = useState(true);
   const [selectedHubId, setSelectedHubId] = useState(null);
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [landmark, setLandmark] = useState("");
+  const [addressLine1] = useState("");
+  const [addressLine2] = useState("");
+  const [landmark] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
   const [acceptedTnC, setAcceptedTnC] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -1181,104 +1179,8 @@ const Booking = () => {
                   />
                 </div>
 
-                <div className="mt-[24px] flex items-center gap-x-[10px]">
-                  <p className="font-medium text-[18px] text-[#222222]">
-                    Pickup Options
-                  </p>
-                  <span className="h-[1px] flex-1 bg-[#D9D9D9] rounded-[8px]" />
-                </div>
-                <p className="text-[14px] mt-[16px] text-[#222222]">
-                  Choose how you’d like to get your vehicle.
-                </p>
-                <div className="text-[13px] mt-[16px] flex items-center gap-x-[8px] text-[#222222]">
-                  <ToggleButton
-                    id="doorstepDelivery"
-                    defaultChecked={requiredDoorstepDelivery}
-                    onChange={(isEnabled) => {
-                      setRequiredDoorstepDelivery(isEnabled);
-                      // Recalculate pricing with new home delivery setting
-                      recalculatePricing(isEnabled);
-                    }}
-                    disabled={false}
-                  />
-                  <p>
-                    Opt for doorstep delivery & get your EV delivered right to
-                    your location at just ₹200
-                  </p>
-                </div>
-                {requiredDoorstepDelivery ? (
-                  <div className="mt-[16px] gap-y-[16px] flex flex-col">
-                    <div className="flex flex-col">
-                      <p className="text-[12px] text-[#717171]">
-                        Flat, House no., Building, Company, Apartment
-                      </p>
-                      <input
-                        value={addressLine1}
-                        onChange={(e) => setAddressLine1(e.target.value)}
-                        type="text"
-                        className="mt-[4px] flex-1 rounded-[8px] outline-none border p-[16px] h-[48px] bg-[#F7F7F7] border-[#EDEDED] text-[14px]"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[12px] text-[#717171]">
-                        Area, Street, Sector, Village
-                      </p>
-                      <input
-                        value={addressLine2}
-                        onChange={(e) => setAddressLine2(e.target.value)}
-                        type="text"
-                        className="mt-[4px] flex-1 rounded-[8px] outline-none border p-[16px] h-[48px] bg-[#F7F7F7] border-[#EDEDED] text-[14px]"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[12px] text-[#717171]">
-                        Landmark (optional)
-                      </p>
-                      <input
-                        value={landmark}
-                        onChange={(e) => setLandmark(e.target.value)}
-                        type="text"
-                        className="mt-[4px] flex-1 rounded-[8px] outline-none border p-[16px] h-[48px] bg-[#F7F7F7] border-[#EDEDED] text-[14px]"
-                        placeholder="Eg. Near RTO office"
-                      />
-                    </div>
-                    <div className="flex items-center gap-x-[16px]"></div>
-                  </div>
-                ) : (
-                  <div className="mt-[16px] flex flex-col">
-                    <p className="text-[12px] text-[#717171]">
-                      Pickup location
-                    </p>
-                    <div className="mt-[4px] gap-x-[12px] flex items-center">
-                      <div className="relative w-full">
-                        <HubDropdown
-                          hubs={hubLocations}
-                          selectedHubId={selectedHubId}
-                          setSelectedHubId={setSelectedHubId}
-                          isLoading={hubsLoading}
-                          placeholder="Select a hub"
-                        />
-                      </div>
-                    </div>
-                    {/* Address validation message */}
-                    {requiredDoorstepDelivery && isAddressRequired() && (
-                      <div className="mt-[8px] p-[12px] bg-[#FEF2F2] border border-[#FECACA] rounded-[8px]">
-                        <p className="text-[12px] text-[#DC2626]">
-                          ⚠️ Please enter your complete address to proceed with
-                          doorstep delivery
-                        </p>
-                        <p className="text-[12px] text-[#DC2626] mt-[4px]">
-                          Missing:{" "}
-                          {!addressLine1.trim() ? "Address Line 1" : ""}{" "}
-                          {!addressLine1.trim() && !addressLine2.trim()
-                            ? "and "
-                            : ""}{" "}
-                          {!addressLine2.trim() ? "Address Line 2" : ""}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Pickup options removed: one hub, so the first hub stays selected and
+                    doorstep delivery is off. Pickup hub shows in the overview. */}
                 {SHOW_EXTEND_UPSELL && (
                   <div className="mt-[24px] flex items-center overflow-hidden w-full h-[102px] rounded-[12px] py-[8px] pr-[20px] bg-[#FAF6FE]">
                     <img
@@ -1481,32 +1383,6 @@ const Booking = () => {
                     />
                   </div>
                 </div>
-                <div className="mt-[64px]">
-                  <p className="font-bold text-[24px] text-[#222222]">
-                    Terms & Conditions
-                  </p>
-                  <div className="mt-[16px] flex items-center gap-x-[4px]">
-                    <input
-                      type="checkbox"
-                      id="tncCheckbox"
-                      className="accent-[#1B29A9]"
-                      checked={acceptedTnC}
-                      onChange={() => setAcceptedTnC(!acceptedTnC)}
-                    />
-                    <label
-                      htmlFor="tncCheckbox"
-                      className="font-medium text-[13px] text-[#222222]"
-                    >
-                      By clicking here, I agree to the{" "}
-                      <span
-                        onClick={() => setShowTermsModal(true)}
-                        className="cursor-pointer underline underline-offset-4 text-[#1B29A9] hover:text-[#0F0F0F]"
-                      >
-                        Terms & Conditions, Privacy Policy, Cookie Policy.
-                      </span>
-                    </label>
-                  </div>
-                </div>
               </div>
               <aside className="w-full min-[900px]:sticky min-[900px]:top-[96px]">
                 <div className="sticky top-[104px] space-y-[12px]">
@@ -1550,10 +1426,20 @@ const Booking = () => {
                       </p>
                     </div>
                   </div>
+                  {(() => {
+                    const hub = hubLocations.find((h) => h.id === selectedHubId);
+                    return hub ? (
+                      <p className="mt-[12px] text-[14px] text-[#222222]">
+                        <span className="text-[#717171]">Pickup at </span>
+                        <span className="font-semibold">{hub.hubName || hub.name}</span>
+                        {hub.address ? <span className="block text-[13px] text-[#717171]">{hub.address}</span> : null}
+                      </p>
+                    ) : null;
+                  })()}
                   {!isSubscription && (
                     <button
                       onClick={() => setShowDateChangeModal(true)}
-                      className="mt-[12px] cursor-pointer text-[14px] font-medium text-[#1B29A9] transition-colors hover:text-[#3844B4]"
+                      className="mt-[12px] cursor-pointer text-[14px] font-medium text-[#a8392b] transition-colors hover:text-[#7e2a20]"
                     >
                       Change dates
                     </button>
@@ -1833,9 +1719,34 @@ const Booking = () => {
                       </p>
                     </div>
                   </div>
+                  <label
+                    htmlFor="tncCheckbox"
+                    className="mt-[20px] flex cursor-pointer items-start gap-x-[10px] rounded-[12px] border border-[#e3e0e8] bg-white p-[12px] text-[13px] leading-[1.5] text-[#222222]"
+                  >
+                    <input
+                      type="checkbox"
+                      id="tncCheckbox"
+                      className="mt-[2px] size-[18px] shrink-0 accent-[#c44536]"
+                      checked={acceptedTnC}
+                      onChange={() => setAcceptedTnC(!acceptedTnC)}
+                    />
+                    <span>
+                      I agree to the{" "}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowTermsModal(true);
+                        }}
+                        className="font-semibold text-[#a8392b] underline underline-offset-4 hover:text-[#7e2a20]"
+                      >
+                        Terms & Conditions, Privacy Policy and Cookie Policy
+                      </button>
+                    </span>
+                  </label>
                   <button
                     onClick={handlePayment}
-                    className={`mt-[24px] h-[48px] w-full rounded-[24px] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors ${
+                    className={`mt-[12px] h-[48px] w-full rounded-[24px] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors ${
                       canProceedToPayment()
                         ? "bg-[#c44536] cursor-pointer hover:bg-[#a8392b]"
                         : "bg-[#CBCBCB] cursor-not-allowed"
