@@ -326,3 +326,12 @@ input[type="range"]::-webkit-slider-runnable-track {
 .sixt-band {
   background: linear-gradient(90deg, #3b2721 0%, #6e3c25 50%, #3b2721 100%);
 }
+
+/* Login panel: Jaipur dusk - warm near-black with a terracotta glow behind the scooter
+   and a faint sunset at the top, so the brand colour carries the panel. */
+.login-stage {
+  background:
+    radial-gradient(62% 34% at 50% 50%, rgba(214, 92, 62, 0.42) 0%, rgba(214, 92, 62, 0) 100%),
+    radial-gradient(90% 28% at 80% 0%, rgba(244, 150, 102, 0.28) 0%, rgba(244, 150, 102, 0) 100%),
+    linear-gradient(180deg, #1d1311 0%, #2a1915 42%, #3a221b 62%, #1e1412 84%, #140d0c 100%);
+}

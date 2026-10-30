@@ -96,7 +96,7 @@ const Login = () => {
       ) : (
         <div className="flex self-end md:self-center w-full md:w-[1000px] md:max-w-none max-h-[92%] rounded-t-[24px] md:rounded-[16px] overflow-hidden login-shadow bg-white">
           {/* Franchise panel: city lockup, headline, the NDuro on the stage, three promises. */}
-          <div className="sixt-stage hidden w-[440px] shrink-0 flex-col px-[40px] pb-[36px] pt-[40px] text-white md:flex">
+          <div className="login-stage hidden w-[440px] shrink-0 flex-col px-[40px] pb-[36px] pt-[40px] text-white md:flex">
             <div className="flex items-center gap-[12px]">
               <span className="font-display text-[26px] leading-[0.85] tracking-[0.06em] text-[#f4b9a8]">{c.city}</span>
               <span aria-hidden="true" className="h-[22px] w-px bg-white/30" />
@@ -116,12 +116,12 @@ const Login = () => {
                 const Glyph = item.Icon;
                 return (
                   <li key={item.title} className="flex items-start gap-[12px]">
-                    <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-white/[0.14]">
+                    <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#c44536]/30 ring-1 ring-[#f4b9a8]/25">
                       <Glyph className="size-[17px]" aria-hidden="true" />
                     </span>
                     <span>
                       <span className="block text-[15px] font-bold">{item.title}</span>
-                      <span className="mt-[2px] block text-[13px] leading-[1.45] text-white/75">{item.body}</span>
+                      <span className="mt-[2px] block text-[13px] leading-[1.45] text-[#e9d9d4]">{item.body}</span>
                     </span>
                   </li>
                 );
