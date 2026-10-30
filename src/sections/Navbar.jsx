@@ -7,6 +7,7 @@ import Login from "../components/Login";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { WalletCards } from "lucide-react";
+import { franchiseHome } from "../config/franchiseHome";
 
 const compactRupees = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -83,13 +84,12 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
             </div>
           ) : token ? (
             <div className={`flex items-center gap-x-1.5 md:gap-x-3 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
-              <button
-                type="button"
-                onClick={() => navigate("/business")}
+              <a
+                href={franchiseHome.businessEmailHref}
                 className="hidden min-h-10 items-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:flex sm:px-4 sm:text-[13px]"
               >
-                For Business
-              </button>
+                Business enquiries
+              </a>
               {wallet?.showInHeader && (
                 <button
                   type="button"
@@ -229,13 +229,12 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
             </div>
           ) : (
             <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
-              <button
-                type="button"
-                onClick={() => navigate("/business")}
+              <a
+                href={franchiseHome.businessEmailHref}
                 className="hidden h-10 items-center justify-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:flex sm:px-4 sm:text-[13px]"
               >
-                For Business
-              </button>
+                Business enquiries
+              </a>
               <button
                 onClick={() => setShowLoginPage(true)}
                 className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#c44536] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#a8392b]"

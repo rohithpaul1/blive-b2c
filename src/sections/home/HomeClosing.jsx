@@ -36,7 +36,6 @@ const MoreCard = ({ title, body, cta, onClick, href, image, alt }) => (
 );
 
 export const MoreBlive = () => {
-  const navigate = useNavigate();
   return (
     <section className="bg-[#ecebf0] px-[clamp(16px,5vw,80px)] py-[64px] md:py-[88px]">
       <div className="mx-auto max-w-[1240px]">
@@ -53,14 +52,10 @@ export const MoreBlive = () => {
             alt="Lectrix NDuro under-seat storage"
           />
           <MoreCard
-            title={`${c.brand} for business`}
-            body="Electric scooters for your delivery and field teams."
-            cta="Register now"
-            href="/business"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/business");
-            }}
+            title="Scooters for your team"
+            body="Delivery and field teams can rent in bulk. Write to us for fleet pricing."
+            cta="Email us"
+            href={c.businessEmailHref}
             image="/images/home/nduro-floor.webp"
             alt="Lectrix NDuro floorboard"
           />
@@ -119,7 +114,7 @@ export const HomeFooter = () => {
             <span className="text-[14px] font-bold text-white">Rent</span>
             <a href="#plans" className={link}>Daily and weekly</a>
             <a href="#plans" className={link}>Subscription</a>
-            <button type="button" onClick={() => navigate("/business")} className={link}>For business</button>
+            <a href={c.businessEmailHref} className={link}>Business enquiries</a>
           </div>
           <div className="flex flex-col gap-2.5">
             <span className="text-[14px] font-bold text-white">Help</span>

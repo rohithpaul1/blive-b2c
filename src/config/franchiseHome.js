@@ -7,6 +7,9 @@ export const franchiseHome = {
   hubAddress: "Shop 12, MI Road, near Panch Batti, Jaipur 302001",
   supportPhone: "080-4719-0022",
   supportPhoneHref: "tel:08047190022",
+  // Business rentals are handled by contact for now (no self-serve business flow).
+  businessEmail: "contact@blive.co.in",
+  businessEmailHref: "mailto:contact@blive.co.in?subject=Business%20enquiry",
   headline: "Skip the petrol pump. Ride electric in Jaipur.",
   stats: [
     { value: "12,000+", label: "rides" },

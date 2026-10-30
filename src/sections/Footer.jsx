@@ -42,12 +42,12 @@ const Footer = () => {
         >
           Help Center
         </p>
-        <p
-          onClick={() => navigate("/business")}
+        <a
+          href="mailto:contact@blive.co.in?subject=Business%20enquiry"
           className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
         >
-          For Business
-        </p>
+          Business enquiries
+        </a>
         <a
           href="mailto:contact@blive.co.in"
           className="flex min-h-[44px] cursor-pointer items-center text-[14px] text-[#D9DBE1] transition-colors hover:text-white md:min-h-0 md:text-[13px]"
