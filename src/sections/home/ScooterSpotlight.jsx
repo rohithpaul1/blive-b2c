@@ -61,9 +61,10 @@ export const HomeSteps = () => (
       </h2>
       <ol className="m-0 mt-9 grid list-none grid-cols-1 gap-3.5 p-0 sm:grid-cols-2 lg:grid-cols-5">
         {c.steps.map((s, i) => (
-          <li key={s} className="rounded-[18px] bg-white p-[22px]">
+          <li key={s.title} className="flex flex-col rounded-[18px] bg-white p-[22px]">
             <span className="font-display block text-[44px] leading-none tabular-nums text-[#c44536]">{String(i + 1).padStart(2, "0")}</span>
-            <p className="m-0 mt-1 text-[16px] font-bold leading-snug text-[#1c1a22]">{s}</p>
+            <p className="m-0 mt-[12px] text-[17px] font-bold leading-snug text-[#1c1a22]">{s.title}</p>
+            <p className="m-0 mt-[6px] text-[15px] leading-normal text-[#5a5562]">{s.body}</p>
           </li>
         ))}
       </ol>

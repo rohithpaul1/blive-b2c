@@ -87,11 +87,11 @@ export const franchiseHome = {
     },
   ],
   steps: [
-    "Choose dates and time",
-    "Pick daily, weekly or subscription",
-    "Pay online",
-    "Verify licence and Aadhaar",
-    "Pick up at the hub and ride",
+    { title: "Pick your dates", body: "Choose pickup and return times that suit your day, down to the half hour." },
+    { title: "Choose your plan", body: "Ride by the day, save 10% by the week, or subscribe and save 50%." },
+    { title: "Pay in a minute", body: "One secure online payment and your scooter is held for you." },
+    { title: "Get verified online", body: "Upload your licence and Aadhaar from your phone. No paperwork at the hub." },
+    { title: "Grab the keys and go", body: "Pick up a ready-to-ride NDuro at the hub and head out." },
   ],
   quote: {
     text: "First time with an electric vehicle. Customer service called to check everything was okay after the first week. Saves money on petrol.",
