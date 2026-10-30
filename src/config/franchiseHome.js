@@ -22,17 +22,12 @@ export const franchiseHome = {
     brand: "Lectrix",
     // Side-on transparent PNG of the model, shown on the search page stage.
     cutout: "/images/home/nduro-side.png",
-    // Spec row on the search page stage (icon keys map to icons in ModelPicker).
+    // Spec row on the search page stage: keep it to the four that matter most.
     features: [
       { icon: "range", label: "90 km range" },
-      { icon: "speed", label: "65 km/h top speed" },
-      { icon: "battery", label: "2.3 kWh swappable battery" },
-      { icon: "storage", label: "42 L under-seat storage" },
-      { icon: "modes", label: "Eco, Normal, Sport" },
-      { icon: "reverse", label: "Reverse mode" },
-      { icon: "bluetooth", label: "Bluetooth and navigation" },
-      { icon: "weight", label: "117 kg" },
-      { icon: "seats", label: "2 seats" },
+      { icon: "speed", label: "65 km/h" },
+      { icon: "battery", label: "Swappable battery" },
+      { icon: "storage", label: "42 L storage" },
     ],
     specs: [
       { value: "90 km", label: "range per battery" },
