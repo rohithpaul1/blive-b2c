@@ -89,9 +89,9 @@ export const franchiseHome = {
   steps: [
     "Choose dates and time",
     "Pick daily, weekly or subscription",
+    "Pay online",
     "Verify licence and Aadhaar",
-    "Pay and pick up at the hub",
-    "Ride, extend or return",
+    "Pick up at the hub and ride",
   ],
   quote: {
     text: "First time with an electric vehicle. Customer service called to check everything was okay after the first week. Saves money on petrol.",
