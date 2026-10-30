@@ -40,7 +40,7 @@ const RangeCalendar = ({ pickupDate, returnDate, single, onPick }) => {
   const canGoBack = !isBefore(addMonths(month, -1), startOfMonth(today));
 
   return (
-    <div className="rounded-[12px] bg-white px-[24px] pb-[28px] pt-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
+    <div className="rounded-[12px] bg-white px-[28px] pb-[32px] pt-[26px] shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
       <div className="relative grid grid-cols-2 gap-[32px] xl:grid-cols-3">
         <button
           type="button"
@@ -65,12 +65,12 @@ const RangeCalendar = ({ pickupDate, returnDate, single, onPick }) => {
           return (
             <div key={offset} className={offset === 2 ? "hidden xl:block" : ""}>
               <p className="text-center text-[21px] font-extrabold tracking-[-0.01em] text-[#191919]">{format(m, "MMMM yyyy")}</p>
-              <div className="mt-[16px] grid grid-cols-7 border-b border-[#e6e6e6] pb-[10px] text-center text-[13px] font-normal uppercase text-[#4a4a4a]">
+              <div className="mt-[20px] grid grid-cols-7 border-b border-[#e6e6e6] pb-[14px] text-center text-[13px] font-normal uppercase text-[#4a4a4a]">
                 {WEEKDAYS.map((d) => (
                   <span key={d}>{d}</span>
                 ))}
               </div>
-              <div className="mt-[12px] grid grid-cols-7 gap-y-[2px]">
+              <div className="mt-[14px] grid grid-cols-7 gap-y-[6px]">
                 {monthDays(m).map((day, i) => {
                   if (!day) return <span key={`e${i}`} />;
                   const past = isBefore(day, today);
@@ -87,7 +87,7 @@ const RangeCalendar = ({ pickupDate, returnDate, single, onPick }) => {
                       aria-pressed={Boolean(edge)}
                       aria-label={format(day, "EEEE d MMMM yyyy")}
                       onClick={() => onPick(day)}
-                      className={`flex h-[34px] w-full items-center justify-center text-[15px] font-bold tabular-nums transition-colors ${
+                      className={`flex h-[46px] w-full items-center justify-center text-[16px] font-bold tabular-nums transition-colors ${
                         edge
                           ? "rounded-[6px] bg-[#191919] text-white"
                           : inRange
