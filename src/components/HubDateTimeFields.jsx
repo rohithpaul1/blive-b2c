@@ -34,20 +34,20 @@ const monthDays = (month) => {
   return days;
 };
 
-const RangeCalendar = ({ pickupDate, returnDate, stage, single, onPick }) => {
+const RangeCalendar = ({ pickupDate, returnDate, single, onPick }) => {
   const [month, setMonth] = useState(() => startOfMonth(pickupDate || new Date()));
   const today = startOfDay(new Date());
   const canGoBack = !isBefore(addMonths(month, -1), startOfMonth(today));
 
   return (
-    <div className="rounded-[20px] border border-[#e6e3e9] bg-white p-[20px] shadow-[0_18px_48px_rgba(15,13,22,0.18)]">
+    <div className="rounded-[12px] bg-white px-[24px] pb-[28px] pt-[22px] shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
       <div className="relative grid grid-cols-2 gap-[32px] xl:grid-cols-3">
         <button
           type="button"
           aria-label="Previous month"
           disabled={!canGoBack}
           onClick={() => setMonth((m) => addMonths(m, -1))}
-          className="absolute left-0 top-[-4px] flex size-[36px] items-center justify-center rounded-full text-[#1c1a22] hover:bg-[#f3f2f4] disabled:opacity-30"
+          className="absolute left-[-8px] top-[-2px] flex size-[36px] items-center justify-center rounded-full text-[#1c1a22] hover:bg-[#f2f2f2] disabled:opacity-30"
         >
           <ChevronLeft className="size-[20px]" aria-hidden="true" />
         </button>
@@ -55,7 +55,7 @@ const RangeCalendar = ({ pickupDate, returnDate, stage, single, onPick }) => {
           type="button"
           aria-label="Next month"
           onClick={() => setMonth((m) => addMonths(m, 1))}
-          className="absolute right-0 top-[-4px] flex size-[36px] items-center justify-center rounded-full text-[#1c1a22] hover:bg-[#f3f2f4]"
+          className="absolute right-[-8px] top-[-2px] flex size-[36px] items-center justify-center rounded-full text-[#1c1a22] hover:bg-[#f2f2f2]"
         >
           <ChevronRight className="size-[20px]" aria-hidden="true" />
         </button>
@@ -64,13 +64,13 @@ const RangeCalendar = ({ pickupDate, returnDate, stage, single, onPick }) => {
           const m = addMonths(month, offset);
           return (
             <div key={offset} className={offset === 2 ? "hidden xl:block" : ""}>
-              <p className="text-center text-[17px] font-bold text-[#1c1a22]">{format(m, "MMMM yyyy")}</p>
-              <div className="mt-[14px] grid grid-cols-7 text-center text-[11px] font-bold uppercase tracking-[0.04em] text-[#6a6573]">
+              <p className="text-center text-[21px] font-extrabold tracking-[-0.01em] text-[#191919]">{format(m, "MMMM yyyy")}</p>
+              <div className="mt-[16px] grid grid-cols-7 border-b border-[#e6e6e6] pb-[10px] text-center text-[13px] font-normal uppercase text-[#4a4a4a]">
                 {WEEKDAYS.map((d) => (
-                  <span key={d} className="py-[6px]">{d}</span>
+                  <span key={d}>{d}</span>
                 ))}
               </div>
-              <div className="mt-[4px] grid grid-cols-7 gap-y-[4px]">
+              <div className="mt-[12px] grid grid-cols-7 gap-y-[2px]">
                 {monthDays(m).map((day, i) => {
                   if (!day) return <span key={`e${i}`} />;
                   const past = isBefore(day, today);
@@ -79,34 +79,26 @@ const RangeCalendar = ({ pickupDate, returnDate, stage, single, onPick }) => {
                   const inRange =
                     !single && pickupDate && returnDate && day > startOfDay(pickupDate) && day < startOfDay(returnDate);
                   const edge = isPickup || isReturn;
-                  const band =
-                    inRange ||
-                    (!single && returnDate && pickupDate && !isSameDay(pickupDate, returnDate) &&
-                      ((isPickup && "start") || (isReturn && "end")));
                   return (
-                    <div
+                    <button
                       key={day.toISOString()}
-                      className={`flex justify-center ${band ? "bg-[#f4ecea]" : ""} ${
-                        band === "start" ? "rounded-l-full" : band === "end" ? "rounded-r-full" : ""
+                      type="button"
+                      disabled={past}
+                      aria-pressed={Boolean(edge)}
+                      aria-label={format(day, "EEEE d MMMM yyyy")}
+                      onClick={() => onPick(day)}
+                      className={`flex h-[34px] w-full items-center justify-center text-[15px] font-bold tabular-nums transition-colors ${
+                        edge
+                          ? "rounded-[6px] bg-[#191919] text-white"
+                          : inRange
+                          ? "bg-[#f2f2f2] text-[#191919] hover:bg-[#e6e6e6]"
+                          : past
+                          ? "cursor-not-allowed text-[#c4c4c4]"
+                          : "rounded-[6px] text-[#191919] hover:bg-[#f2f2f2]"
                       }`}
                     >
-                      <button
-                        type="button"
-                        disabled={past}
-                        aria-pressed={Boolean(edge)}
-                        aria-label={format(day, "EEEE d MMMM yyyy")}
-                        onClick={() => onPick(day)}
-                        className={`flex size-[40px] items-center justify-center rounded-full text-[14px] font-bold tabular-nums transition-colors ${
-                          edge
-                            ? "bg-[#1c1a22] text-white"
-                            : past
-                            ? "cursor-not-allowed text-[#c9c6cd]"
-                            : "text-[#1c1a22] hover:bg-[#ebe7ee]"
-                        }`}
-                      >
-                        {day.getDate()}
-                      </button>
-                    </div>
+                      {day.getDate()}
+                    </button>
                   );
                 })}
               </div>
@@ -114,9 +106,6 @@ const RangeCalendar = ({ pickupDate, returnDate, stage, single, onPick }) => {
           );
         })}
       </div>
-      <p className="mt-[14px] border-t border-[#efedf1] pt-[12px] text-[13px] text-[#6a6573]">
-        {single ? "Pick the day your subscription starts." : stage === "pickup" ? "Pick your pickup date." : "Now pick your return date."}
-      </p>
     </div>
   );
 };
@@ -175,8 +164,8 @@ const SlotList = ({ title, value, isBlocked, onPick }) => {
 };
 
 const segment = (active) =>
-  `flex min-h-[56px] items-center gap-[10px] px-[14px] text-left text-[15px] font-medium text-[#1c1a22] transition-colors hover:bg-[#faf9fb] ${
-    active ? "relative z-[1] rounded-[12px] outline outline-2 -outline-offset-2 outline-[#c44536]" : ""
+  `flex min-h-[56px] items-center gap-[10px] px-[14px] text-left text-[16px] font-medium text-[#191919] transition-colors hover:bg-[#fafafa] ${
+    active ? "relative z-[1] rounded-[8px] outline outline-2 -outline-offset-2 outline-[#c44536]" : ""
   }`;
 
 export default function HubDateTimeFields({
@@ -242,14 +231,14 @@ export default function HubDateTimeFields({
         <p className="mb-[6px] text-[13px] font-bold text-[#1c1a22]">
           {isPickup ? (isSubscription ? "Start date" : "Pickup date") : "Return date"}
         </p>
-        <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] rounded-[12px] border border-[#dedce1] bg-white">
+        <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] rounded-[8px] border border-[#d9d9d9] bg-white">
           <button
             type="button"
             aria-expanded={datesOpen && stage === kind}
             onClick={() => openDates(kind)}
-            className={`${segment(datesOpen && stage === kind)} border-r border-[#dedce1]`}
+            className={`${segment(datesOpen && stage === kind)} border-r border-[#d9d9d9]`}
           >
-            <CalendarDays className="size-[19px] shrink-0 text-[#c44536]" aria-hidden="true" />
+            <CalendarDays className="size-[20px] shrink-0 text-[#191919]" aria-hidden="true" />
             <span className="truncate tabular-nums">{dateLabel(value?.date)}</span>
           </button>
           <button
@@ -295,7 +284,6 @@ export default function HubDateTimeFields({
           <RangeCalendar
             pickupDate={pickup?.date}
             returnDate={dropoff?.date}
-            stage={stage}
             single={isSubscription}
             onPick={pickDay}
           />
