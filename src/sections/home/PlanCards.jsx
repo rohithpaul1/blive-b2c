@@ -69,7 +69,7 @@ const PlanCards = () => (
   <section id="plans" className="bg-[#f1f0f4] px-[clamp(16px,5vw,80px)] py-[64px] md:py-[88px]">
     <div className="mx-auto max-w-[1180px]">
       <h2 className="font-display m-0 text-[clamp(40px,5vw,60px)] leading-[0.95] text-[#0f0d16]">
-        One scooter. Pick how long.
+        Ride for a day, a week or a month.
       </h2>
       <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
         {c.plans.map((p) => (

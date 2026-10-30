@@ -164,7 +164,7 @@ function ModelCard({ model, planType, selected, onSelect, pricingFor, best }) {
 }
 
 export default function ModelPicker({ models, selectedPlanType, onPlanChange, pickup, dropoff, cutout = null, features = [] }) {
-  const { rentNow, pricingFor, isSubscription } = useRentNow();
+  const { rentNow, pricingFor, isSubscription, rentalDays } = useRentNow();
   const [modelId, setModelId] = useState(() => (models.find((m) => m.isAvailable) || models[0])?.id);
   const [busy, setBusy] = useState(false);
 
@@ -174,7 +174,19 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
 
   const model = models.find((m) => m.id === modelId) || models[0];
   const planTypes = PLAN_ORDER.filter((pt) => model?.plans[pt]);
-  const planType = planTypes.includes(selectedPlanType) ? selectedPlanType : planTypes[0];
+  // Preselect the plan that fits the rider's dates (subscriptions: monthly, else the chosen cycle).
+  const fitsDates = isSubscription
+    ? (planTypes.includes(selectedPlanType) ? selectedPlanType : planTypes.includes("monthly") ? "monthly" : planTypes[0])
+    : rentalDays >= 30 && planTypes.includes("monthly")
+    ? "monthly"
+    : rentalDays >= 7 && planTypes.includes("weekly")
+    ? "weekly"
+    : planTypes.includes("daily")
+    ? "daily"
+    : planTypes[0];
+  const planType = fitsDates;
+  // Selected plan first, then the nudges.
+  const orderedPlans = [planType, ...planTypes.filter((pt) => pt !== planType)];
 
   // Per-day price of each plan, for savings and the best-value badge.
   const perDay = useMemo(() => {
@@ -280,36 +292,59 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
         <div className="flex flex-col gap-[14px] px-[20px] py-[24px] md:px-[36px] md:py-[32px]">
           <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">{isSubscription ? "Billing" : "Rental plan"}</h3>
           <div role="radiogroup" aria-label="Rental plan" className="flex flex-col gap-[10px]">
-            {planTypes.map((pt) => {
+            {orderedPlans.map((pt) => {
               const on = pt === planType;
+              const unit = isSubscription ? planUnit(pt) : "day";
+              const rate = isSubscription ? Number(model.plans[pt].price) || 0 : perDay[pt];
+              const delta = isSubscription ? 0 : Math.round(perDay[pt] - perDay[planType]);
+              const longer = UNIT_DAYS[pt] > UNIT_DAYS[planType];
+              // Nudge copy: longer plans sell the lower daily rate, shorter ones stay neutral.
+              const nudge = on
+                ? isSubscription
+                  ? planNote(pt)
+                  : `Fits your ${pricing.days}-day trip`
+                : !isSubscription && longer && delta < 0
+                ? `Ride ${UNIT_DAYS[pt]} days and pay ₹${inr(rate)} a day`
+                : planNote(pt);
               return (
                 <button
                   key={pt}
                   type="button"
                   role="radio"
                   aria-checked={on}
-                  onClick={() => onPlanChange(pt)}
-                  className={`flex min-h-[72px] w-full items-center gap-[14px] rounded-[12px] bg-white px-[16px] py-[12px] text-left transition-colors ${
-                    on ? "border-2 border-[#1c1a22]" : "my-px border border-[#d9d9d9] hover:border-[#9a96a0]"
+                  onClick={() => !on && onPlanChange(pt)}
+                  className={`flex min-h-[72px] w-full items-center gap-[14px] rounded-[12px] px-[16px] py-[12px] text-left transition-colors ${
+                    on ? "border-2 border-[#1c1a22] bg-white" : "my-px border border-[#d9d9d9] bg-white hover:border-[#9a96a0]"
                   }`}
                 >
                   <span className={`size-[20px] shrink-0 rounded-full ${on ? "border-[6px] border-[#1c1a22]" : "border-2 border-[#b9b5c2]"}`} />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[16px] font-bold text-[#1c1a22]">{planName(pt)}</span>
-                    <span className="mt-[2px] block text-[14px] text-[#5a5562]">{planNote(pt)}</span>
+                    <span className="block text-[16px] font-bold text-[#1c1a22]">
+                      {planName(pt)}
+                      {on && <span className="ml-[8px] text-[13px] font-semibold text-[#5a5562]">₹{inr(rate)} / {unit}</span>}
+                    </span>
+                    <span className="mt-[2px] block text-[14px] text-[#5a5562]">{nudge}</span>
                   </span>
-                  {pt === bestPlan && (
-                    <span className="hidden rounded-full bg-[#c44536] px-[10px] py-[4px] text-[12px] font-bold text-white sm:inline">Best value</span>
+                  {!on && pt === bestPlan && (
+                    <span className="hidden rounded-full bg-[#c44536] px-[10px] py-[4px] text-[12px] font-bold text-white sm:inline">
+                      {longer ? "Save more" : "Best value"}
+                    </span>
                   )}
                   <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">
-                    ₹{inr(isSubscription ? model.plans[pt].price : perDay[pt])} / {isSubscription ? planUnit(pt) : "day"}
+                    {on
+                      ? "Included"
+                      : isSubscription
+                      ? `₹${inr(rate)} / ${unit}`
+                      : delta === 0
+                      ? "Same price"
+                      : `${delta > 0 ? "+" : "−"} ₹${inr(Math.abs(delta))} / day`}
                   </span>
                 </button>
               );
             })}
           </div>
           {!isSubscription && (
-            <p className="m-0 text-[13px] text-[#6a6573]">Choosing weekly or monthly sets your return date to match the plan.</p>
+            <p className="m-0 text-[13px] text-[#6a6573]">Your plan follows your dates. Switching plans moves your return date to match.</p>
           )}
 
           <h3 className="m-0 mt-[6px] text-[17px] font-bold text-[#1c1a22]">Included</h3>
