@@ -27,7 +27,7 @@ const Home = () => {
 
     return (
         <div className="home-a w-full overflow-x-hidden overflow-y-auto bg-white text-[#1c1a22]">
-            <Navbar />
+            <Navbar contained />
             <HomeHero />
             <SubscribeBand />
             <PlanCards />

@@ -6,7 +6,7 @@ import { franchiseHome as c } from "../../config/franchiseHome";
 const HomeHero = () => (
   <section
     id="hero"
-    className="home-hero-bg relative px-[clamp(16px,5vw,80px)] pb-[72px] pt-[124px] text-white md:pb-[96px] md:pt-[144px]"
+    className="home-hero-bg relative px-[clamp(16px,5vw,80px)] pb-[56px] pt-[124px] text-white md:pb-[72px] md:pt-[144px]"
   >
     <div className="mx-auto max-w-[1180px]">
       <h1 className="font-display m-0 max-w-[900px] text-[clamp(44px,6vw,88px)] leading-[0.95]">
@@ -23,8 +23,8 @@ const HomeHero = () => (
         ))}
       </div>
     </div>
-    <div id="hero-search" className="relative mt-10 h-[40px] md:mt-12 md:h-[56px]">
-      <SearchBar />
+    <div id="hero-search" className="relative mx-auto mt-10 max-w-[1180px] md:mt-12">
+      <SearchBar singleHub />
     </div>
   </section>
 );

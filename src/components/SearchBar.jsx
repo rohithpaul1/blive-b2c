@@ -41,13 +41,15 @@ const LOCATIONS = [
 
 const SUBSCRIPTION_DURATIONS = [1, 3, 6, 12];
 
-const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
+// singleHub: franchise homepage with one hub. No location step, no business tab,
+// dates show their times, and the card sits in the page flow instead of overlapping the hero.
+const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
   const [showLocation, setShowLocation] = useState(false);
   const [showDatepicker, setShowDatepicker] = useState(false);
   const [desktopExpanded, setDesktopExpanded] = useState(false);
   const [desktopDateStage, setDesktopDateStage] = useState("pickup");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileStep, setMobileStep] = useState("where");
+  const [mobileStep, setMobileStep] = useState(singleHub ? "when" : "where");
   const [mobileLocationQuery, setMobileLocationQuery] = useState("");
   const [mobileCalendarMonth, setMobileCalendarMonth] = useState(() => startOfMonth(new Date()));
   const [mobileDateStage, setMobileDateStage] = useState("pickup");
@@ -302,7 +304,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
     setMobileLocationQuery("");
     setMobileCalendarMonth(startOfMonth(pickup));
     setMobileDateStage("pickup");
-    setMobileStep("where");
+    setMobileStep(singleHub ? "when" : "where");
     sessionStorage.setItem("selectedLocation", "HSR Layout, Bengaluru");
     sessionStorage.setItem("selectedPickupDate", pickup.toISOString());
     sessionStorage.setItem("selectedDropoffDate", dropoff.toISOString());
@@ -312,7 +314,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
 
   const modeSwitch = (mobile = false) => (
     <div
-      className={mobile ? "grid w-full grid-cols-3 gap-[6px]" : "flex items-center gap-[8px]"}
+      className={mobile ? `grid w-full ${singleHub ? "grid-cols-2" : "grid-cols-3"} gap-[6px]` : "flex items-center gap-[8px]"}
       role="tablist"
       aria-label="Rental journey"
     >
@@ -328,7 +330,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             mobile ? "gap-[5px] px-[8px] text-[12px]" : "gap-[8px] px-[18px] text-[13px]"
           } ${
             rentalMode === mode
-              ? "border-[#2f2350] bg-[#2f2350] text-white"
+              ? singleHub
+                ? "border-[#1c1a22] bg-[#1c1a22] text-white"
+                : "border-[#2f2350] bg-[#2f2350] text-white"
               : "border-transparent bg-[#f3f2f4] text-[#514d56] hover:bg-[#ebe9ed]"
           }`}
           aria-selected={rentalMode === mode}
@@ -338,6 +342,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           {mobile && mode === RENTAL_MODES.fixed ? "Fixed" : label}
         </button>
       ))}
+      {!singleHub && (
       <button
         type="button"
         onClick={() => {
@@ -353,6 +358,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         <Building2 className="size-[17px]" aria-hidden="true" />
         {mobile ? "Business" : "For business"}
       </button>
+      )}
     </div>
   );
 
@@ -494,6 +500,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
   const mobileFooterLabel =
     mobileStep === "where" || (mobileStep === "when" && isSubscription)
       ? "Next"
+      : singleHub
+      ? "Show price"
       : "Show vehicles";
 
   return (
@@ -502,6 +510,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
       className={`z-40 ${
         onSearchPage
           ? "relative w-full max-w-[700px]"
+          : singleHub
+          ? "relative w-full"
           : "absolute left-1/2 bottom-0 w-[calc(100%_-_32px)] max-w-[1160px] -translate-x-1/2 translate-y-1/2 md:w-[calc(100%_-_40px)]"
       }`}
     >
@@ -509,7 +519,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         type="button"
         onClick={() => {
           setMobileOpen(true);
-          setMobileStep("where");
+          setMobileStep(singleHub ? "when" : "where");
         }}
         className={`flex min-h-[62px] w-full items-center gap-[12px] rounded-full border bg-white p-[8px] pl-[16px] text-left md:hidden ${onSearchPage ? "border-[#dddddd] shadow-[0_2px_8px_rgba(0,0,0,0.07)]" : "border-[#e7e5e8] shadow-[0_8px_24px_rgba(16,24,40,0.12)]"}`}
         aria-label="Open vehicle search"
@@ -609,11 +619,21 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
         <div className="flex items-center justify-between gap-[16px]">
           {modeSwitch()}
           <div className="flex items-center gap-[12px]">
+            {singleHub ? (
+              <button
+                type="button"
+                onClick={() => navigate("/my-bookings")}
+                className="text-[13px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[#a8392b]"
+              >
+                View or change my booking
+              </button>
+            ) : (
             <p className="text-[12px] text-[#716c75]">
               {isSubscription
                 ? "Choose a start date and how long you expect to ride."
                 : "Choose your pickup and return dates."}
             </p>
+            )}
             {onSearchPage && (
               <button
                 type="button"
@@ -631,7 +651,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           </div>
         </div>
 
-        <div className={`mt-[16px] grid gap-[10px] ${isSubscription ? "grid-cols-[1.5fr_1fr_1fr_auto]" : "grid-cols-[1.5fr_1fr_1fr_auto]"}`}>
+        <div className={`mt-[16px] grid gap-[10px] ${singleHub ? "grid-cols-[1fr_1fr_auto]" : "grid-cols-[1.5fr_1fr_1fr_auto]"}`}>
+          {!singleHub && (
           <button
             id="location"
             type="button"
@@ -650,6 +671,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             </span>
             <ChevronDown className="size-[17px] shrink-0 text-[#6f6973]" aria-hidden="true" />
           </button>
+          )}
 
           <button
             id="pickup-btn"
@@ -657,20 +679,21 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             onClick={() => openDesktopDatepicker("pickup")}
             className={desktopFieldClass}
           >
-            <CalendarDays className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
+            <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#351a75]"}`} aria-hidden="true" />
             <span className="min-w-0">
               <span className="block text-[12px] font-bold text-[#4c4750]">
                 {isSubscription ? "Start date" : "Pickup date"}
               </span>
               <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
                 {formattedDate(selectedPickup?.date)}
+                {singleHub && ` · ${selectedPickup?.time || DEFAULT_TIME}`}
               </span>
             </span>
           </button>
 
           {isSubscription ? (
             <label className={`${desktopFieldClass} cursor-pointer`}>
-              <Clock3 className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
+              <Clock3 className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#351a75]"}`} aria-hidden="true" />
               <span className="min-w-0 flex-1">
                 <span className="block text-[12px] font-bold text-[#4c4750]">How long?</span>
                 <select
@@ -695,11 +718,12 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
               onClick={() => openDesktopDatepicker("dropoff")}
               className={desktopFieldClass}
             >
-              <CalendarDays className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
+              <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#351a75]"}`} aria-hidden="true" />
               <span className="min-w-0">
                 <span className="block text-[12px] font-bold text-[#4c4750]">Return date</span>
                 <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
                   {formattedDate(selectedDropoff?.date)}
+                  {singleHub && ` · ${selectedDropoff?.time || DEFAULT_TIME}`}
                 </span>
               </span>
             </button>
@@ -708,10 +732,14 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
           <button
             type="button"
             onClick={handleRentNow}
-            className="flex min-h-[66px] min-w-[156px] items-center justify-center gap-[9px] rounded-[14px] bg-[#351a75] px-[24px] text-[14px] font-bold text-white transition-colors hover:bg-[#2c155f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#351a75]"
+            className={`flex min-h-[66px] min-w-[156px] items-center justify-center gap-[9px] rounded-[14px] px-[24px] text-[14px] font-bold text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+              singleHub
+                ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
+                : "bg-[#351a75] hover:bg-[#2c155f] focus-visible:outline-[#351a75]"
+            }`}
           >
             <Search className="size-[19px]" aria-hidden="true" />
-            Show vehicles
+            {singleHub ? "Show price" : "Show vehicles"}
           </button>
         </div>
       </div>
@@ -778,6 +806,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto px-[12px] pb-[150px] pt-[8px] [scrollbar-width:none]">
+              {!singleHub && (
               <section
                 className={`overflow-hidden rounded-[20px] border bg-white transition-shadow ${
                   mobileStep === "where"
@@ -848,6 +877,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                   </div>
                 )}
               </section>
+              )}
 
               <section
                 className={`mt-[12px] overflow-hidden rounded-[20px] border bg-white transition-shadow ${
@@ -1029,6 +1059,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                 </section>
               )}
 
+              {!singleHub && (
               <button
                 type="button"
                 onClick={() => {
@@ -1040,6 +1071,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
                 <Building2 className="size-[17px]" aria-hidden="true" />
                 <span className="underline underline-offset-4">Renting for a business?</span>
               </button>
+              )}
             </div>
 
             <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[#e4e1e6] bg-white px-[20px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[12px]">
@@ -1068,9 +1100,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger }) => {
               <button
                 type="button"
                 onClick={mobileFooterAction}
-                className="flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] bg-[#351a75] px-[22px] text-[16px] font-bold text-white"
+                className={`flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] px-[22px] text-[16px] font-bold text-white ${singleHub ? "bg-[#c44536]" : "bg-[#351a75]"}`}
               >
-                {mobileFooterLabel === "Show vehicles" && <Search className="size-[18px]" aria-hidden="true" />}
+                {mobileFooterLabel !== "Next" && <Search className="size-[18px]" aria-hidden="true" />}
                 {mobileFooterLabel}
                 {mobileFooterLabel === "Next" && <ChevronRight className="size-[18px]" aria-hidden="true" />}
               </button>

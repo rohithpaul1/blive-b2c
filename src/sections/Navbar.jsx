@@ -16,7 +16,7 @@ const compactRupees = (value) =>
     maximumFractionDigits: 1,
   }).format(Number(value || 0));
 
-const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
+const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const {
@@ -39,12 +39,12 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger }) => {
     <>
       {showLoginPage && !isBusinessWebsite && <Login />}
       <nav
-        className={`fixed top-0 z-[45] flex w-full flex-col items-center justify-center px-[clamp(20px,4vw,64px)] py-[10px] ${
+        className={`fixed top-0 z-[45] flex w-full flex-col items-center justify-center py-[10px] ${contained ? "px-[clamp(16px,5vw,80px)]" : "px-[clamp(20px,4vw,64px)]"} ${
           expanded ? (onSearchPage ? "bg-white md:shadow-[0_4px_14px_rgba(0,0,0,0.06)]" : "bg-white header-shadow") : "h-[72px] bg-white/95"
         }`}
       >
         <div
-          className={`min-h-[48px] w-full items-center self-start ${
+          className={`min-h-[48px] w-full items-center ${contained ? "mx-auto max-w-[1180px]" : "self-start"} ${
             onSearchPage
               ? "grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-[12px] md:grid-cols-[auto_minmax(280px,700px)_auto] md:gap-x-[24px]"
               : "flex justify-between"
