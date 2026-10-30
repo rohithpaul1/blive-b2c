@@ -43,7 +43,7 @@ const HelpCenter = () => {
                     aria-current={active ? "true" : undefined}
                     className={`min-h-[44px] whitespace-nowrap rounded-full border px-[16px] text-[15px] font-semibold md:w-full md:whitespace-normal md:rounded-none md:rounded-r-md md:border-0 md:border-l-4 md:py-4 md:pl-4 md:text-left md:text-[17px] ${
                       active
-                        ? "border-[#222222] bg-[#222222] text-white md:border-[#351a75] md:bg-[#f4f0fc] md:text-[#351a75]"
+                        ? "border-[#222222] bg-[#222222] text-white md:border-[#c44536] md:bg-[#fdf0ec] md:text-[#c44536]"
                         : "border-[#dddddd] text-[#3A3A3A] md:border-transparent"
                     }`}
                   >
@@ -68,7 +68,7 @@ const HelpCenter = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`flex h-[40px] shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-[16px] text-[14px] font-medium md:h-[44px] ${
                   activeTab === tab
-                    ? "border-[#351a75] bg-[#351a75] text-white"
+                    ? "border-[#c44536] bg-[#c44536] text-white"
                     : "border-[#C0C0C0] bg-transparent text-[#3A3A3A]"
                 }`}
               >

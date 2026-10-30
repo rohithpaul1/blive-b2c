@@ -225,7 +225,7 @@ const MyBookings = () => {
             </div>
             <div className="flex flex-col pt-[20px]">
                 {wallet?.showInHeader && wallet.activeSubscription && (
-                    <div className="mx-auto mb-5 grid w-[calc(100%_-_2rem)] max-w-[1040px] gap-4 rounded-[20px] border border-[#e5deef] bg-[#faf8ff] p-5 sm:w-[calc(100%_-_3rem)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+                    <div className="mx-auto mb-5 grid w-[calc(100%_-_2rem)] max-w-[1040px] gap-4 rounded-[20px] border border-[#e5deef] bg-[#fdf6f4] p-5 sm:w-[calc(100%_-_3rem)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
                         <div className="flex min-w-0 items-start gap-4">
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#ece4fb] text-[#4c288f]">
                                 <WalletCards size={22} aria-hidden="true" />
@@ -244,7 +244,7 @@ const MyBookings = () => {
                         <button
                             type="button"
                             onClick={() => navigate("/wallet")}
-                            className="min-h-11 rounded-full bg-[#351a75] px-6 text-sm font-bold text-white transition-colors hover:bg-[#2c155f]"
+                            className="min-h-11 rounded-full bg-[#c44536] px-6 text-sm font-bold text-white transition-colors hover:bg-[#a8392b]"
                         >
                             Add money
                         </button>
@@ -267,7 +267,7 @@ const MyBookings = () => {
                             <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">{error}</p>
                             <button 
                                 onClick={fetchBookingHistory}
-                                className="mt-4 min-h-11 rounded-full bg-[#351a75] px-6 py-2 font-semibold text-white hover:bg-[#2c155f]"
+                                className="mt-4 min-h-11 rounded-full bg-[#c44536] px-6 py-2 font-semibold text-white hover:bg-[#a8392b]"
                             >
                                 Retry
                             </button>

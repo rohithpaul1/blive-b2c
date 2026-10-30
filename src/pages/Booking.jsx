@@ -1837,7 +1837,7 @@ const Booking = () => {
                     onClick={handlePayment}
                     className={`mt-[24px] h-[48px] w-full rounded-[24px] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors ${
                       canProceedToPayment()
-                        ? "bg-[#351a75] cursor-pointer hover:bg-[#2c155f]"
+                        ? "bg-[#c44536] cursor-pointer hover:bg-[#a8392b]"
                         : "bg-[#CBCBCB] cursor-not-allowed"
                     }`}
                     disabled={!canProceedToPayment() || isLoading}
@@ -1893,7 +1893,7 @@ const Booking = () => {
                     {appliedPromocode ? (
                       <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[10px] border border-dashed border-[#cfc6ef] bg-[#f6f3ff] p-[14px]">
                         <div className="min-w-0">
-                          <p className="truncate text-[14px] font-bold text-[#351a75]">
+                          <p className="truncate text-[14px] font-bold text-[#c44536]">
                             {appliedPromocode.promocode}
                           </p>
                           <p className="mt-[2px] text-[12px] text-[#656565]">
@@ -1902,7 +1902,7 @@ const Booking = () => {
                         </div>
                         <button
                           onClick={() => setAppliedPromocode(null)}
-                          className="text-[12px] font-bold text-[#351a75]"
+                          className="text-[12px] font-bold text-[#c44536]"
                         >
                           Remove
                         </button>
@@ -1910,7 +1910,7 @@ const Booking = () => {
                     ) : (
                       <button
                         onClick={() => setShowPromocodePage(true)}
-                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[#8f78c6] px-[16px] text-[13px] font-bold text-[#351a75] transition-colors hover:bg-[#f6f3ff]"
+                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[#8f78c6] px-[16px] text-[13px] font-bold text-[#c44536] transition-colors hover:bg-[#f6f3ff]"
                       >
                         <span className="mr-[8px] text-[20px] font-normal">+</span>
                         Apply coupon

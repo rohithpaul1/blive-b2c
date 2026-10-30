@@ -43,7 +43,7 @@ const MobileTabBar = () => {
                   aria-current={active ? "page" : undefined}
                   onClick={() => (auth && !token ? setShowLoginPage(true) : navigate(to))}
                   className={`flex h-full w-full flex-col items-center justify-center gap-[4px] text-[12px] font-medium transition-colors ${
-                    active ? "text-[#351a75]" : "text-[#6a6a6a]"
+                    active ? "text-[#c44536]" : "text-[#6a6a6a]"
                   }`}
                 >
                   {createElement(Icon, { size: 22, strokeWidth: active ? 2.4 : 1.8, "aria-hidden": true })}

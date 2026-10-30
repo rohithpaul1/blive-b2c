@@ -296,7 +296,7 @@ const Wallet = () => {
                         aria-pressed={on}
                         onClick={() => { setAmount(preset); setCustomAmount(""); setJustAdded(0); }}
                         className={`min-h-[52px] rounded-2xl text-base font-semibold transition-colors ${
-                          on ? "border-2 border-[#3b2380] bg-[#f1edff] text-[#3b2380]" : "border border-[#dcdae3] bg-white hover:border-[#b8a7dc]"
+                          on ? "border-2 border-[#3b2380] bg-[#f1edff] text-[#3b2380]" : "border border-[#dcdae3] bg-white hover:border-[#e9a998]"
                         }`}
                       >
                         {rupees(preset)}
@@ -320,7 +320,7 @@ const Wallet = () => {
                   type="button"
                   onClick={() => topUp(chosenAmount)}
                   disabled={adding || !(chosenAmount > 0)}
-                  className="mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#3b2380] px-5 text-base font-semibold text-white transition-colors hover:bg-[#2c155f] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-5 flex min-h-14 w-full items-center justify-center rounded-2xl bg-[#3b2380] px-5 text-base font-semibold text-white transition-colors hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {adding ? "Adding money…" : chosenAmount > 0 ? `Add ${rupees(chosenAmount)}` : "Choose an amount"}
                 </button>

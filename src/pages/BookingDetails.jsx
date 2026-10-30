@@ -759,7 +759,7 @@ const BookingDetails = () => {
                             <button
                                 type="button"
                                 onClick={() => navigate('/wallet')}
-                                className="min-h-11 rounded-full border border-[#cbbce9] bg-[#f7f4fc] px-5 text-sm font-bold text-[#4a2595] hover:bg-[#f0eafb]"
+                                className="min-h-11 rounded-full border border-[#f0c2b5] bg-[#f7f4fc] px-5 text-sm font-bold text-[#4a2595] hover:bg-[#f0eafb]"
                             >
                                 Manage wallet
                             </button>

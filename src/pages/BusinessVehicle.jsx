@@ -178,7 +178,7 @@ function BusinessVehicle() {
                     [<ShieldCheck key="support" className="size-5" aria-hidden="true" />, "Business support", "Connected operations", "Quotation, KYB, deployment, rentals, and support remain linked."],
                   ].map(([icon, title, value, copy]) => (
                     <article key={title} className="rounded-[20px] border border-[#e4e1e5] bg-white p-6">
-                      <span className="flex size-11 items-center justify-center rounded-full bg-[#f2eef6] text-[#5b3b78]">{icon}</span>
+                      <span className="flex size-11 items-center justify-center rounded-full bg-[#fbeee9] text-[#5b3b78]">{icon}</span>
                       <p className="mt-6 text-[12px] font-bold text-[#837d85]">{title}</p>
                       <h3 className="mt-2 text-[19px] font-black">{value}</h3>
                       <p className="mt-3 text-[13px] leading-6 text-[#716c75]">{copy}</p>

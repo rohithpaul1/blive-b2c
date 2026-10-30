@@ -57,7 +57,7 @@ const Customers = () => {
           </button>
           <button
             onClick={goNext}
-            className="flex size-[48px] cursor-pointer items-center justify-center rounded-full bg-[#0F0F0F] transition-colors hover:bg-[#351a75] md:size-[56px]"
+            className="flex size-[48px] cursor-pointer items-center justify-center rounded-full bg-[#0F0F0F] transition-colors hover:bg-[#c44536] md:size-[56px]"
           >
             <img
               className="size-[20px]"

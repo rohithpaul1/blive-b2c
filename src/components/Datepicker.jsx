@@ -164,7 +164,7 @@ export default function DateTimePicker({
                 onClick={() => handleDateClick(day)}
                 disabled={isPast}
                 className={`relative min-h-[40px] cursor-pointer rounded-[8px] p-2 text-sm transition-colors aspect-square
-                  ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[#2A244E29]" : isPast ? "cursor-not-allowed bg-transparent text-[#c7c4c9]" : "bg-[#F1F2F447] hover:bg-gray-200"}
+                  ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[#c4453629]" : isPast ? "cursor-not-allowed bg-transparent text-[#c7c4c9]" : "bg-[#F1F2F447] hover:bg-gray-200"}
                 `}
               >
                 {day.getDate()}
@@ -233,14 +233,14 @@ export default function DateTimePicker({
       )}
 
       {isSubscription && (
-        <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#e6e2ee] bg-[#faf9fc] px-[16px] py-[12px]">
+        <div className="mb-[20px] flex items-center justify-between rounded-[12px] border border-[#efe3df] bg-[#faf9fc] px-[16px] py-[12px]">
           <div>
             <p className="text-[12px] font-bold text-[#29252f]">Expected duration</p>
             <p className="mt-[2px] text-[12px] text-[#717171]">
               Planning for {startingPeriodLabel(currentPlanType, subscriptionDuration)} from this date. You can extend later.
             </p>
           </div>
-          <p className="text-[12px] font-medium text-[#5b476f]">
+          <p className="text-[12px] font-medium text-[#7e2a20]">
             No return date required
           </p>
         </div>

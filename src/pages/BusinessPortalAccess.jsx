@@ -123,7 +123,7 @@ function BusinessPortalAccess() {
           Back to BLive NXT for Business
         </button>
         <div className="relative my-auto max-w-[560px]">
-          <span className="flex size-12 items-center justify-center rounded-[15px] bg-white text-[#351a75]">
+          <span className="flex size-12 items-center justify-center rounded-[15px] bg-white text-[#c44536]">
             <Building2 className="size-6" />
           </span>
           <h1 className="mt-8 text-[52px] font-black leading-[1.03] tracking-[-0.05em]">
@@ -223,7 +223,7 @@ function BusinessPortalAccess() {
               <button
                 type="submit"
                 disabled={working || isLoading}
-                className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#351a75] px-5 text-[14px] font-bold text-white transition hover:bg-[#2c155f] disabled:cursor-wait disabled:bg-[#aaa4b2]"
+                className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#c44536] px-5 text-[14px] font-bold text-white transition hover:bg-[#a8392b] disabled:cursor-wait disabled:bg-[#aaa4b2]"
               >
                 {working
                   ? mode === "create"

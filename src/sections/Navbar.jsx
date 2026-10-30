@@ -76,7 +76,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
               <button
                 type="button"
                 onClick={() => navigate("/business/access")}
-                className="flex h-10 items-center justify-center rounded-full bg-[#351a75] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[#2c155f] sm:px-5 sm:text-[13px]"
+                className="flex h-10 items-center justify-center rounded-full bg-[#c44536] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[#a8392b] sm:px-5 sm:text-[13px]"
               >
                 Business login
               </button>
@@ -97,8 +97,8 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
                   aria-label={`Wallet balance ${compactRupees(wallet.availableBalance)}`}
                   className={`flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-bold transition-colors ${
                     location.pathname === "/wallet"
-                      ? "border-[#cbbce9] bg-[#f4f0fc] text-[#48258f]"
-                      : "border-[#dfdfe3] bg-white text-[#303035] hover:border-[#b8a7dc] hover:bg-[#faf8ff]"
+                      ? "border-[#f0c2b5] bg-[#fdf0ec] text-[#a8392b]"
+                      : "border-[#dfdfe3] bg-white text-[#303035] hover:border-[#e9a998] hover:bg-[#fdf6f4]"
                   }`}
                 >
                   <WalletCards size={18} aria-hidden="true" />
@@ -238,7 +238,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
               </button>
               <button
                 onClick={() => setShowLoginPage(true)}
-                className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#351a75] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#2c155f]"
+                className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#c44536] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#a8392b]"
               >
                 Login or Signup
               </button>

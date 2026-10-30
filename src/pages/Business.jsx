@@ -333,7 +333,7 @@ function Business() {
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#business-fleet-builder"
-                  className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[14px] bg-white px-6 text-[15px] font-bold text-[#24183d] transition hover:bg-[#f4f0fc]"
+                  className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[14px] bg-white px-6 text-[15px] font-bold text-[#24183d] transition hover:bg-[#fdf0ec]"
                 >
                   Choose vehicles
                   <ArrowRight className="size-[18px]" aria-hidden="true" />
@@ -584,7 +584,7 @@ function Business() {
                     </button>
                     <a
                       href="mailto:contact@blive.co.in"
-                      className="flex min-h-[50px] flex-1 items-center justify-center rounded-[13px] bg-[#351a75] px-5 text-[14px] font-bold text-white"
+                      className="flex min-h-[50px] flex-1 items-center justify-center rounded-[13px] bg-[#c44536] px-5 text-[14px] font-bold text-white"
                     >
                       Contact BLive NXT
                     </a>
@@ -794,7 +794,7 @@ function Business() {
                         type="checkbox"
                         checked={form.consent}
                         onChange={(event) => updateForm("consent", event.target.checked)}
-                        className="mt-0.5 size-4 accent-[#351a75]"
+                        className="mt-0.5 size-4 accent-[#c44536]"
                       />
                       <span className="text-[12px] leading-5 text-[#686368]">
                         I agree that BLive NXT may contact me about this fleet enquiry and quotation.
@@ -810,7 +810,7 @@ function Business() {
                     <button
                       type="submit"
                       disabled={submitting || catalog === undefined}
-                      className="mt-5 flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[14px] bg-[#351a75] px-6 text-[15px] font-bold text-white transition hover:bg-[#2c155f] disabled:cursor-not-allowed disabled:bg-[#aaa4b2]"
+                      className="mt-5 flex min-h-[54px] w-full items-center justify-center gap-2 rounded-[14px] bg-[#c44536] px-6 text-[15px] font-bold text-white transition hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:bg-[#aaa4b2]"
                     >
                       {submitting ? "Submitting enquiry…" : "Submit fleet enquiry"}
                       {!submitting && <ArrowRight className="size-[18px]" aria-hidden="true" />}
