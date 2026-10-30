@@ -6,7 +6,7 @@ import { LoginPageContext } from "../contexts/LoginPageContext";
 import Login from "../components/Login";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "convex/react";
-import { WalletCards } from "lucide-react";
+import { ChevronLeft, WalletCards } from "lucide-react";
 import { franchiseHome } from "../config/franchiseHome";
 
 const compactRupees = (value) =>
@@ -60,7 +60,18 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
             alt="b:live NXT"
           />
           {onSearchPage && (
-            <div className="col-span-3 row-start-1 flex w-full justify-self-center md:col-span-1 md:col-start-2 md:mt-0">
+            // Phones: the logo is hidden on results, so a back button leads the row.
+            <button
+              type="button"
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/home"))}
+              aria-label="Back"
+              className="col-start-1 row-start-1 flex size-[44px] items-center justify-center rounded-full border border-[#dddddd] bg-white text-[#191919] md:hidden"
+            >
+              <ChevronLeft className="size-[22px]" aria-hidden="true" />
+            </button>
+          )}
+          {onSearchPage && (
+            <div className="col-span-2 col-start-2 row-start-1 flex w-full justify-self-center md:col-span-1 md:col-start-2 md:mt-0">
               <SearchBar onSearchPage={true} onSearchTrigger={onSearchTrigger} singleHub={singleHub} />
             </div>
           )}
