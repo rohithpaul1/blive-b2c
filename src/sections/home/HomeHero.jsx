@@ -23,7 +23,7 @@ const HomeHero = () => (
         ))}
       </div>
     </div>
-    <div id="hero-search" className="relative mx-auto mt-10 max-w-[1180px] md:mt-12">
+    <div id="hero-search" className="relative mx-auto mt-8 max-w-[1180px] md:mt-12">
       <SearchBar singleHub />
     </div>
   </section>

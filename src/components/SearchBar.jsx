@@ -20,6 +20,7 @@ import Datepicker from "./Datepicker";
 import LocationDropdown from "./LocationDropdown";
 import TimeSlotPicker from "./TimeSlotPicker";
 import HubDateTimeFields from "./HubDateTimeFields";
+import HubMobileSearch from "./HubMobileSearch";
 import { SearchBarContext } from "../contexts/SearchBarContext";
 import { RENTAL_MODES, startingPeriodLabel } from "../utils/subscription";
 import {
@@ -50,6 +51,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
   const [desktopExpanded, setDesktopExpanded] = useState(false);
   const [desktopDateStage, setDesktopDateStage] = useState("pickup");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hubSheetOpen, setHubSheetOpen] = useState(false);
   const [mobileStep, setMobileStep] = useState(singleHub ? "when" : "where");
   const [mobileLocationQuery, setMobileLocationQuery] = useState("");
   const [mobileCalendarMonth, setMobileCalendarMonth] = useState(() => startOfMonth(new Date()));
@@ -359,7 +361,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             rentalMode === mode
               ? singleHub
                 ? "border-[#1c1a22] bg-[#1c1a22] text-white"
-                : "border-[#2f2350] bg-[#2f2350] text-white"
+                : "border-[#1c1a22] bg-[#1c1a22] text-white"
               : "border-transparent bg-[#f3f2f4] text-[#514d56] hover:bg-[#ebe9ed]"
           }`}
           aria-selected={rentalMode === mode}
@@ -390,7 +392,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
   );
 
   const desktopFieldClass =
-    "flex min-h-[66px] min-w-0 items-center gap-[12px] rounded-[14px] border border-[#dedce1] bg-white px-[16px] text-left transition-colors hover:border-[#9d92b6] hover:bg-[#fbfafc]";
+    "flex min-h-[66px] min-w-0 items-center gap-[12px] rounded-[14px] border border-[#dedce1] bg-white px-[16px] text-left transition-colors hover:border-[#c9a39a] hover:bg-[#fbfafc]";
 
   const filteredLocations = LOCATIONS.filter((location) =>
     location.name.toLowerCase().includes(mobileLocationQuery.trim().toLowerCase())
@@ -542,16 +544,61 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
           : "absolute left-1/2 bottom-0 w-[calc(100%_-_32px)] max-w-[1160px] -translate-x-1/2 translate-y-1/2 md:w-[calc(100%_-_40px)]"
       }`}
     >
+      {singleHub && !onSearchPage ? (
+        <div className="md:hidden">
+          <div className="rounded-[18px] bg-white p-[14px] shadow-[0_12px_32px_rgba(15,13,22,0.22)]">
+            {modeSwitch()}
+            <div className="mt-[14px]">
+            <HubMobileSearch
+              isSubscription={isSubscription}
+              pickup={selectedPickup}
+              dropoff={selectedDropoff}
+              onPickupDate={pickHubPickupDate}
+              onReturnDate={pickHubReturnDate}
+              onPickupTime={selectMobilePickupTime}
+              onReturnTime={setDropoffTime}
+              isPickupBlocked={isPickupSlotBlocked(selectedPickup?.date)}
+              isReturnBlocked={isReturnSlotBlocked(selectedPickup, selectedDropoff?.date)}
+              duration={subscriptionDuration}
+              durations={SUBSCRIPTION_DURATIONS}
+              onDuration={setSubscriptionDuration}
+            />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setHubSheetOpen(false);
+                handleRentNow();
+              }}
+              className="mt-[12px] flex min-h-[54px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[#c44536] text-[17px] font-bold text-white active:bg-[#a8392b]"
+            >
+              <Search className="size-[19px]" aria-hidden="true" />
+              Show price
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/my-bookings")}
+              className="mx-auto mt-[10px] block min-h-[40px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4"
+            >
+              View or change my booking
+            </button>
+          </div>
+        </div>
+      ) : (
       <button
         type="button"
         onClick={() => {
+          if (singleHub) {
+            setHubSheetOpen(true);
+            return;
+          }
           setMobileOpen(true);
-          setMobileStep(singleHub ? "when" : "where");
+          setMobileStep("where");
         }}
         className={`flex min-h-[62px] w-full items-center gap-[12px] rounded-full border bg-white p-[8px] pl-[16px] text-left md:hidden ${onSearchPage ? "border-[#dddddd] shadow-[0_2px_8px_rgba(0,0,0,0.07)]" : "border-[#e7e5e8] shadow-[0_8px_24px_rgba(16,24,40,0.12)]"}`}
         aria-label="Open vehicle search"
       >
-        <Search className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
+        <Search className="size-[20px] shrink-0 text-[#c44536]" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           {onSearchPage ? (
             <>
@@ -568,10 +615,67 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             </span>
           )}
         </span>
-        <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#e1dce7] bg-[#f8f6fa] text-[#351a75]">
+        <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#ecdcd7] bg-[#fbf6f4] text-[#c44536]">
           <SlidersHorizontal className="size-[18px]" aria-hidden="true" />
         </span>
       </button>
+      )}
+      {singleHub && onSearchPage && hubSheetOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[110] flex flex-col bg-[#f2f1f4] md:hidden" role="dialog" aria-modal="true" aria-label="Change your search">
+            <div className="flex items-center justify-between px-[16px] pb-[10px] pt-[max(14px,env(safe-area-inset-top))]">
+              <p className="m-0 text-[20px] font-extrabold text-[#191919]">Change your search</p>
+              <button
+                type="button"
+                onClick={() => setHubSheetOpen(false)}
+                aria-label="Close"
+                className="flex size-[40px] items-center justify-center rounded-full bg-white"
+              >
+                <X className="size-[20px]" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="px-[16px]">
+              <div className="rounded-[18px] bg-white p-[14px] shadow-[0_12px_32px_rgba(15,13,22,0.22)]">
+            {modeSwitch()}
+            <div className="mt-[14px]">
+            <HubMobileSearch
+              isSubscription={isSubscription}
+              pickup={selectedPickup}
+              dropoff={selectedDropoff}
+              onPickupDate={pickHubPickupDate}
+              onReturnDate={pickHubReturnDate}
+              onPickupTime={selectMobilePickupTime}
+              onReturnTime={setDropoffTime}
+              isPickupBlocked={isPickupSlotBlocked(selectedPickup?.date)}
+              isReturnBlocked={isReturnSlotBlocked(selectedPickup, selectedDropoff?.date)}
+              duration={subscriptionDuration}
+              durations={SUBSCRIPTION_DURATIONS}
+              onDuration={setSubscriptionDuration}
+            />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setHubSheetOpen(false);
+                handleRentNow();
+              }}
+              className="mt-[12px] flex min-h-[54px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[#c44536] text-[17px] font-bold text-white active:bg-[#a8392b]"
+            >
+              <Search className="size-[19px]" aria-hidden="true" />
+              Show price
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/my-bookings")}
+              className="mx-auto mt-[10px] block min-h-[40px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4"
+            >
+              View or change my booking
+            </button>
+          </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {onSearchPage && !desktopExpanded && (
         <div className="hidden min-h-[54px] w-full items-center rounded-full border border-[#dedce1] bg-white p-[5px] pl-[8px] shadow-[0_5px_18px_rgba(24,18,32,0.12)] transition-shadow hover:shadow-[0_7px_22px_rgba(24,18,32,0.16)] md:flex">
@@ -582,7 +686,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             onClick={() => openDesktopSearch("location")}
             className="flex min-w-0 flex-1 items-center gap-[8px] rounded-full px-[10px] py-[8px] text-left hover:bg-[#f7f6f8]"
           >
-            <MapPin className="size-[17px] shrink-0 text-[#351a75]" aria-hidden="true" />
+            <MapPin className="size-[17px] shrink-0 text-[#c44536]" aria-hidden="true" />
             <span className="truncate text-[13px] font-bold text-[#29262b]">
               {selectedLocation.split(",")[0]}
             </span>
@@ -619,7 +723,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             type="button"
             onClick={handleRentNow}
             className={`flex size-[44px] shrink-0 items-center justify-center rounded-full text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-              singleHub ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]" : "bg-[#351a75] hover:bg-[#2c155f] focus-visible:outline-[#351a75]"
+              singleHub ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]" : "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
             }`}
             aria-label="Search vehicles"
           >
@@ -697,7 +801,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             }}
             className={desktopFieldClass}
           >
-            <MapPin className="size-[20px] shrink-0 text-[#351a75]" aria-hidden="true" />
+            <MapPin className="size-[20px] shrink-0 text-[#c44536]" aria-hidden="true" />
             <span className="min-w-0 flex-1">
               <span className="block text-[12px] font-bold text-[#4c4750]">Pickup location</span>
               <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
@@ -731,7 +835,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             onClick={() => openDesktopDatepicker("pickup")}
             className={desktopFieldClass}
           >
-            <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#351a75]"}`} aria-hidden="true" />
+            <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#c44536]"}`} aria-hidden="true" />
             <span className="min-w-0">
               <span className="block text-[12px] font-bold text-[#4c4750]">
                 {isSubscription ? "Start date" : "Pickup date"}
@@ -745,7 +849,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
 
           {isSubscription ? (
             <label className={`${desktopFieldClass} cursor-pointer`}>
-              <Clock3 className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#351a75]"}`} aria-hidden="true" />
+              <Clock3 className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#c44536]"}`} aria-hidden="true" />
               <span className="min-w-0 flex-1">
                 <span className="block text-[12px] font-bold text-[#4c4750]">How long?</span>
                 <select
@@ -770,7 +874,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               onClick={() => openDesktopDatepicker("dropoff")}
               className={desktopFieldClass}
             >
-              <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#351a75]"}`} aria-hidden="true" />
+              <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#c44536]"}`} aria-hidden="true" />
               <span className="min-w-0">
                 <span className="block text-[12px] font-bold text-[#4c4750]">Return date</span>
                 <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
@@ -790,7 +894,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             className={`flex ${singleHub ? "min-h-[58px] rounded-[12px]" : "min-h-[66px] rounded-[14px]"} min-w-[156px] items-center justify-center gap-[9px] px-[24px] text-[14px] font-bold text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
               singleHub
                 ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
-                : "bg-[#351a75] hover:bg-[#2c155f] focus-visible:outline-[#351a75]"
+                : "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
             }`}
           >
             <Search className="size-[19px]" aria-hidden="true" />
@@ -1159,7 +1263,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               <button
                 type="button"
                 onClick={mobileFooterAction}
-                className={`flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] px-[22px] text-[16px] font-bold text-white ${singleHub ? "bg-[#c44536]" : "bg-[#351a75]"}`}
+                className={`flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] px-[22px] text-[16px] font-bold text-white ${singleHub ? "bg-[#c44536]" : "bg-[#c44536]"}`}
               >
                 {mobileFooterLabel !== "Next" && <Search className="size-[18px]" aria-hidden="true" />}
                 {mobileFooterLabel}
