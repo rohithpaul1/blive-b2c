@@ -169,7 +169,7 @@ const Login = () => {
             )}
             {sender && <SpanLoader />}
             <div className="mt-[32px] mx-[32px] flex flex-col">
-              <p className="text-[12px] text-[#717171]">Phone Number</p>
+              <p className="text-[12px] text-[#717171]">Mobile number</p>
               <div className="mt-[4px] gap-x-[12px] flex items-center">
                 <div className="relative w-fit">
                   <select
@@ -196,8 +196,8 @@ const Login = () => {
                     const onlyNums = e.target.value.replace(/\D/g, "");
                     setPhoneNumber(onlyNums);
                   }}
-                  placeholder="0000000000"
-                  className="rounded-[8px] w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[16px] tracking-[0.04em] text-[#222222] focus:border-[#c44536] focus:bg-white"
+                  placeholder="Enter your 10-digit mobile number"
+                  className="rounded-[8px] w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[16px] text-[#222222] placeholder:text-[#9a949d] focus:border-[#c44536] focus:bg-white"
                   type="text"
                   inputMode="numeric"
                 />
