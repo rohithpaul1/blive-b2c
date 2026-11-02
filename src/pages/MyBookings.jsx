@@ -221,21 +221,21 @@ const MyBookings = () => {
             <Navbar onSearchPage={false} expanded={true} />
             <div className="mt-[124px] flex w-full items-center gap-x-[12px] border-y border-[#EDEDED] px-4 py-[20px] sm:px-8 lg:px-[clamp(40px,7vw,112px)]">
                 <img src="/images/Ticket.svg" alt="Ticket Image" />
-                <h1 className="text-[22px] font-bold text-[#222222] sm:text-[28px]">My Bookings</h1>
+                <h1 className="font-display m-0 text-[34px] leading-none text-[#0f0d16] sm:text-[44px]">My bookings</h1>
             </div>
             <div className="flex flex-col pt-[20px]">
                 {wallet?.showInHeader && wallet.activeSubscription && (
-                    <div className="mx-auto mb-5 grid w-[calc(100%_-_2rem)] max-w-[1040px] gap-4 rounded-[20px] border border-[#e5deef] bg-[#fdf6f4] p-5 sm:w-[calc(100%_-_3rem)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+                    <div className="mx-auto mb-5 grid w-[calc(100%_-_2rem)] max-w-[1040px] gap-4 rounded-[20px] border border-[#f0d9d2] bg-[#fdf6f4] p-5 sm:w-[calc(100%_-_3rem)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
                         <div className="flex min-w-0 items-start gap-4">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#ece4fb] text-[#4c288f]">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fbe4dc] text-[#a8392b]">
                                 <WalletCards size={22} aria-hidden="true" />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-sm font-medium text-[#6d6278]">Available for your next renewal</p>
-                                <p className="mt-1 text-[26px] font-bold tracking-[-0.03em] text-[#2d174f]">
+                                <p className="text-sm font-medium text-[#5a5562]">Available for your next renewal</p>
+                                <p className="mt-1 text-[26px] font-bold tracking-[-0.03em] text-[#1c1a22]">
                                     ₹{Number(wallet.availableBalance || 0).toLocaleString("en-IN")}
                                 </p>
-                                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-[#6d6278]">
+                                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-[#5a5562]">
                                     <CalendarDays size={15} aria-hidden="true" />
                                     ₹{Number(wallet.activeSubscription.recurringCharge || 0).toLocaleString("en-IN")} due {new Date(wallet.activeSubscription.nextChargeAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                                 </p>
@@ -252,10 +252,10 @@ const MyBookings = () => {
                 )}
                 <div className="header-shadow overflow-x-auto px-4 sm:px-6">
                     <div className="mx-auto flex min-w-max max-w-[1040px] items-center gap-x-[28px] sm:gap-x-[35px]">
-                    <button onClick={() => setTab("Ongoing")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Ongoing" ? "border-[#5d35b5] text-[#4a2595]" : "text-[#717171] border-transparent"}`}>Ongoing</button>
-                    <button onClick={() => setTab("Upcoming")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Upcoming" ? "border-[#5d35b5] text-[#4a2595]" : "text-[#717171] border-transparent"}`}>Upcoming</button>
-                    <button onClick={() => setTab("Past")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Past" ? "border-[#5d35b5] text-[#4a2595]" : "text-[#717171] border-transparent"}`}>Past</button>
-                    <button onClick={() => setTab("Cancelled")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Cancelled" ? "border-[#5d35b5] text-[#4a2595]" : "text-[#717171] border-transparent"}`}>Cancelled</button>
+                    <button onClick={() => setTab("Ongoing")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Ongoing" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Ongoing</button>
+                    <button onClick={() => setTab("Upcoming")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Upcoming" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Upcoming</button>
+                    <button onClick={() => setTab("Past")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Past" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Past</button>
+                    <button onClick={() => setTab("Cancelled")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Cancelled" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Cancelled</button>
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-y-[24px] px-4 py-[36px] sm:px-6 sm:py-[50px]">

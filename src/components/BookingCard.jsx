@@ -2,6 +2,8 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import { API_BASE_URL } from "../config/env";
 import { renewalCadenceLabel, startingPeriodLabel } from "../utils/subscription";
+import { Clock, Download, MapPin, Navigation, RotateCcw } from "lucide-react";
+import { franchiseHome } from "../config/franchiseHome";
 
 const BookingCard = ({ item, tab, onClick }) => {
     const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
@@ -128,10 +130,7 @@ const BookingCard = ({ item, tab, onClick }) => {
                 return 1;
             }
 
-            if (dropoffDateTime <= pickupDateTime) {
-                toast.error("Dropoff date/time must be after pickup date/time");
-                return 0;
-            }
+            if (dropoffDateTime <= pickupDateTime) return 0;
 
             const diffMs = dropoffDateTime.getTime() - pickupDateTime.getTime();
 
@@ -142,7 +141,6 @@ const BookingCard = ({ item, tab, onClick }) => {
             return Math.max(1, calculatedDays);
         } catch (err) {
             console.error("countDays error:", err);
-            toast.error("Could not calculate rental days");
             return 0;
         }
     };
@@ -167,126 +165,147 @@ const BookingCard = ({ item, tab, onClick }) => {
         }
     };
 
-    return (
-        <div 
-            key={item.id} 
-            onClick={handleCardClick}
-            className="flex w-full max-w-[1040px] cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[#eceaec] bg-white shadow-[0_6px_20px_rgba(16,24,40,0.08)] transition-shadow hover:shadow-lg md:min-h-[260px] md:flex-row"
-        >
-            <div className="relative h-[210px] w-full overflow-hidden md:h-auto md:min-h-[260px] md:w-[35%]">
-                <img src={item.brandLogo || item.imgUrl} alt="Vehicle Image" className="w-full h-full scale-110 object-cover" />
-            </div>
-            <div className="flex w-full flex-col px-[16px] py-[22px] sm:px-[24px] md:py-[28px]">
-                <div className="flex items-center justify-between px-[8px] sm:px-[16px]">
-                    <div className="flex flex-col">
-                        <p className="font-bold text-[22px] text-[#222222]">{item.vehicleName}</p>
-                        {item.manufacturer && (
-                            <p className="text-[14px] text-[#717171] mt-[2px]">{item.manufacturer}</p>
-                        )}
-                        {item.planType && (
-                            <p className="text-[12px] text-[#1B29A9] mt-[2px] font-medium capitalize">
-                                {isSubscription ? `${item.planType} subscription` : `${item.planType} plan`}
-                            </p>
-                        )}
-                    </div>
-                    <img src="/images/MenuDot.png" alt="Menu Dot" className="w-[24px] h-[24px]" />
-                </div>
-                <div className="mt-[8px] flex items-center gap-x-[24px] px-[8px] sm:px-[16px]">
-                    {tab === "Past" && <div className="flex items-center gap-x-[8px]">
-                        <img className="w-[24px] h-[24px]" src="/images/Dropoff.png" alt="Dropoff Icon" />
-                        <p className="font-medium text-[12px] text-[#222222]">Dropped off at {item.dropoffLocation || "Location"}</p>
-                    </div>}
-                    {tab === "Cancelled" && <div className="flex items-center gap-x-[8px]">
-                        <img className="w-[24px] h-[24px]" src="/images/Refund.png" alt="Refund Icon" />
-                        <p className="font-medium text-[12px] text-[#222222]">Refund initiated</p>
-                    </div>}
-                    {tab === "Upcoming" && <div className="flex items-center gap-x-[8px]">
-                        <img className="w-[24px] h-[24px]" src="/images/Watch.png" alt="Time Icon" />
-                        <p className="font-medium text-[12px] text-[#222222]">
-                            {(() => {
-                                if (!item.pickup?.date) return "Pickup date not available";
-                                
-                                const pickupDate = new Date(item.pickup.date);
-                                const today = new Date();
-                                const diffTime = pickupDate.getTime() - today.getTime();
-                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                
-                                if (diffDays < 0) return "Pickup date has passed";
-                                if (diffDays === 0) return "Pickup today";
-                                if (diffDays === 1) return "Pickup tomorrow";
-                                return `Pickup in ${diffDays} days`;
-                            })()}
-                        </p>
-                    </div>}
-                    {(tab === "Past" || tab === "Cancelled") && <div className="flex items-center gap-x-[8px]">
-                        <img className="w-[24px] h-[24px]" src="/images/Watch.png" alt="Time Icon" />
-                        <p className="font-medium text-[12px] text-[#222222]">
-                            {tab === "Past" ? 
-                                ("Completed " + formattedDate(item.dropoff?.date || item.pickup?.date) + " - " + (item.dropoff?.time || item.pickup?.time || "N/A")) : 
-                                ("Cancelled on " + formattedDate(item.cancelled?.date || item.pickup?.date) + " - " + (item.cancelled?.time || item.pickup?.time || "N/A"))
-                            }
-                        </p>
-                    </div>}
-                </div>
-                <span className="w-full mt-[16px] flex-1 h-[1px] border-b border-dashed border-[#D9D9D9]"/>
-                <div className="mt-[16px] flex flex-col gap-[16px] px-[8px] sm:px-[16px] md:min-h-[56px] md:flex-row md:items-center md:justify-between">
-                    <div className='grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-[8px] sm:gap-x-[15px]'>
-                        <div className='flex flex-col'>
-                            <p className='text-[16px] font-bold text-[#222222] sm:text-[18px]'>{formattedDate(item.pickup?.date || '')} <span className='block text-[13px] text-[#222222B2] sm:inline sm:text-[14px]'>{item.pickup?.time || 'N/A'}</span></p>
-                        </div>
-                        <div className='flex items-center gap-x-[10px]'>
-                            <span className='hidden h-[1px] w-8 rounded-[8px] bg-[#D9D9D9] sm:block' />
-                            <p className='max-w-[84px] text-center text-[12px] text-[#222222]'>
-                                {isSubscription ? `${startingPeriod} planned` : `${countDays(item.pickup || {}, item.dropoff || {})} Days`}
-                            </p>
-                            <span className='hidden h-[1px] w-8 rounded-[8px] bg-[#D9D9D9] sm:block' />
-                        </div>
-                        <div className='flex min-w-0 flex-col items-end text-right'>
-                            <p className='text-[16px] font-bold text-[#222222] sm:text-[18px]'>{formattedDate(item.dropoff?.date || '')} <span className='block text-[13px] text-[#222222B2] sm:inline sm:text-[14px]'>{item.dropoff?.time || 'N/A'}</span></p>
-                            {isSubscription && <p className="text-[12px] text-[#717171]">Planned until</p>}
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <p className="font-bold text-[24px] text-[#222222]">₹{Number(isSubscription ? item.subscription?.recurringCharge : item.price || 0).toLocaleString("en-IN")}</p>
-                        {isSubscription && (
-                            <p className="text-[12px] text-[#717171]">
-                                Renews {renewalCadenceLabel(item.planType)}
-                                {item.subscription?.nextBillingAt ? ` · next ${new Date(item.subscription.nextBillingAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : ""}
-                            </p>
-                        )}
-                    </div>
-                </div>
-                <div className="mt-[16px] flex flex-wrap items-center gap-[12px] px-[8px] sm:px-[16px]">
-                    {tab === "Ongoing" && <button 
-                        onClick={handleGetDirections}
-                        className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px] hover:bg-gray-50 transition-colors"
-                    >
-                        <img className="w-[20px] h-[20px]" src="/images/Directions.png" alt="Directions Image" />
-                        <p className="font-medium text-[12px] text-[#3A3A3A]">Get Directions to Dropoff</p>
-                    </button>}
-                    
+    // Status line for the stage chip and the info row.
+    const statusLine = (() => {
+        if (tab === "Upcoming") {
+            if (!item.pickup?.date) return "Pickup date to be confirmed";
+            const pickupDay = new Date(`${item.pickup.date}T00:00:00`);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffDays = Math.round((pickupDay - today) / 86400000);
+            if (diffDays < 0) return "Pickup date has passed";
+            if (diffDays === 0) return `Pickup today, ${item.pickup.time}`;
+            if (diffDays === 1) return `Pickup tomorrow, ${item.pickup.time}`;
+            return `Pickup in ${diffDays} days`;
+        }
+        if (tab === "Ongoing") return `Return by ${formattedDate(item.dropoff?.date)}, ${item.dropoff?.time || ""}`;
+        if (tab === "Past") return `Returned ${formattedDate(item.dropoff?.date)}`;
+        return `Cancelled ${formattedDate(item.cancelled?.date || item.pickup?.date)}`;
+    })();
+    const chip = { Upcoming: "Upcoming", Ongoing: "On the road", Past: "Completed", Cancelled: "Cancelled" }[tab] || tab;
+    const chipTone =
+        tab === "Ongoing" ? "bg-[#1f8a4c] text-white"
+        : tab === "Upcoming" ? "bg-[#c44536] text-white"
+        : "bg-white/[0.18] text-white";
 
-                    {(tab === "Past") && <button 
-                        onClick={handleViewReceipt}
-                        disabled={isDownloadingInvoice}
-                        className={`h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px] transition-colors ${
-                            isDownloadingInvoice 
-                                ? 'cursor-not-allowed bg-gray-100' 
-                                : 'cursor-pointer hover:bg-gray-50'
-                        }`}
-                    >
-                        {isDownloadingInvoice ? (
-                            <>
-                                <div className="w-[20px] h-[20px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-                                <p className="font-medium text-[12px] text-[#3A3A3A]">Generating...</p>
-                            </>
-                        ) : (
-                            <>
-                                <img className="w-[20px] h-[20px]" src="/images/Invoice.png" alt="Invoice Image" />
-                                <p className="font-medium text-[12px] text-[#3A3A3A]">Download Invoice</p>
-                            </>
+    // The franchise's own model gets its cut-out on the stage; anything else shows its photo.
+    const ownModel = String(item.vehicleName || "").toLowerCase().includes(String(franchiseHome.model.brand || "").toLowerCase());
+    const art = ownModel ? franchiseHome.model.cutout : item.brandLogo || item.imgUrl;
+    const isCutout = /\.png($|\?)/i.test(String(art || ""));
+
+    // Trip box dates: "Mon, 2 Nov", with the year only when it isn't this year.
+    const tripDate = (date) => {
+        if (!date) return "To be confirmed";
+        const d = new Date(`${String(date).slice(0, 10)}T00:00:00`);
+        const part = (o) => d.toLocaleDateString("en-GB", o);
+        const year = d.getFullYear() !== new Date().getFullYear() ? ` ${d.getFullYear()}` : "";
+        return `${part({ weekday: "short" })} ${part({ day: "numeric" })} ${part({ month: "short" })}${year}`;
+    };
+    const days = countDays(item.pickup || {}, item.dropoff || {});
+    const span = isSubscription
+        ? `${commitmentDuration}-${startingPeriod.replace(/^\d+\s*/, "").replace(/s$/, "")} plan`
+        : `${days} ${days === 1 ? "day" : "days"}`;
+    const planText = item.planType ? (isSubscription ? `${renewalCadenceLabel(item.planType)} subscription` : `${item.planType} rental`) : "";
+    const byline = [item.manufacturer, planText].filter(Boolean).join(" · ");
+    const place = item.isHomeDelivery ? item.dropoffLocation : item.hub?.name || item.dropoffLocation;
+    const amount = Number(isSubscription ? item.subscription?.recurringCharge : item.price || 0);
+    const amountLabel = isSubscription ? `per ${String(item.planType || "").replace(/ly$/, "") || "cycle"}` : tab === "Cancelled" ? "Refund on its way" : "Paid";
+    const canDirect = (tab === "Upcoming" || tab === "Ongoing") && item?.hub?.latitude && item?.hub?.longitude;
+
+    return (
+        <div
+            key={item.id}
+            onClick={handleCardClick}
+            className="grid w-full max-w-[1040px] cursor-pointer overflow-hidden rounded-[20px] border border-[#e3e0e8] bg-white transition-shadow hover:shadow-[0_10px_28px_rgba(16,24,40,0.10)] md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]"
+        >
+            <div className={`sixt-stage relative flex min-h-[210px] items-end justify-center px-[20px] pb-[14px] pt-[48px] ${tab === "Past" || tab === "Cancelled" ? "grayscale-[0.6]" : ""}`}>
+                <span className={`absolute left-[16px] top-[16px] rounded-full px-[12px] py-[5px] text-[13px] font-semibold ${chipTone}`}>{chip}</span>
+                {isCutout ? (
+                    <div className="relative flex h-[170px] w-full items-end justify-center md:h-[190px]">
+                        <span aria-hidden="true" className="absolute bottom-[4%] left-1/2 h-[9%] w-[72%] -translate-x-1/2 rounded-[50%] bg-black/55 blur-[12px]" />
+                        <img src={art} alt="" className="relative h-full w-full object-contain object-bottom" />
+                    </div>
+                ) : (
+                    <img src={art} alt="" className="h-[180px] w-full object-cover [mask-image:radial-gradient(ellipse_62%_58%_at_50%_52%,#000_45%,transparent_100%)]" />
+                )}
+            </div>
+
+            <div className="flex min-w-0 flex-col gap-[18px] px-[20px] py-[20px] sm:px-[28px] sm:py-[24px]">
+                <div>
+                    <p className="font-display m-0 text-[30px] leading-none text-[#0f0d16]">{item.vehicleName}</p>
+                    {byline && <p className="m-0 mt-[8px] text-[15px] capitalize text-[#5a5562]">{byline}</p>}
+                    <div className="mt-[12px] flex flex-wrap gap-x-[20px] gap-y-[8px] text-[14px] text-[#3d3846]">
+                        <span className="inline-flex items-center gap-[6px] font-semibold text-[#1c1a22]">
+                            <Clock className="size-[16px]" aria-hidden="true" />
+                            {statusLine}
+                        </span>
+                        {place && (
+                            <span className="inline-flex items-center gap-[6px]">
+                                <MapPin className="size-[16px]" aria-hidden="true" />
+                                {item.isHomeDelivery ? place : `${tab === "Past" || tab === "Ongoing" ? "Picked up at" : "Pick up at"} ${place}`}
+                            </span>
                         )}
-                    </button>}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 items-center gap-x-[10px] gap-y-[10px] rounded-[14px] sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] bg-[#f4f3f6] px-[16px] py-[14px]">
+                    <div className="min-w-0">
+                        <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6a6573]">{isSubscription ? "Starts" : "Pick up"}</p>
+                        <p className="m-0 mt-[4px] whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22] sm:text-[17px]">{tripDate(item.pickup?.date)}</p>
+                        <p className="m-0 whitespace-nowrap text-[14px] tabular-nums text-[#5a5562]">{item.pickup?.time || ""}</p>
+                    </div>
+                    <span className="order-first col-span-2 justify-self-start rounded-full border border-[#dcd9e0] bg-white px-[12px] py-[4px] text-[13px] font-semibold text-[#3d3846] sm:order-none sm:col-span-1 sm:justify-self-center">{span}</span>
+                    <div className="min-w-0 text-right">
+                        <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6a6573]">{isSubscription ? "Planned until" : "Return"}</p>
+                        <p className="m-0 mt-[4px] whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22] sm:text-[17px]">{tripDate(item.dropoff?.date)}</p>
+                        <p className="m-0 whitespace-nowrap text-[14px] tabular-nums text-[#5a5562]">{item.dropoff?.time || ""}</p>
+                    </div>
+                </div>
+
+                <div className="mt-auto flex flex-wrap items-end justify-between gap-[14px]">
+                    <p className="m-0">
+                        <span className="text-[28px] font-extrabold tabular-nums text-[#1c1a22]">₹{amount.toLocaleString("en-IN")}</span>
+                        <span className="ml-[8px] text-[14px] text-[#5a5562]">{amountLabel}</span>
+                        {isSubscription && item.subscription?.nextBillingAt && (
+                            <span className="block text-[13px] text-[#6a6573]">
+                                Next bill {new Date(item.subscription.nextBillingAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                            </span>
+                        )}
+                    </p>
+                    <div className="flex flex-wrap gap-[10px]">
+                        {canDirect && (
+                            <button
+                                type="button"
+                                onClick={handleGetDirections}
+                                className="inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] border-2 border-[#1c1a22] px-[16px] text-[14px] font-bold text-[#1c1a22] transition-colors hover:bg-[#1c1a22] hover:text-white"
+                            >
+                                <Navigation className="size-[16px]" aria-hidden="true" />
+                                Directions to hub
+                            </button>
+                        )}
+                        {tab === "Past" && (
+                            <button
+                                type="button"
+                                onClick={handleViewReceipt}
+                                disabled={isDownloadingInvoice}
+                                className="inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] border-2 border-[#1c1a22] px-[16px] text-[14px] font-bold text-[#1c1a22] transition-colors hover:bg-[#1c1a22] hover:text-white disabled:cursor-wait disabled:opacity-60"
+                            >
+                                <Download className="size-[16px]" aria-hidden="true" />
+                                {isDownloadingInvoice ? "Preparing invoice…" : "Invoice"}
+                            </button>
+                        )}
+                        {(tab === "Past" || tab === "Cancelled") && (
+                            <a
+                                href="/search"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] bg-[#c44536] px-[16px] text-[14px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                            >
+                                <RotateCcw className="size-[16px]" aria-hidden="true" />
+                                Ride again
+                            </a>
+                        )}
+                        <span className="hidden min-h-[44px] items-center px-[4px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 sm:inline-flex">View details</span>
+                    </div>
                 </div>
             </div>
         </div>
