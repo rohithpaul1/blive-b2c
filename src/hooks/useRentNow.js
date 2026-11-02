@@ -15,7 +15,7 @@ import { billableDays } from "../utils/timeSlots";
 
 const UNIT_DAYS = { daily: 1, weekly: 7, monthly: 30 };
 
-const formatDateTimeForAPI = (date, time) => {
+export const formatDateTimeForAPI = (date, time) => {
   if (!date) return null;
   const [clock = "10", modifier = "AM"] = String(time || "10 AM").split(" ");
   let [hours, minutes = "00"] = clock.split(":");

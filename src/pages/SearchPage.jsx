@@ -12,6 +12,7 @@ import { getAPI } from "../caller/axiosUrls";
 import Footer from "../sections/Footer";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
+import { formatDateTimeForAPI } from "../hooks/useRentNow";
 
 const VEHICLE_IMAGES = {
   Lectrix: "/images/home/nduro-side.png",
@@ -88,9 +89,12 @@ const SearchPage = () => {
         setIsLoading(true);
 
         // Build query parameters
+        const pickupDate = formatDateTimeForAPI(selectedPickup?.date, selectedPickup?.time);
+        const dropoffDate = formatDateTimeForAPI(selectedDropoff?.date, selectedDropoff?.time);
         const params = new URLSearchParams({
           page: page.toString(),
           limit: itemsPerPage.toString(),
+          ...(pickupDate && dropoffDate ? { pickupDate, dropoffDate } : {}),
           ...filters,
         });
 
@@ -117,7 +121,9 @@ const SearchPage = () => {
         setIsLoading(false);
       }
     },
-    [itemsPerPage]
+    // Refetch when the dates change so "N available" always matches the search.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [itemsPerPage, selectedPickup?.date, selectedPickup?.time, selectedDropoff?.date, selectedDropoff?.time]
   );
 
   // Update filter data based on API response

@@ -41,7 +41,10 @@ export async function resolveConvex(method, path, data) {
     return { handled: true, result: ok(hubs) };
   }
   if (method === "GET" && p.startsWith("/vehicle-plan/vehicle-model-with-plan")) {
-    const data = await client.query("b2c/catalog:list", {});
+    // With the searched dates, counts are scooters checkout can actually reserve at the hub.
+    const pickupDate = queryParams.get("pickupDate");
+    const dropoffDate = queryParams.get("dropoffDate");
+    const data = await client.query("b2c/catalog:list", pickupDate && dropoffDate ? { pickupDate, dropoffDate } : {});
     return { handled: true, result: ok(data) };
   }
   if (method === "GET" && p === "/vehicle-plan/check-new-user") {
