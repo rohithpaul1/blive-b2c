@@ -251,6 +251,7 @@ export default function HubMobileSearch({
   isPickupBlocked,
   isReturnBlocked,
   duration,
+  durationText,
   durations = [],
   onDuration,
 }) {
@@ -263,7 +264,7 @@ export default function HubMobileSearch({
         <Field icon={CalendarDays} label={isSubscription ? "Start date" : "Pickup date"} value={dateText(pickup?.date)} onClick={() => setOpen("dates")} />
         <Field icon={Clock3} label="Time" value={clockLabel(pickup?.time)} onClick={() => setOpen("pickupTime")} />
         {isSubscription ? (
-          <Field icon={ChevronDown} label="How long?" value={durationLabel(duration)} onClick={() => setOpen("duration")} wide />
+          <Field icon={ChevronDown} label="How long?" value={durationText ? `About ${durationText}` : durationLabel(duration)} onClick={() => setOpen("duration")} wide />
         ) : (
           <>
             <Field icon={CalendarDays} label="Return date" value={dateText(dropoff?.date)} onClick={() => setOpen("dates")} />

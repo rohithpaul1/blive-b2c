@@ -22,7 +22,7 @@ import TimeSlotPicker from "./TimeSlotPicker";
 import HubDateTimeFields from "./HubDateTimeFields";
 import HubMobileSearch from "./HubMobileSearch";
 import { SearchBarContext } from "../contexts/SearchBarContext";
-import { RENTAL_MODES, startingPeriodLabel } from "../utils/subscription";
+import { RENTAL_MODES, planUnitLabel, startingPeriodLabel } from "../utils/subscription";
 import {
   DEFAULT_TIME,
   billableDays,
@@ -77,8 +77,19 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
     setSubscriptionDuration,
     handlePickupDateChange,
     autoAdjustPlanTypeFromDates,
+    currentPlanType,
+    adjustDropoffDateForPlan,
   } = useContext(SearchBarContext);
   const isSubscription = rentalMode === RENTAL_MODES.subscription;
+  // "How long" is picked in months and starts on monthly billing; the search page can
+  // switch the cycle later (3 months -> 13 weeks), so labels use the plan's own unit.
+  const pickMonths = (value) => {
+    const months = Number(value) || 1;
+    updateCurrentPlanType("monthly");
+    setSubscriptionDuration(months);
+    adjustDropoffDateForPlan("monthly", selectedPickup?.date, months);
+  };
+  const durationText = `${subscriptionDuration} ${planUnitLabel(currentPlanType, subscriptionDuration)}`;
 
   useEffect(() => {
     if (!mobileOpen) return undefined;
@@ -560,8 +571,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               isPickupBlocked={isPickupSlotBlocked(selectedPickup?.date)}
               isReturnBlocked={isReturnSlotBlocked(selectedPickup, selectedDropoff?.date)}
               duration={subscriptionDuration}
+              durationText={durationText}
               durations={SUBSCRIPTION_DURATIONS}
-              onDuration={setSubscriptionDuration}
+              onDuration={pickMonths}
             />
             </div>
             <button
@@ -649,8 +661,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               isPickupBlocked={isPickupSlotBlocked(selectedPickup?.date)}
               isReturnBlocked={isReturnSlotBlocked(selectedPickup, selectedDropoff?.date)}
               duration={subscriptionDuration}
+              durationText={durationText}
               durations={SUBSCRIPTION_DURATIONS}
-              onDuration={setSubscriptionDuration}
+              onDuration={pickMonths}
             />
             </div>
             <button
@@ -715,7 +728,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
           >
             <span className="block truncate text-[13px] font-medium text-[#656068]">
               {isSubscription
-                ? `${subscriptionDuration} ${Number(subscriptionDuration) === 1 ? "month" : "months"}`
+                ? durationText
                 : "Fixed rental"}
             </span>
           </button>
@@ -824,8 +837,9 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               isPickupBlocked={isPickupSlotBlocked(selectedPickup?.date)}
               isReturnBlocked={isReturnSlotBlocked(selectedPickup, selectedDropoff?.date)}
               duration={subscriptionDuration}
+              durationText={durationText}
               durations={SUBSCRIPTION_DURATIONS}
-              onDuration={setSubscriptionDuration}
+              onDuration={pickMonths}
             />
           ) : (
           <>
@@ -855,7 +869,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
                 <select
                   aria-label="Expected subscription duration"
                   value={subscriptionDuration}
-                  onChange={(event) => setSubscriptionDuration(event.target.value)}
+                  onChange={(event) => pickMonths(event.target.value)}
                   className="mt-[1px] w-full appearance-none bg-transparent text-[14px] font-medium text-[#262626] outline-none"
                 >
                   {SUBSCRIPTION_DURATIONS.map((duration) => (
@@ -1181,7 +1195,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
                     >
                       <span className="text-[14px] text-[#6a6a6a]">How long</span>
                       <span className="text-[14px] font-bold text-[#222222]">
-                        About {subscriptionDuration} {Number(subscriptionDuration) === 1 ? "month" : "months"}
+                        About {durationText}
                       </span>
                     </button>
                   ) : (
@@ -1195,7 +1209,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
                           <button
                             key={duration}
                             type="button"
-                            onClick={() => setSubscriptionDuration(duration)}
+                            onClick={() => pickMonths(duration)}
                             aria-pressed={Number(subscriptionDuration) === duration}
                             className={`min-h-[68px] rounded-[14px] px-[12px] text-left text-[#222222] transition-colors ${
                               Number(subscriptionDuration) === duration

@@ -65,6 +65,8 @@ const SearchPage = () => {
     adjustDropoffDateForPlan,
     updateCurrentPlanType,
     rentalMode,
+    setSubscriptionDuration,
+    currentPlanType,
   } = useContext(SearchBarContext);
   const isSubscription = rentalMode === RENTAL_MODES.subscription;
   const { setSelectedProduct } = useContext(ProductContext);
@@ -467,6 +469,13 @@ const SearchPage = () => {
     adjustDropoffDateForPlan(planType);
   };
 
+  const handleBillingChange = (planType, units) => {
+    setSelectedPlanType(planType);
+    updateCurrentPlanType(planType);
+    setSubscriptionDuration(units);
+    adjustDropoffDateForPlan(planType, selectedPickup.date, units);
+  };
+
   const showCatalogTools = pickerModels.length > 1;
 
   // overflow-x-clip (not hidden) so the sticky filter row sticks to the page scroll
@@ -537,8 +546,9 @@ const SearchPage = () => {
                 {pickerModels.length > 0 ? (
                   <ModelPicker
                     models={pickerModels}
-                    selectedPlanType={selectedPlanType}
+                    selectedPlanType={isSubscription ? currentPlanType : selectedPlanType}
                     onPlanChange={handlePlanPick}
+                    onBillingChange={handleBillingChange}
                     pickup={selectedPickup}
                     dropoff={selectedDropoff}
                     cutout={pickerModels.length === 1 ? franchiseHome.model.cutout : null}

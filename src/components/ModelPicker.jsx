@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { BatteryCharging, Bluetooth, Check, Gauge, Package, Route, SlidersHorizontal, Undo2, User, Weight, Zap } from "lucide-react";
 import useRentNow from "../hooks/useRentNow";
-import { planUnit } from "../utils/subscription";
+import { addPlanDuration, planUnit } from "../utils/subscription";
 
 // Search results built for a franchise that rents one model, after Sixt's
 // "Booking option" panel: the model on the left, plans and price on the right.
@@ -221,12 +221,16 @@ export default function ModelPicker({
   addOns = [],
   hubAddress = "",
   supportPhone = "",
+  onBillingChange,
 }) {
   const { rentNow, pricingFor, isSubscription, rentalDays } = useRentNow();
   const [modelId, setModelId] = useState(() => (models.find((m) => m.isAvailable) || models[0])?.id);
   const [busy, setBusy] = useState(false);
   const [addOnIds, setAddOnIds] = useState(readAddOns);
   const [detailsId, setDetailsId] = useState(null);
+  // Subscriptions: a cycle the rider tapped but hasn't confirmed yet, and the last change made.
+  const [pendingCycle, setPendingCycle] = useState(null);
+  const [cycleChanged, setCycleChanged] = useState(null);
 
   useEffect(() => {
     if (!models.some((m) => m.id === modelId)) setModelId((models.find((m) => m.isAvailable) || models[0])?.id);
@@ -245,8 +249,6 @@ export default function ModelPicker({
     ? "daily"
     : planTypes[0];
   const planType = fitsDates;
-  // Selected plan first, then the nudges.
-  const orderedPlans = [planType, ...planTypes.filter((pt) => pt !== planType)];
 
   // Per-day price of each plan, for savings and the best-value badge.
   const perDay = useMemo(() => {
@@ -256,7 +258,6 @@ export default function ModelPicker({
     });
     return out;
   }, [model, planTypes]);
-  const bestPlan = planTypes.length > 1 ? planTypes.reduce((a, b) => (perDay[b] < perDay[a] ? b : a)) : null;
 
   if (!model) return null;
 
@@ -268,18 +269,6 @@ export default function ModelPicker({
   const selectedPlan = model.plans[planType];
   const pricing = pricingFor(selectedPlan?.price, planType);
   const single = models.length === 1;
-
-  const planName = (pt) =>
-    isSubscription
-      ? { daily: "Billed daily", weekly: "Billed weekly", monthly: "Billed monthly" }[pt]
-      : { daily: "Daily", weekly: "Weekly", monthly: "Monthly" }[pt];
-  const planNote = (pt) => {
-    const save = perDay.daily && pt !== "daily" ? Math.round((1 - perDay[pt] / perDay.daily) * 100) : 0;
-    const base = isSubscription
-      ? `Renews every ${planUnit(pt)} until you stop`
-      : { daily: "For a few days", weekly: "7 days", monthly: "30 days" }[pt];
-    return save > 0 ? `${base} · save ${save}%` : base;
-  };
 
   const tripLine =
     pickup?.date &&
@@ -310,6 +299,58 @@ export default function ModelPicker({
           : `${targetDays} days cost ₹${inr(-diff)} less than ${days}.`,
     };
   })();
+
+  // Subscriptions: the commitment stays the same length; the cycle only changes how often you pay.
+  const UNIT_WORD = { daily: "day", weekly: "week", monthly: "month" };
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  const fmt = (d) => format(d, "d MMM");
+  const commitDays = pickup?.date
+    ? Math.max(1, Math.round((addPlanDuration(pickup.date, planType, pricing.units || 1) - new Date(pickup.date)) / 86400000))
+    : 30;
+  const unitsFor = (pt) =>
+    pt === planType
+      ? pricing.units || 1
+      : pt === "monthly"
+      ? Math.max(1, Math.round(commitDays / 30.44))
+      : pt === "weekly"
+      ? Math.max(1, Math.round(commitDays / 7))
+      : commitDays;
+  // A commitment is at most 24 bills, so daily billing isn't offered on long plans.
+  const cycles = isSubscription ? planTypes.filter((pt) => unitsFor(pt) <= 24) : [];
+  const cyclePrice = (pt) => Number(model.plans[pt]?.price) || 0;
+  const cycleTotal = (pt) => cyclePrice(pt) * unitsFor(pt);
+  const cycleEnd = (pt) => (pickup?.date ? addPlanDuration(pickup.date, pt, unitsFor(pt)) : null);
+  const schedule = (() => {
+    if (!isSubscription || !pickup?.date) return null;
+    const units = unitsFor(planType);
+    const start = new Date(pickup.date);
+    return {
+      units,
+      next: units > 1 ? addPlanDuration(start, planType, 1) : null,
+      last: units > 1 ? addPlanDuration(start, planType, units - 1) : null,
+      end: addPlanDuration(start, planType, units),
+    };
+  })();
+  const switchNote = (pt) => {
+    const diff = cycleTotal(pt) - cycleTotal(planType);
+    const endNow = cycleEnd(planType);
+    const endNew = cycleEnd(pt);
+    const moved = endNow && endNew && fmt(endNow) !== fmt(endNew);
+    return [
+      `You'll pay ₹${inr(cyclePrice(pt))} every ${UNIT_WORD[pt]} instead of ₹${inr(cyclePrice(planType))} every ${UNIT_WORD[planType]}.`,
+      `That's ${plural(unitsFor(pt), "bill")} and ₹${inr(cycleTotal(pt))} in total${
+        diff ? `, ₹${inr(Math.abs(diff))} ${diff > 0 ? "more" : "less"} than ${UNIT_WORD[planType]}ly billing` : ""
+      }.`.replace("dayly", "daily"),
+      moved ? `Your plan ends ${fmt(endNew)} instead of ${fmt(endNow)}.` : endNew ? `Your plan still ends ${fmt(endNew)}.` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+  const confirmCycle = (pt) => {
+    setCycleChanged({ from: planType, to: pt });
+    setPendingCycle(null);
+    onBillingChange?.(pt, unitsFor(pt));
+  };
 
   const addOnDays = isSubscription ? (pricing.units || 1) * (UNIT_DAYS[planType] || 1) : pricing.days || 1;
   const chosenAddOns = addOns.filter((a) => addOnIds.includes(a.id));
@@ -401,61 +442,109 @@ export default function ModelPicker({
 
         <div className="flex flex-col gap-[22px] px-[20px] py-[24px] md:px-[36px] md:py-[32px]">
           {isSubscription ? (
-            <div className="flex flex-col gap-[12px]">
-              <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">Billing</h3>
-            <div role="radiogroup" aria-label="Rental plan" className="flex flex-col gap-[10px]">
-              {orderedPlans.map((pt) => {
-                const on = pt === planType;
-                const unit = isSubscription ? planUnit(pt) : "day";
-                const rate = isSubscription ? Number(model.plans[pt].price) || 0 : perDay[pt];
-                const delta = isSubscription ? 0 : Math.round(perDay[pt] - perDay[planType]);
-                const longer = UNIT_DAYS[pt] > UNIT_DAYS[planType];
-                // Nudge copy: longer plans sell the lower daily rate, shorter ones stay neutral.
-                const nudge = on
-                  ? isSubscription
-                    ? planNote(pt)
-                    : `Fits your ${pricing.days}-day trip`
-                  : !isSubscription && longer && delta < 0
-                  ? `Ride ${UNIT_DAYS[pt]} days and pay ₹${inr(rate)} a day`
-                  : planNote(pt);
-                return (
-                  <button
-                    key={pt}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    onClick={() => !on && onPlanChange(pt)}
-                    className={`flex min-h-[72px] w-full items-center gap-[14px] rounded-[12px] px-[16px] py-[12px] text-left transition-colors ${
-                      on ? "border-2 border-[#1c1a22] bg-white" : "my-px border border-[#d9d9d9] bg-white hover:border-[#9a96a0]"
-                    }`}
-                  >
-                    <span className={`size-[20px] shrink-0 rounded-full ${on ? "border-[6px] border-[#1c1a22]" : "border-2 border-[#b9b5c2]"}`} />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[16px] font-bold text-[#1c1a22]">
-                        {planName(pt)}
-                        {on && <span className="ml-[8px] text-[13px] font-semibold text-[#5a5562]">₹{inr(rate)} / {unit}</span>}
+            model.isAvailable &&
+            schedule && (
+              <div className="flex flex-col gap-[10px]">
+                <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">Your subscription</h3>
+                <div className="flex items-baseline justify-between gap-[12px] rounded-[12px] border border-[#e3e0e8] px-[16px] py-[14px]">
+                  <span className="text-[15px] text-[#3d3846]">
+                    {plural(schedule.units, UNIT_WORD[planType])} · billed {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[planType]}
+                  </span>
+                  <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">
+                    ₹{inr(cyclePrice(planType))} a {UNIT_WORD[planType]}
+                  </span>
+                </div>
+                {cycleChanged && cycleChanged.to === planType && (
+                  <p role="status" className="m-0 rounded-[10px] bg-[#eef7f1] px-[14px] py-[10px] text-[14px] text-[#1f5f3a]">
+                    Billing changed from {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[cycleChanged.from]} to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[cycleChanged.to]}. Your new bills are below.
+                  </p>
+                )}
+
+                <div className="rounded-[12px] border border-[#e3e0e8] px-[16px] py-[14px]">
+                  <p className="m-0 text-[14px] font-bold text-[#1c1a22]">When you'll pay</p>
+                  <ol className="m-0 mt-[12px] flex list-none flex-col gap-[12px] p-0 text-[14px] text-[#3d3846]">
+                    <li className="flex items-start gap-[10px]">
+                      <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full bg-[#c44536]" />
+                      <span className="flex-1">
+                        <span className="block font-semibold text-[#1c1a22]">First bill, at checkout</span>
+                        Covers {fmt(new Date(pickup.date))} to {fmt(schedule.next || schedule.end)}
                       </span>
-                      <span className="mt-[2px] block text-[14px] text-[#5a5562]">{nudge}</span>
-                    </span>
-                    {!on && pt === bestPlan && (
-                      <span className="hidden rounded-full bg-[#c44536] px-[10px] py-[4px] text-[12px] font-bold text-white sm:inline">
-                        {longer ? "Save more" : "Best value"}
-                      </span>
+                      <span className="font-bold tabular-nums text-[#1c1a22]">₹{inr(cyclePrice(planType))}</span>
+                    </li>
+                    {schedule.next && (
+                      <li className="flex items-start gap-[10px]">
+                        <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full border-2 border-[#c44536]" />
+                        <span className="flex-1">
+                          <span className="block font-semibold text-[#1c1a22]">Then every {UNIT_WORD[planType]}</span>
+                          {fmt(schedule.next)}
+                          {schedule.units > 2 ? ` to ${fmt(schedule.last)}` : ""} · {plural(schedule.units - 1, "more bill")}
+                        </span>
+                        <span className="font-bold tabular-nums text-[#1c1a22]">₹{inr(cyclePrice(planType))}</span>
+                      </li>
                     )}
-                    <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">
-                      {on
-                        ? "Included"
-                        : isSubscription
-                        ? `₹${inr(rate)} / ${unit}`
-                        : delta === 0
-                        ? "Same price"
-                        : `${delta > 0 ? "+" : "−"} ₹${inr(Math.abs(delta))} / day`}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            </div>
+                    <li className="flex items-start gap-[10px]">
+                      <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full bg-[#b9b5c2]" />
+                      <span className="flex-1">
+                        <span className="block font-semibold text-[#1c1a22]">Plan ends {fmt(schedule.end)}</span>
+                        {plural(schedule.units, "bill")} in total
+                      </span>
+                      <span className="font-bold tabular-nums text-[#1c1a22]">₹{inr(cycleTotal(planType))}</span>
+                    </li>
+                  </ol>
+                </div>
+
+                {cycles.length > 1 && (
+                  <div className="flex flex-wrap items-center justify-between gap-[10px]">
+                    <span className="text-[14px] font-semibold text-[#3d3846]">Pay every</span>
+                    <div role="radiogroup" aria-label="Billing cycle" className="inline-flex rounded-full bg-[#f2f1f4] p-[4px]">
+                      {cycles.map((pt) => {
+                        const on = pt === planType;
+                        return (
+                          <button
+                            key={pt}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            onClick={() => setPendingCycle(on ? null : pt)}
+                            className={`min-h-[36px] rounded-full px-[16px] text-[14px] font-bold capitalize transition-colors ${
+                              on
+                                ? "bg-white text-[#1c1a22] shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
+                                : pendingCycle === pt
+                                ? "text-[#c44536]"
+                                : "text-[#5a5562] hover:text-[#1c1a22]"
+                            }`}
+                          >
+                            {UNIT_WORD[pt]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {pendingCycle && pendingCycle !== planType && (
+                  <div role="alertdialog" aria-label="Change billing cycle" className="rounded-[12px] bg-[#fdf0ec] px-[16px] py-[14px]">
+                    <p className="m-0 text-[15px] font-bold text-[#1c1a22]">Switch to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[pendingCycle]} billing?</p>
+                    <p className="m-0 mt-[4px] text-[14px] leading-[1.5] text-[#5a5562]">{switchNote(pendingCycle)}</p>
+                    <div className="mt-[12px] flex flex-wrap gap-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => confirmCycle(pendingCycle)}
+                        className="min-h-[44px] rounded-[10px] bg-[#c44536] px-[16px] text-[15px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                      >
+                        Switch to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[pendingCycle]}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPendingCycle(null)}
+                        className="min-h-[44px] rounded-[10px] px-[12px] text-[15px] font-bold text-[#1c1a22] underline underline-offset-4"
+                      >
+                        Keep {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[planType]}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
           ) : (
             model.isAvailable && (
               <div className="flex flex-col gap-[10px]">
@@ -530,11 +619,13 @@ export default function ModelPicker({
           <div className="mt-auto flex flex-wrap items-center justify-between gap-[16px] border-t border-[#ecebef] pt-[18px]">
             {model.isAvailable ? (
               <p className="m-0">
-                <span className="text-[32px] font-extrabold tabular-nums text-[#1c1a22]">₹{inr(pricing.total)}</span>
+                <span className="text-[32px] font-extrabold tabular-nums text-[#1c1a22]">
+                  ₹{inr(isSubscription ? cyclePrice(planType) : pricing.total)}
+                </span>
                 <span className="text-[15px] text-[#5a5562]">
                   {" "}
                   {isSubscription
-                    ? `for ${pricing.units} ${planUnit(planType)}${pricing.units === 1 ? "" : "s"} planned`
+                    ? `today, then ₹${inr(cyclePrice(planType))} a ${planUnit(planType)}`
                     : `for ${pricing.days} ${pricing.days === 1 ? "day" : "days"}`}
                 </span>
                 <span className="block text-[13px] text-[#6a6573]">

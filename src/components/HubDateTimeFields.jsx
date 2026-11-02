@@ -181,6 +181,7 @@ export default function HubDateTimeFields({
   isPickupBlocked,
   isReturnBlocked,
   duration,
+  durationText,
   durations = [],
   onDuration,
 }) {
@@ -287,7 +288,7 @@ export default function HubDateTimeFields({
               className={`${segment(open === "duration")} w-full`}
             >
               <Clock3 className="size-[20px] shrink-0 text-[#191919]" aria-hidden="true" />
-              <span className="truncate">{durationLabel(duration)}</span>
+              <span className="truncate">{durationText ? `About ${durationText}` : durationLabel(duration)}</span>
               <ChevronDown className="ml-auto size-[16px] shrink-0 text-[#6a6573]" aria-hidden="true" />
             </button>
           </div>
