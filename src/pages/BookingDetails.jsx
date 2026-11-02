@@ -12,10 +12,12 @@ import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import { useUser } from "../contexts/UserContext";
 import Login from "../components/Login";
-import { startingPeriodLabel } from "../utils/subscription";
+import { renewalCadenceLabel } from "../utils/subscription";
+import { CalendarClock, Check, ChevronLeft, Clock, Download, Mail, MapPin, Navigation, Phone, Wallet, X } from "lucide-react";
+import { franchiseHome } from "../config/franchiseHome";
 
 const BookingDetails = () => {
-    const [openMenu, setOpenMenu] = useState(false);
+    const [, setOpenMenu] = useState(false);
     const [openCancelPage, setOpenCancelPage] = useState(false);
     const [openModifyDates, setOpenModifyDates] = useState(false);
     const [bookingData, setBookingData] = useState(null);
@@ -320,8 +322,8 @@ const BookingDetails = () => {
             hubLocation: apiData.hub?.address || apiData.dropoffLocation || 'Hub Location',
             hubName: apiData.hub?.name || 'Default Hub',
             hubImage: apiData.hub?.image || '/images/Hub.jpg', // Use actual hub image from API
-            hubPhone: apiData.hub?.contactNumber || '+91 7569546222',
-            hubEmail: apiData.hub?.contactEmail || 'support@hub.com',
+            hubPhone: apiData.hub?.contactNumber || franchiseHome.supportPhone,
+            hubEmail: apiData.hub?.contactEmail || franchiseHome.businessEmail,
             hubLatitude: apiData.hub?.latitude || null,
             hubLongitude: apiData.hub?.longitude || null,
             bookingDate: { 
@@ -499,7 +501,7 @@ const BookingDetails = () => {
                     <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">{error}</p>
                     <button 
                         onClick={fetchBookingDetails}
-                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        className="mt-4 min-h-[44px] rounded-[10px] bg-[#c44536] px-5 font-bold text-white hover:bg-[#a8392b]"
                     >
                         Retry
                     </button>
@@ -529,352 +531,272 @@ const BookingDetails = () => {
                 />
             </div>}
             <Navbar onSearchPage={false} expanded={true} />
-            <div className="mt-[124px] flex w-full items-center border-y border-[#EDEDED] px-4 py-[20px] sm:px-8 lg:px-[clamp(40px,7vw,112px)]">
-                <p className="text-[24px] font-bold text-[#222222] sm:text-[28px]">Booking details</p>
-            </div>
-            <div className="mx-auto flex w-full max-w-[1180px] flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8" >
-                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
-                    <div className="flex flex-col">
-                        <p className="font-medium text-[14px] text-[#222222]">Booking Confirmation ID: {data.bookingId}</p>
-                        <p className="font-bold text-[28px] text-[#222222]">{data.vehicleName}</p>
-                    </div>
-                    <div className="flex items-center gap-x-[10px] sm:gap-x-[14px]">
-                        {data.status === "Ongoing" && <div className="flex items-center gap-x-[10px] rounded-[8px] py-[6px] px-[12px] bg-[#E3F9E9]">
-                            <img className="w-[20px] h-[20px]" src="/images/Ongoing.png" alt="Ongoing Image" />
-                            <p className="font-bold text-[#1C7E4A]">Ongoing</p>
-                        </div>}
-                        {data.status === "Upcoming" && <div className="flex items-center gap-x-[10px] rounded-[8px] py-[6px] px-[12px] bg-[#EDEDED]">
-                            <p className="font-bold text-[#3A3A3A]">Upcoming</p>
-                        </div>}
-                        {data.status === "Past" && <div className="flex items-center gap-x-[10px] rounded-[8px] py-[6px] px-[12px] bg-[#EDEDED]">
-                            <p className="font-bold text-[#3A3A3A]">Past</p>
-                        </div>}
-                        {data.status === "Cancelled" && <div className="flex items-center gap-x-[10px] rounded-[8px] py-[6px] px-[12px] bg-[#F3D8D8]">
-                            <p className="font-bold text-[#370000]">Cancelled</p>
-                        </div>}
-                        <div className="relative">
-                            <img id="menu" onClick={() => setOpenMenu(!openMenu)} className="p-[6px] cursor-pointer" src="/images/MenuDot.png" alt="Menu Dot Image" />
-                            <div ref={menuDropdown} className={`absolute duration-500 transition-all right-0 z-30 w-[325px] overflow-hidden mt-[20px] ${openMenu ? "py-[16px] max-h-[1000px]" : "py-0 max-h-0"} flex flex-col bg-white rounded-[16px] calender-shadow`}>
-                                {data.rentalMode !== 'subscription' && <button onClick={() => {
-                                    handleViewReceipt();
-                                    setOpenMenu(false);
-                                }} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">View Receipt</button>}
-                                {data.status === "Upcoming" && <>
-                                    {data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Modify Booking Dates</button>}
-                                    {/* <button className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Modify Add-ons</button> */}
-                                    <button onClick={() => setOpenCancelPage(true)} className="font-medium cursor-pointer text-[#FE7171] py-[16px] px-[32px] hover:bg-gray-200 text-left">Cancel Booking</button>
-                                </>}
-                                {data.status !== "Upcoming" && data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="font-medium cursor-pointer text-[#222222] py-[16px] px-[32px] hover:bg-gray-200 text-left">Extend Rental</button>}
-                            </div> 
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-[24px]">
-                    <div className="relative h-[220px] w-full overflow-hidden rounded-[16px] sm:h-[300px]">
-                        <div className="absolute w-full h-full bg-[#3D3D3D52] z-20" />
-                        <img src={data.hubImage} alt="Hub Image" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="mt-[8px] flex flex-wrap items-center gap-x-[18px] gap-y-2">
-                        <div className="flex gap-x-[4px] items-center">
-                            <img className="w-[24px] h-[24px]" src="/images/Location.png" alt="Location Image" />
-                            <p className="font-medium text-[14px] text-[#3A3A3A]">
-                                {data.delivery ? 'Hub Location: ' : ''}{data.hubLocation}
-                            </p>
-                        </div>
-                        {!data.delivery && <button onClick={handleGetDirections} className="font-medium text-[14px] text-[#1B29A9] cursor-pointer">Get Directions</button>}
-                    </div>
-                </div>
-
-         
-
-                {/* Document Upload Section - Only for Upcoming Bookings */}
-                {data.status === "Upcoming" && (
-                    <div className="mt-[32px]" data-document-section>
-                        <div className="flex items-center gap-x-[10px]">
-                            <p className="font-medium text-[18px] text-[#222222]">
-                                Customer Documents
-                            </p>
-                            <span className="h-[1px] flex-1 bg-[#D9D9D9] rounded-[8px]" />
-                        </div>
-                        
-                        <div className="mt-[16px]">
-                            <p className="text-[12px] text-[#717171]">Email</p>
-                            <input
-                                value={email}
-                                disabled={true}
-                                type="email"
-                                className="mt-[4px] w-full rounded-[8px] outline-none border p-[16px] h-[48px] bg-gray-100 border-[#EDEDED] text-[14px] text-[#666666] cursor-not-allowed"
-                                placeholder="Email will be updated after document upload"
-                            />
-                        </div>
-                        
-                        <div className="mt-[16px]">
-                            <p className="text-[12px] text-[#717171]">
-                                Upload Aadhaar
-                            </p>
-                            <div className="flex mt-[16px] gap-x-[24px]">
-                                <UploadCard
-                                    label="Upload Aadhaar"
-                                    sublabel="(Front)"
-                                    valueKey="aadhaar-front-bottom"
-                                    onUploadComplete={handleUploadComplete}
-                                    uploadedDocument={userDocuments.find(
-                                        (doc) => doc.type === "aadhaar-front-bottom"
-                                    )}
-                                />
-                                <UploadCard
-                                    label="Upload Aadhaar"
-                                    sublabel="(Back)"
-                                    valueKey="aadhaar-back"
-                                    onUploadComplete={handleUploadComplete}
-                                    uploadedDocument={userDocuments.find(
-                                        (doc) => doc.type === "aadhaar-back"
-                                    )}
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-[16px]">
-                            <p className="text-[12px] text-[#717171]">
-                                Upload Driving License
-                            </p>
-                            <div className="flex mt-[16px] gap-x-[24px]">
-                                <UploadCard
-                                    label="Upload Driving"
-                                    sublabel="License"
-                                    valueKey="driving-licence"
-                                    onUploadComplete={handleUploadComplete}
-                                    uploadedDocument={userDocuments.find(
-                                        (doc) => doc.type === "driving-licence"
-                                    )}
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-[16px]">
-                            <p className="text-[12px] text-[#717171]">
-                                Upload Local Address Proof
-                            </p>
-                            <div className="flex mt-[16px] gap-x-[24px]">
-                                <UploadCard
-                                    label="Upload Local"
-                                    sublabel="Address Proof"
-                                    valueKey="local-address-proof"
-                                    onUploadComplete={handleUploadComplete}
-                                    uploadedDocument={userDocuments.find(
-                                        (doc) => doc.type === "local-address-proof"
-                                    )}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-[24px] flex justify-center">
-                            <button
-                                onClick={uploadDocuments}
-                                disabled={isUploadingDocuments}
-                                className={`h-[48px] font-medium text-[#FDFDFD] rounded-[24px] py-[13px] px-[24px] ${
-                                    isUploadingDocuments
-                                        ? "bg-[#CBCBCB] text-[#666666] cursor-not-allowed"
-                                        : "bg-[#000000] cursor-pointer hover:bg-[#333333] transition-colors"
-                                }`}
-                            >
-                                {isUploadingDocuments ? "Updating..." : "Update Documents"}
-                            </button>
-                        </div>
-                    </div>
-                )}
-                <div className="mt-[36px]">
-                    <p className="font-bold text-[24px] text-[#222222]">
-                        {data.rentalMode === 'subscription' ? 'Subscription schedule' : 'Rental Duration'}
-                    </p>
-                    <div className="mt-[16px] bg-[#F7F7F7] py-[16px] px-[24px] rounded-[16px] w-full">
-                        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-x-[15px]'>
-                            <div className='flex flex-col'>
-                                <p className='text-[12px] text-[#3A3A3A]'>Pick up</p>
-                                <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.pickup?.date)} <span className='text-[#646464] text-[12px]'>{data?.pickup?.time || "10 AM"}</span></p>
-                            </div>
-                            <div className='flex flex-1 items-center gap-x-[10px]'>
-                                <span className='hidden h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9] sm:block' />
-                                <p className='text-[12px] text-[#222222]'>
-                                    {data.rentalMode === 'subscription'
-                                        ? `${startingPeriodLabel(data.ratePlan || data.subscription?.commitmentUnit, data.subscription?.commitmentDuration || 1)} planned`
-                                        : `${countDays(data.pickup, data.dropoff)} Days`}
-                                </p>
-                                <span className='hidden h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9] sm:block' />
-                            </div>
-                            <div className='flex flex-col'>
-                                <p className='text-[12px] text-[#3A3A3A] text-right'>
-                                    {data.rentalMode === 'subscription' ? 'Planned until' : 'Dropoff'}
-                                </p>
-                                <p className='font-bold text-[14px] text-[#222222]'>{formattedDate(data?.dropoff?.date)} <span className='text-[#646464] text-[12px]'>{data?.dropoff?.time || "10 AM"}</span></p>
-                            </div>
-                        </div>
-                        {data.rentalMode === 'subscription' && (
-                            <div className="mt-[14px] flex items-start justify-between gap-[16px] rounded-[12px] border border-[#E4E2F7] bg-[#F8F7FF] px-[16px] py-[12px]">
-                                <div>
-                                    <p className="font-bold text-[13px] text-[#222222]">Automatic billing</p>
-                                    <p className="mt-[2px] text-[12px] text-[#646464]">
-                                        Renews {data.subscription?.commitmentUnit || 'month'}ly. Your current plan is scheduled until {formattedDate(data?.dropoff?.date)}, and you can extend it later.
-                                    </p>
+            {(() => {
+                const isSub = data.rentalMode === 'subscription';
+                const tone = {
+                    Upcoming: "bg-[#c44536] text-white",
+                    Ongoing: "bg-[#1f8a4c] text-white",
+                    Past: "bg-white/[0.18] text-white",
+                    Cancelled: "bg-white/[0.18] text-white",
+                }[data.status] || "bg-white/[0.18] text-white";
+                const chip = { Upcoming: "Upcoming", Ongoing: "On the road", Past: "Completed", Cancelled: "Cancelled" }[data.status] || data.status;
+                const ownModel = String(data.vehicleName || "").toLowerCase().includes(String(franchiseHome.model.brand || "").toLowerCase());
+                const art = ownModel ? franchiseHome.model.cutout : data.imgUrl;
+                const tripDate = (date) => {
+                    if (!date) return "To be confirmed";
+                    const d = new Date(`${String(date).slice(0, 10)}T00:00:00`);
+                    const part = (o) => d.toLocaleDateString("en-GB", o);
+                    const year = d.getFullYear() !== new Date().getFullYear() ? ` ${d.getFullYear()}` : "";
+                    return `${part({ weekday: "short" })} ${part({ day: "numeric" })} ${part({ month: "short" })}${year}`;
+                };
+                const days = countDays(data.pickup, data.dropoff);
+                const unit = data.subscription?.commitmentUnit || 'month';
+                const span = isSub
+                    ? `${data.subscription?.commitmentDuration || 1}-${String(unit).replace(/s$/, "")} plan`
+                    : `${days} ${days === 1 ? "day" : "days"}`;
+                const amount = Number(isSub ? data.subscription?.walletTopUpAmount : data.amountPaid || 0);
+                const outlineBtn = "inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] border-2 border-[#1c1a22] px-[16px] text-[14px] font-bold text-[#1c1a22] transition-colors hover:bg-[#1c1a22] hover:text-white";
+                const sectionTitle = "m-0 text-[20px] font-bold text-[#1c1a22]";
+                return (
+                    <div className="mx-auto mt-[124px] w-full max-w-[1180px] px-4 pb-[56px] pt-[24px] sm:px-6 lg:px-8">
+                        <div className="grid gap-[28px] lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+                            <div className="flex min-w-0 flex-col gap-[28px]">
+                                {/* Stage: the scooter, status and booking number */}
+                                <div className={`sixt-stage relative overflow-hidden rounded-[20px] px-[22px] pb-[18px] pt-[22px] text-white sm:px-[32px] sm:pt-[28px] ${data.status === "Past" || data.status === "Cancelled" ? "grayscale-[0.5]" : ""}`}>
+                                    <div className="flex flex-wrap items-start justify-between gap-[12px]">
+                                        <div>
+                                            <span className={`inline-block rounded-full px-[12px] py-[5px] text-[13px] font-semibold ${tone}`}>{chip}</span>
+                                            <h1 className="font-display m-0 mt-[14px] text-[clamp(34px,5vw,52px)] leading-[0.95]">{data.vehicleName}</h1>
+                                            <p className="m-0 mt-[8px] text-[15px] text-white/80">
+                                                {[data.manufacturer, isSub ? `${renewalCadenceLabel(data.ratePlan)} subscription` : `${data.ratePlan} rental`].filter(Boolean).join(" · ")}
+                                            </p>
+                                        </div>
+                                        <p className="m-0 text-[13px] text-white/70 sm:text-right">
+                                            Booking ID
+                                            <span className="block text-[15px] font-semibold tabular-nums text-white">{data.bookingId}</span>
+                                        </p>
+                                    </div>
+                                    <div className="relative mx-auto mt-[6px] flex h-[clamp(190px,26vw,280px)] max-w-[560px] items-end justify-center">
+                                        <span aria-hidden="true" className="absolute bottom-[4%] left-1/2 h-[9%] w-[72%] -translate-x-1/2 rounded-[50%] bg-black/55 blur-[14px]" />
+                                        <img src={art} alt="" className="relative h-full w-full object-contain object-bottom" />
+                                    </div>
                                 </div>
-                                <p className="shrink-0 font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')}/{data.subscription?.commitmentUnit || 'month'}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="mt-[16px] flex items-center gap-x-[16px]">
-                    {data.status === "Ongoing" && data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
-                        <img className="w-[20px] h-[20px]" src="/images/Extend.png" alt="Extend Image" />
-                        <p className="font-medium text-[12px] text-[#3A3A3A]">Extend Rental</p>
-                    </button>}
-                    {data.status === "Upcoming" && data.rentalMode !== 'subscription' && <button onClick={() => setOpenModifyDates(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
-                        <img className="w-[20px] h-[20px]" src="/images/Extend.png" alt="Extend Image" />
-                        <p className="font-medium text-[12px] text-[#3A3A3A]">Change Dates</p>
-                    </button>}
-                    {data.status === "Upcoming" && <button onClick={() => setOpenCancelPage(true)} className="cursor-pointer h-[40px] border py-[6px] px-[16px] border-[#D9D9D9] rounded-[24px] flex items-center gap-x-[8px]">
-                        <img className="w-[20px] h-[20px]" src="/images/DeleteBlack.png" alt="Delete Image" />
-                        <p className="font-medium text-[12px] text-[#3A3A3A]">Cancel Booking</p>
-                    </button>}
-                </div>
-                <div className="mt-[32px]">
-                    <p className="font-bold text-[24px] text-[#222222]">Vehicle Details</p>
-                    <div className="mt-[16px]">
-                        <div className="card-shadow flex items-center gap-x-[12px] rounded-[16px] border border-[#EDEDED] py-[12px] px-[16px] bg-white">
-                            <img className="w-[64px] h-[64px] rounded-[8px] object-cover" src={data.imgUrl} alt="Scooter Book Image" />
-                            <div className="flex flex-col">
-                                <p className="font-bold text-[18px] text-[#484848]">{data.vehicleName}</p>
-                                <p className="text-[#3A3A3A] text-[12px]">
-                                    {data.rentalMode === 'subscription' ? 'Subscription cycle' : 'Rate plan'}: {data.ratePlan}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {data.delivery && <div className="mt-[20px]">
-                        <p className="font-bold text-[15px] text-[#222222]">You’ve chosen doorstep delivery. Your vehicle will be safely delivered to your provided address.</p>
-                        <p className="text-[14px] text-[#222222]">{data.deliveryAddress}</p>
-                    </div>}
-                </div>
-                <div className="mt-[32px]">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="font-bold text-[24px] text-[#222222]">Payment Information</p>
-                        {data.rentalMode === 'subscription' && (
-                            <button
-                                type="button"
-                                onClick={() => navigate('/wallet')}
-                                className="min-h-11 rounded-full border border-[#f0c2b5] bg-[#f7f4fc] px-5 text-sm font-bold text-[#4a2595] hover:bg-[#f0eafb]"
-                            >
-                                Manage wallet
-                            </button>
-                        )}
-                        {data.rentalMode !== 'subscription' && <button
-                            onClick={handleViewReceipt} 
-                            disabled={isDownloadingReceipt}
-                            className={`font-bold text-[14px] flex items-center gap-x-[8px] transition-colors ${
-                                isDownloadingReceipt 
-                                    ? 'text-gray-400 cursor-not-allowed' 
-                                    : 'text-[#1B29A9] cursor-pointer hover:text-[#3844B4]'
-                            }`}
-                        >
-                            {isDownloadingReceipt ? (
-                                <>
-                                    <div className="w-[16px] h-[16px] border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-                                    <span>Generating...</span>
-                                </>
-                            ) : (
-                                'View Receipt'
-                            )}
-                        </button>}
-                    </div>
-                    <p className="mt-[18px] font-medium text-[#222222]">
-                        {data.rentalMode === 'subscription' ? 'Wallet top-up paid' : 'Total Amount'}
-                    </p>
-                    <div className="mt-[2px] flex items-center gap-x-[16px]">
-                        <p className="font-bold text-[18px] text-[#222222]">
-                            ₹{Number(data.rentalMode === 'subscription' ? data.subscription?.walletTopUpAmount : data.amountPaid || 0).toLocaleString('en-IN')}
-                        </p>
-                        <div className="flex items-center gap-x-[8px]">
-                            <p className="font-medium text-[12px] text-[#222222]">Payment Status</p>
-                            {data.paymentStatus === "Completed" && <span className="bg-[#DFFAEB] py-[4px] px-[16px] h-[26px] font-medium text-[12px] text-[#222222] rounded-[12px]">{data.rentalMode === 'subscription' ? 'Wallet funded' : 'Completed'}</span>}
-                        </div>
-                    </div> 
-                    {data.rentalMode === 'subscription' && (
-                        <div className="mt-[16px] grid gap-[12px] rounded-[16px] border border-[#EDEDED] bg-[#F7F7F7] p-[16px] sm:grid-cols-3">
-                            <div>
-                                <p className="text-[12px] text-[#717171]">Starting wallet balance</p>
-                                <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.requiredOpeningBalance || 0).toLocaleString('en-IN')}</p>
-                            </div>
-                            <div>
-                                <p className="text-[12px] text-[#717171]">Security deposit</p>
-                                <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.securityDeposit || 0).toLocaleString('en-IN')}</p>
-                            </div>
-                            <div>
-                                <p className="text-[12px] text-[#717171]">Estimated for planned duration</p>
-                                <p className="mt-[2px] font-bold text-[14px] text-[#222222]">₹{Number(data.subscription?.minimumCommitmentValue || 0).toLocaleString('en-IN')}</p>
-                            </div>
-                            <p className="text-[12px] leading-[18px] text-[#646464] sm:col-span-3">
-                                Your wallet funds the ₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')} {data.subscription?.commitmentUnit || 'month'}ly charge. Automatic renewal is always on.
-                            </p>
-                        </div>
-                    )}
-                    {data.refundDate && <div className="flex flex-col mt-[8px]">
-                        <p className="text-[14px] text-[#222222]">Refund Processed on {(formattedDate(data.refundDate.date))}</p>
-                        <p className="text-[#6a6a6a] text-[14px] italic">Refunds (if applicable) will reflect in 5–7 business days.</p>
-                    </div>}
-                    {data.savedAmount && <div className="mt-[16px] bg-[#FFF2CB] py-[8px] px-[16px] rounded-[12px] h-[38px] flex items-center gap-x-[8px]">
-                        <img src="/images/Saved.png" alt="Saved Image" className="w-[20px] h-[20px]" />
-                        <p className="font-medium text-[14px] text-[#222222]">You have saved ₹{data.savedAmount} with this booking</p>
-                    </div>}
-                    <div className="mt-[32px]">
-                        <p className="font-medium text-[#222222]">Payment Method</p>
-                        <div className="mt-[8px] bg-[#F7F7F7] p-[16px] gap-x-[16px] rounded-[16px] flex items-center">
-                            <img className="w-[40px] h-[40px]" src={data.paymentMethodImg} alt="Google Pay Image" />
-                            <div className="flex flex-col">
-                                <p className="font-bold text-[#222222]">{data.paymentMethodName}</p>
-                                <p className="text-[#6a6a6a] text-[12px]">{data.paymentMethodDetails}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="mt-[32px]">
-                        <WhatToExpect
-                            showDropoff={data.rentalMode !== 'subscription'}
-                            rentalMode={data.rentalMode}
-                            commitmentDuration={data.subscription?.commitmentDuration || 1}
-                            commitmentUnit={data.subscription?.commitmentUnit || 'month'}
-                        />
-                    </div>
-                    <div className="mt-[32px]">
-                        <p className="font-bold text-[24px] text-[#222222]">Cancellation Policy</p>
-                        {data.status === "Ongoing" && <p className="mt-[16px] text-[#222222] text-[14px]">Cancellations are not available once your booking is ongoing</p>}
-                        {data.status === "Upcoming" && <>
-                            <p className="mt-[16px] text-[#222222] text-[14px]">This hub has free cancellation with full refund available on all EVs until 48 hours prior, after which the cancellation becomes non- refundable. Learn more about <span className="font-bold underline underline-offset-4 cursor-pointer">Cancellations & Refunds</span></p>
-                            <div className="mt-[10px] py-[30px]">
-                                <CancellationBar bookingDate={data.bookingDate.date} pickupDate={data.pickup.date} />
-                            </div>
-                        </>}
-                        {data.status === "Past" && <p className="mt-[16px] text-[#222222] text-[14px]">This booking was completed successfully, so cancellation/refund does not apply.</p>}
-                        {data.status === "Cancelled" && <p className="mt-[16px] text-[#222222] text-[14px]">This booking was cancelled after the free cancellation period. Refund eligibility shown above.</p>}
-                    </div>
-                    <div className="mt-[32px]">
-                        <p className="font-bold text-[24px] text-[#222222]">Contact Hub for Support</p>
-                        <p className="mt-[16px] text-[#222222] text-[14px]">You can contact the hub directly for any queries or emergencies</p>
-                        <div className="mt-[12px] flex flex-col gap-y-[8px]">
-                            <div className="grid grid-cols-[150px_1fr] items-center">
-                                <div className="flex items-center gap-x-[4px]">
-                                <img className="w-[24px] h-[24px]" src="/images/Phone.png" alt="Phone" />
-                                <p className="text-[14px] text-[#3A3A3A] font-medium">Hub Phone</p>
-                                </div>
-                                <p className="font-bold text-[14px] text-[#3A3A3A]">{data.hubPhone}</p>
+
+                                {/* Trip */}
+                                <section className="flex flex-col gap-[14px]">
+                                    <h2 className={sectionTitle}>{isSub ? 'Subscription schedule' : 'Your trip'}</h2>
+                                    <div className="grid grid-cols-2 items-center gap-x-[10px] gap-y-[10px] rounded-[14px] bg-[#f4f3f6] px-[18px] py-[16px] sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+                                        <div className="min-w-0">
+                                            <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6a6573]">{isSub ? "Starts" : "Pick up"}</p>
+                                            <p className="m-0 mt-[4px] whitespace-nowrap text-[17px] font-bold tabular-nums text-[#1c1a22]">{tripDate(data?.pickup?.date)}</p>
+                                            <p className="m-0 whitespace-nowrap text-[14px] tabular-nums text-[#5a5562]">{data?.pickup?.time || "10:00 AM"}</p>
+                                        </div>
+                                        <span className="order-first col-span-2 justify-self-start rounded-full border border-[#dcd9e0] bg-white px-[12px] py-[4px] text-[13px] font-semibold text-[#3d3846] sm:order-none sm:col-span-1 sm:justify-self-center">{span}</span>
+                                        <div className="min-w-0 text-right">
+                                            <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6a6573]">{isSub ? "Planned until" : "Return"}</p>
+                                            <p className="m-0 mt-[4px] whitespace-nowrap text-[17px] font-bold tabular-nums text-[#1c1a22]">{tripDate(data?.dropoff?.date)}</p>
+                                            <p className="m-0 whitespace-nowrap text-[14px] tabular-nums text-[#5a5562]">{data?.dropoff?.time || "10:00 AM"}</p>
+                                        </div>
+                                    </div>
+                                    {isSub && (
+                                        <div className="flex items-start gap-[12px] rounded-[12px] border border-[#e3e0e8] px-[16px] py-[14px]">
+                                            <CalendarClock className="mt-[2px] size-[18px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
+                                            <p className="m-0 flex-1 text-[14px] leading-[1.5] text-[#3d3846]">
+                                                <span className="block font-bold text-[#1c1a22]">
+                                                    ₹{Number(data.subscription?.recurringCharge || 0).toLocaleString('en-IN')} every {unit}, from your wallet
+                                                </span>
+                                                Renews automatically until {tripDate(data?.dropoff?.date)}. You can extend it later.
+                                            </p>
+                                        </div>
+                                    )}
+                                    {(data.status === "Upcoming" || data.status === "Ongoing") && (
+                                        <div className="flex flex-wrap gap-[10px]">
+                                            {data.rentalMode !== 'subscription' && (
+                                                <button type="button" onClick={() => setOpenModifyDates(true)} className={outlineBtn}>
+                                                    <CalendarClock className="size-[16px]" aria-hidden="true" />
+                                                    {data.status === "Ongoing" ? "Extend rental" : "Change dates"}
+                                                </button>
+                                            )}
+                                            {data.status === "Upcoming" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setOpenCancelPage(true)}
+                                                    className="inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] px-[12px] text-[14px] font-bold text-[#b42318] underline underline-offset-4 hover:text-[#8f1c13]"
+                                                >
+                                                    <X className="size-[16px]" aria-hidden="true" />
+                                                    Cancel booking
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* Where */}
+                                <section className="flex flex-col gap-[14px]">
+                                    <h2 className={sectionTitle}>{data.delivery ? 'Delivery' : 'Pickup hub'}</h2>
+                                    <div className="flex flex-col gap-[14px] rounded-[14px] border border-[#e3e0e8] p-[18px] sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex min-w-0 items-start gap-[12px]">
+                                            <span className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-[#fdf0ec] text-[#c44536]">
+                                                <MapPin className="size-[19px]" aria-hidden="true" />
+                                            </span>
+                                            <p className="m-0 min-w-0 text-[14px] leading-[1.5] text-[#5a5562]">
+                                                <span className="block text-[16px] font-bold text-[#1c1a22]">{data.delivery ? 'Doorstep delivery' : data.hubName}</span>
+                                                {data.delivery ? data.deliveryAddress : data.hubLocation}
+                                            </p>
+                                        </div>
+                                        {!data.delivery && (
+                                            <button type="button" onClick={handleGetDirections} className={`${outlineBtn} shrink-0 self-start sm:self-auto`}>
+                                                <Navigation className="size-[16px]" aria-hidden="true" />
+                                                Directions
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-x-[22px] gap-y-[8px] text-[14px]">
+                                        {data.hubPhone && (
+                                            <a href={`tel:${String(data.hubPhone).replace(/[^\d+]/g, "")}`} className="inline-flex min-h-[40px] items-center gap-[8px] font-semibold text-[#1c1a22] hover:text-[#c44536]">
+                                                <Phone className="size-[16px]" aria-hidden="true" />
+                                                {data.hubPhone}
+                                            </a>
+                                        )}
+                                        {data.hubEmail && (
+                                            <a href={`mailto:${data.hubEmail}`} className="inline-flex min-h-[40px] items-center gap-[8px] font-semibold text-[#1c1a22] hover:text-[#c44536]">
+                                                <Mail className="size-[16px]" aria-hidden="true" />
+                                                {data.hubEmail}
+                                            </a>
+                                        )}
+                                    </div>
+                                </section>
+
+                                {/* Documents (upcoming only) */}
+                                {data.status === "Upcoming" && (
+                                    <section className="flex flex-col gap-[14px]" data-document-section>
+                                        <div>
+                                            <h2 className={sectionTitle}>Get verified before pickup</h2>
+                                            <p className="m-0 mt-[4px] text-[14px] text-[#5a5562]">Upload these from your phone. No paperwork at the hub.</p>
+                                        </div>
+                                        <div className="grid gap-[18px] rounded-[14px] border border-[#e3e0e8] p-[18px]">
+                                            <div>
+                                                <p className="m-0 text-[14px] font-semibold text-[#1c1a22]">Aadhaar</p>
+                                                <div className="mt-[10px] flex flex-wrap gap-[16px]">
+                                                    <UploadCard label="Upload Aadhaar" sublabel="(Front)" valueKey="aadhaar-front-bottom" onUploadComplete={handleUploadComplete} uploadedDocument={userDocuments.find((doc) => doc.type === "aadhaar-front-bottom")} />
+                                                    <UploadCard label="Upload Aadhaar" sublabel="(Back)" valueKey="aadhaar-back" onUploadComplete={handleUploadComplete} uploadedDocument={userDocuments.find((doc) => doc.type === "aadhaar-back")} />
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-[24px]">
+                                                <div>
+                                                    <p className="m-0 text-[14px] font-semibold text-[#1c1a22]">Driving licence</p>
+                                                    <div className="mt-[10px]">
+                                                        <UploadCard label="Upload Driving" sublabel="License" valueKey="driving-licence" onUploadComplete={handleUploadComplete} uploadedDocument={userDocuments.find((doc) => doc.type === "driving-licence")} />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className="m-0 text-[14px] font-semibold text-[#1c1a22]">Local address proof</p>
+                                                    <div className="mt-[10px]">
+                                                        <UploadCard label="Upload Local" sublabel="Address Proof" valueKey="local-address-proof" onUploadComplete={handleUploadComplete} uploadedDocument={userDocuments.find((doc) => doc.type === "local-address-proof")} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {email && <p className="m-0 text-[13px] text-[#6a6573]">Updates go to {email}</p>}
+                                            <button
+                                                type="button"
+                                                onClick={uploadDocuments}
+                                                disabled={isUploadingDocuments}
+                                                className="min-h-[48px] justify-self-start rounded-[10px] bg-[#c44536] px-[24px] text-[15px] font-bold text-white transition-colors hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:bg-[#d9d4d2]"
+                                            >
+                                                {isUploadingDocuments ? "Saving…" : "Save documents"}
+                                            </button>
+                                        </div>
+                                    </section>
+                                )}
+
+                                <WhatToExpect
+                                    showDropoff={data.rentalMode !== 'subscription'}
+                                    rentalMode={data.rentalMode}
+                                    commitmentDuration={data.subscription?.commitmentDuration || 1}
+                                    commitmentUnit={data.subscription?.commitmentUnit || 'month'}
+                                />
+
+                                <section className="flex flex-col gap-[12px]">
+                                    <h2 className={sectionTitle}>Cancellation policy</h2>
+                                    {data.status === "Ongoing" && <p className="m-0 text-[14px] text-[#3d3846]">Your ride has started, so it can't be cancelled.</p>}
+                                    {data.status === "Upcoming" && <>
+                                        <p className="m-0 text-[14px] leading-[1.55] text-[#3d3846]">Cancel for free with a full refund up to 48 hours before pickup. After that, the booking can't be refunded.</p>
+                                        <div className="py-[24px]">
+                                            <CancellationBar bookingDate={data.bookingDate.date} pickupDate={data.pickup.date} />
+                                        </div>
+                                    </>}
+                                    {data.status === "Past" && <p className="m-0 text-[14px] text-[#3d3846]">This ride is complete, so cancellation and refunds don't apply.</p>}
+                                    {data.status === "Cancelled" && <p className="m-0 text-[14px] text-[#3d3846]">This booking was cancelled. Any refund due is shown in the payment summary.</p>}
+                                </section>
                             </div>
 
-                            <div className="grid grid-cols-[150px_1fr] items-center">
-                                <div className="flex items-center gap-x-[4px]">
-                                <img className="w-[24px] h-[24px]" src="/images/Email.png" alt="Email" />
-                                <p className="text-[14px] text-[#3A3A3A] font-medium">Hub Email</p>
+                            {/* Payment summary */}
+                            <aside className="flex flex-col gap-[16px] lg:sticky lg:top-[100px]">
+                                <div className="rounded-[16px] bg-[#f4f3f6] p-[20px]">
+                                    <h2 className="m-0 text-[17px] font-bold text-[#1c1a22]">Payment</h2>
+                                    <p className="m-0 mt-[14px] text-[14px] text-[#5a5562]">{isSub ? 'Paid to your wallet' : data.status === "Cancelled" ? 'Amount paid' : 'Total paid'}</p>
+                                    <p className="m-0 mt-[2px] text-[34px] font-extrabold tabular-nums text-[#1c1a22]">₹{amount.toLocaleString('en-IN')}</p>
+                                    {data.paymentStatus === "Completed" ? (
+                                        <span className="mt-[8px] inline-flex items-center gap-[6px] rounded-full bg-[#e3f4ea] px-[10px] py-[4px] text-[13px] font-semibold text-[#1f6b3f]">
+                                            <Check className="size-[14px]" aria-hidden="true" />
+                                            {isSub ? 'Wallet funded' : 'Paid'}
+                                        </span>
+                                    ) : (
+                                        <span className="mt-[8px] inline-flex items-center gap-[6px] rounded-full bg-[#fdf0ec] px-[10px] py-[4px] text-[13px] font-semibold text-[#a8392b]">
+                                            <Clock className="size-[14px]" aria-hidden="true" />
+                                            Payment pending
+                                        </span>
+                                    )}
+
+                                    {isSub && (
+                                        <ul className="m-0 mt-[16px] flex list-none flex-col gap-[10px] border-t border-[#e1dfe5] p-0 pt-[14px] text-[14px] text-[#3d3846]">
+                                            <li className="flex justify-between gap-[12px]"><span>Starting wallet balance</span><span className="font-bold tabular-nums">₹{Number(data.subscription?.requiredOpeningBalance || 0).toLocaleString('en-IN')}</span></li>
+                                            <li className="flex justify-between gap-[12px]"><span>Security deposit</span><span className="font-bold tabular-nums">₹{Number(data.subscription?.securityDeposit || 0).toLocaleString('en-IN')}</span></li>
+                                            <li className="flex justify-between gap-[12px]"><span>Whole plan, estimated</span><span className="font-bold tabular-nums">₹{Number(data.subscription?.minimumCommitmentValue || 0).toLocaleString('en-IN')}</span></li>
+                                        </ul>
+                                    )}
+
+                                    {data.savedAmount && (
+                                        <p className="m-0 mt-[14px] rounded-[10px] bg-[#fff4d6] px-[12px] py-[8px] text-[14px] font-semibold text-[#5c4300]">You saved ₹{data.savedAmount} on this booking</p>
+                                    )}
+                                    {data.refundDate && (
+                                        <p className="m-0 mt-[14px] text-[14px] leading-[1.5] text-[#3d3846]">
+                                            Refund processed on {formattedDate(data.refundDate.date)}. It reaches your account in 5 to 7 business days.
+                                        </p>
+                                    )}
+
+                                    {(data.paymentMethodName || data.paymentMethodImg) && (
+                                        <div className="mt-[16px] flex items-center gap-[12px] border-t border-[#e1dfe5] pt-[14px]">
+                                            {data.paymentMethodImg && <img className="size-[36px] rounded-[8px] bg-white object-contain p-[4px]" src={data.paymentMethodImg} alt="" />}
+                                            <p className="m-0 text-[14px] text-[#5a5562]">
+                                                <span className="block font-bold text-[#1c1a22]">{data.paymentMethodName}</span>
+                                                {data.paymentMethodDetails}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="mt-[18px] flex flex-wrap gap-[10px]">
+                                        {isSub ? (
+                                            <button type="button" onClick={() => navigate('/wallet')} className={outlineBtn}>
+                                                <Wallet className="size-[16px]" aria-hidden="true" />
+                                                Manage wallet
+                                            </button>
+                                        ) : (
+                                            <button type="button" onClick={handleViewReceipt} disabled={isDownloadingReceipt} className={`${outlineBtn} disabled:cursor-wait disabled:opacity-60`}>
+                                                <Download className="size-[16px]" aria-hidden="true" />
+                                                {isDownloadingReceipt ? 'Preparing receipt…' : 'Receipt'}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="font-bold text-[14px] text-[#3A3A3A]">{data.hubEmail}</p>
-                            </div>
+                                <p className="m-0 px-[4px] text-[13px] leading-[1.5] text-[#6a6573]">
+                                    Need help? Call {franchiseHome.supportPhone}, any time.
+                                </p>
+                            </aside>
                         </div>
                     </div>
-                </div>
-            </div>
+                );
+            })()}
 
             {/* Success Modal for Document Upload */}
             {showSuccessModal && (
@@ -908,7 +830,7 @@ const BookingDetails = () => {
                         {/* Close Button */}
                         <button
                             onClick={() => setShowSuccessModal(false)}
-                            className="px-[32px] py-[12px] bg-[#000000] text-[#FFFFFF] font-medium text-[14px] rounded-[24px] hover:bg-[#333333] transition-colors"
+                            className="min-h-[44px] rounded-[10px] bg-[#c44536] px-[32px] text-[14px] font-bold text-white transition-colors hover:bg-[#a8392b]"
                         >
                             Continue
                         </button>
