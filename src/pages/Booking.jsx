@@ -19,13 +19,14 @@ import {
   RENTAL_MODES,
   planUnit,
   renewalCadenceLabel,
-  startingPeriodLabel,
 } from "../utils/subscription";
+import { Check, MapPin, Pencil, Tag } from "lucide-react";
+import { franchiseHome } from "../config/franchiseHome";
 // Razorpay will be loaded dynamically via script tag
 
 const Booking = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCountryCode, setSelectedCountryCode] = useState("+91");
+  const [selectedCountryCode] = useState("+91");
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -225,14 +226,6 @@ const Booking = () => {
     }
   };
 
-  const formattedDate = (date) => {
-    if (!date) return "No date selected";
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short", // "Aug"
-      day: "numeric", // "23"
-      year: "numeric", // "2025"
-    });
-  };
 
 
   const calculateTotal = () => {
@@ -1072,6 +1065,38 @@ const Booking = () => {
   }, [appliedPromocode]);
 
 
+  // ---- presentation helpers (search page style) ----
+  const tripDate = (date) => {
+    if (!date) return "Add a date";
+    const d = new Date(date);
+    const part = (o) => d.toLocaleDateString("en-GB", o);
+    const year = d.getFullYear() !== new Date().getFullYear() ? ` ${d.getFullYear()}` : "";
+    return `${part({ weekday: "short" })} ${part({ day: "numeric" })} ${part({ month: "short" })}${year}`;
+  };
+  const ownModel = String(selectedProduct?.vehicleName || "")
+    .toLowerCase()
+    .includes(String(franchiseHome.model.brand || "").toLowerCase());
+  const checkoutArt = ownModel ? franchiseHome.model.cutout : selectedProduct?.imgUrl;
+  const planWord = String(selectedProduct?.selectedPlanType || currentPlanType || "daily");
+  const spanLabel = isSubscription
+    ? `${commitmentDuration}-${planUnit(planWord)} plan`
+    : `${days} ${Number(days) === 1 ? "day" : "days"}`;
+  // Add-ons picked on the search page: shown here, paid at the hub (not charged online yet).
+  const pickedAddOns = (() => {
+    try {
+      const ids = JSON.parse(sessionStorage.getItem("selectedAddOns") || "[]");
+      return (franchiseHome.addOns || []).filter((a) => Array.isArray(ids) && ids.includes(a.id));
+    } catch {
+      return [];
+    }
+  })();
+  const addOnDays = isSubscription ? Number(commitmentDuration || 1) * ({ day: 1, week: 7, month: 30 }[planUnit(planWord)] || 30) : Number(days) || 1;
+  const addOnCost = (a) => (a.per === "day" ? a.price * addOnDays : a.price);
+  const sectionTitle = "m-0 text-[20px] font-bold text-[#1c1a22]";
+  const fieldLabel = "m-0 text-[13px] font-semibold text-[#5a5562]";
+  const fieldInput =
+    "mt-[6px] h-[50px] w-full rounded-[10px] border border-[#dcd9e0] bg-white px-[14px] text-[15px] text-[#1c1a22] outline-none placeholder:text-[#9a949d] focus:border-[#c44536]";
+
   return (
     <>
       {isOTPSent && (
@@ -1112,72 +1137,45 @@ const Booking = () => {
       />
       <div className="w-full overflow-x-hidden">
         <Navbar onSearchPage={false} expanded={true} />
-        <div className="px-[clamp(20px,7.5vw,108px)] pb-[100px] pt-[116px]">
+        <div className="px-[clamp(20px,7.5vw,108px)] pb-[100px] pt-[148px]">
           {isLoading || !token ? (
             <Loader />
           ) : (
             <div className="grid items-start gap-[48px] min-[900px]:grid-cols-[minmax(0,1fr)_340px] min-[900px]:gap-[32px] xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-[72px]">
               <div className="min-w-0">
-                <p className="font-bold text-[24px] text-[#222222]">
-                  Customer Details
+                <h1 className="font-display m-0 text-[clamp(36px,4.5vw,56px)] leading-[0.95] text-[#0f0d16]">
+                  Review and pay
+                </h1>
+                <p className="m-0 mt-[8px] text-[16px] text-[#5a5562]">
+                  Pay now, then upload your documents. No paperwork at the hub.
                 </p>
 
-                <div className="flex flex-col mt-[16px]">
-                  <p className="text-[12px] text-[#717171]">Full Name</p>
-                  <input
-                    disabled={true}
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    type="text"
-                    className="mt-[4px] cursor-not-allowed flex-1 rounded-[8px] outline-none border p-[16px] h-[48px] bg-black/10 text-gray-500 border-[#EDEDED] text-[14px] "
-                    placeholder="Enter Full Name"
-                  />
-                </div>
-                <div className="mt-[16px] flex flex-col">
-                  <p className="text-[12px] text-[#717171]">Phone Number</p>
-                  <div className="mt-[4px] gap-x-[12px] flex items-center">
-                    <div className="relative w-fit">
-                      <select
-                        disabled={true}
-                        value={selectedCountryCode}
-                        onChange={(e) => setSelectedCountryCode(e.target.value)}
-                        className="rounded-[8px] cursor-not-allowed border border-[#EDEDED] outline-none p-[16px] bg-black/10 text-gray-500 pr-[40px] bg-[#F7F7F7] font-bold text-[14px] text-[#222222] appearance-none"
-                      >
-                        <option value="+91">
-                          IN (+91)
-                        </option>
-                      </select>
-                      <img
-                        src="/images/Chevron-Down.png"
-                        alt="Chevron"
-                        className="pointer-events-none absolute right-[12px] top-1/2 -translate-y-1/2 w-[16px] h-[16px]"
-                      />
+                <section className="mt-[28px] flex flex-col gap-[14px]">
+                  <h2 className={sectionTitle}>Your details</h2>
+                  <div className="grid gap-[16px] rounded-[14px] border border-[#e3e0e8] p-[18px] sm:grid-cols-2">
+                    <div>
+                      <p className={fieldLabel}>Name</p>
+                      <p className="m-0 mt-[6px] text-[16px] font-semibold text-[#1c1a22]">{fullName || "Add your name in your profile"}</p>
                     </div>
-                    <input
-                      disabled={true}
-                      value={phoneNumber}
-                      maxLength="10"
-                      onChange={(e) => {
-                        const onlyNums = e.target.value.replace(/\D/g, "");
-                        setPhoneNumber(onlyNums);
-                      }}
-                      placeholder="Enter Phone Number"
-                      className="rounded-[8px] cursor-not-allowed bg-black/10 text-gray-500 w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[14px] text-[#222222]"
-                      type="text"
-                      inputMode="numeric"
-                    />
+                    <div>
+                      <p className={fieldLabel}>Mobile number</p>
+                      <p className="m-0 mt-[6px] text-[16px] font-semibold tabular-nums text-[#1c1a22]">
+                        {phoneNumber ? `${selectedCountryCode} ${String(phoneNumber).replace(/^\+?91/, "")}` : "Not added"}
+                      </p>
+                    </div>
+                    <label className="block sm:col-span-2">
+                      <span className={fieldLabel}>Email for your receipt</span>
+                      <input
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        type="email"
+                        autoComplete="email"
+                        className={fieldInput}
+                        placeholder="you@example.com"
+                      />
+                    </label>
                   </div>
-                </div>
-                <div className="mt-[16px] flex flex-col">
-                  <p className="text-[12px] text-[#717171]">Email</p>
-                  <input
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    type="email"
-                    className="mt-[4px] h-[48px] flex-1 rounded-[8px] border border-[#EDEDED] bg-[#F7F7F7] p-[16px] text-[14px] text-[#222222] outline-none focus:border-[#5B21B6] focus:bg-white"
-                    placeholder="Enter Email Address"
-                  />
-                </div>
+                </section>
 
                 {/* Pickup options removed: one hub, so the first hub stays selected and
                     doorstep delivery is off. Pickup hub shows in the overview. */}
@@ -1340,147 +1338,99 @@ const Booking = () => {
                     </div>
                   )}
                 </div>
-                <div className="mt-[24px]">
-                  <p className="font-bold text-[24px] text-[#222222]">
-                    Special Requests{" "}
-                    <span className="font-medium text-[14px]">(Optional)</span>
-                  </p>
-                  <p className="mt-[16px] text-[14px] text-[#222222]">
-                    Special requests are not guaranteed at the time of booking.
-                    We will get back to you via email to confirm your request.
-                  </p>
-                  <div className="mt-[16px] flex flex-col">
-                    <p className="text-[12px] text-[#717171]">
-                      Special Requests
-                    </p>
+                <section className="mt-[32px] flex flex-col gap-[10px]">
+                  <h2 className={sectionTitle}>
+                    Anything we should know? <span className="text-[15px] font-medium text-[#6a6573]">(optional)</span>
+                  </h2>
+                  <label className="block">
+                    <span className="sr-only">Special requests</span>
                     <input
                       value={specialRequests}
                       onChange={(e) => setSpecialRequests(e.target.value)}
                       type="text"
-                      className="mt-[4px] flex-1 rounded-[8px] outline-none border p-[16px] h-[48px] bg-[#F7F7F7] border-[#EDEDED] text-[14px]"
-                      placeholder="eg: Need support wheels, etc."
+                      className={fieldInput}
+                      placeholder="For example, a second helmet or an early pickup"
                     />
-                  </div>
-                </div>
+                  </label>
+                  <p className="m-0 text-[13px] text-[#6a6573]">We'll confirm requests by email. They aren't guaranteed.</p>
+                </section>
+                <div className="mt-[16px]">
                 <WhatToExpect
                   rentalMode={isSubscription ? "subscription" : "fixed"}
                   commitmentDuration={commitmentDuration}
                   commitmentUnit={planUnit(selectedProduct?.selectedPlanType || currentPlanType)}
                 />
-                <div className="mt-[24px]">
-                  <p className="font-bold text-[24px] text-[#222222]">
-                    Cancellation Policy
-                  </p>
-                  <p className="mt-[16px] text-[14px] text-[#222222]">
+                </div>
+                <section className="mt-[28px]">
+                  <h2 className={sectionTitle}>Cancellation policy</h2>
+                  <p className="m-0 mt-[10px] text-[14px] leading-[1.55] text-[#3d3846]">
                     {isSubscription
                       ? "Choose how long you expect to keep the vehicle. You can extend later, while billing renews automatically until you cancel."
-                      : "Cancellations made before 48 hours of the reservation may incur a cancellation fee, based on the selected Rental Plan."}
+                      : "Cancel for free with a full refund up to 48 hours before pickup. After that, the booking can't be refunded."}
                   </p>
-                  <div className="mt-[32px]">
+                  <div className="mt-[24px]">
                     <CancellationBar
                       bookingDate={new Date()}
                       pickupDate={selectedPickup.date}
                     />
                   </div>
-                </div>
+                </section>
               </div>
-              <aside className="w-full min-[900px]:sticky min-[900px]:top-[96px]">
-                <div className="sticky top-[104px] space-y-[12px]">
-                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
-                  <p className="font-bold text-[24px] text-[#222222]">
-                    {isSubscription ? "Subscription Overview" : "Booking Overview"}
-                  </p>
-                  <div className="mt-[24px] gap-x-[15px] flex items-center">
-                    <div className="flex flex-col">
-                      <p className="text-[12px] text-[#3A3A3A]">
-                        {isSubscription ? "Starts" : "Pick up"}
-                      </p>
-                      <p className="font-bold text-[14px] text-[#222222]">
-                        {formattedDate(selectedPickup?.date)}{" "}
-                        <span className="text-[#646464] text-[12px]">
-                          {selectedPickup?.time || "10 AM"}
-                        </span>
-                      </p>
+              <aside className="w-full min-[900px]:sticky min-[900px]:top-[140px]">
+                <div className="space-y-[12px]">
+                  <section className="overflow-hidden rounded-[18px] border border-[#e3e0e8] bg-white">
+                  <div className="sixt-stage px-[20px] pb-[10px] pt-[18px] text-white">
+                    <p className="m-0 text-[13px] text-white/75">{isSubscription ? "Your subscription" : "Your rental"}</p>
+                    <p className="font-display m-0 mt-[4px] text-[30px] leading-none">{selectedProduct?.vehicleName}</p>
+                    <p className="m-0 mt-[6px] text-[14px] capitalize text-white/85">
+                      {isSubscription ? `Billed ${renewalCadenceLabel(planWord)}` : `${planWord} rate`}
+                    </p>
+                    <div className="relative mx-auto mt-[4px] flex h-[150px] items-end justify-center">
+                      <span aria-hidden="true" className="absolute bottom-[5%] left-1/2 h-[9%] w-[70%] -translate-x-1/2 rounded-[50%] bg-black/55 blur-[12px]" />
+                      <img src={checkoutArt} alt="" className="relative h-full w-full object-contain object-bottom" />
                     </div>
-                    <div className="flex-1 flex items-center gap-x-[10px]">
-                      <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
-                      <p className="text-center text-[12px] text-[#222222]">
-                        {isSubscription
-                          ? `${startingPeriodLabel(
-                              selectedProduct?.selectedPlanType || currentPlanType,
-                              commitmentDuration
-                            )} planned`
-                          : `${days} Days`}
-                      </p>
-                      <span className="h-[1px] flex-1 rounded-[8px] bg-[#D9D9D9]" />
+                  </div>
+                  <div className="p-[20px]">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-[8px] rounded-[12px] bg-[#f4f3f6] px-[14px] py-[12px]">
+                    <div className="min-w-0">
+                      <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6a6573]">{isSubscription ? "Starts" : "Pick up"}</p>
+                      <p className="m-0 mt-[3px] whitespace-nowrap text-[15px] font-bold text-[#1c1a22]">{tripDate(selectedPickup?.date)}</p>
+                      <p className="m-0 text-[13px] text-[#5a5562]">{selectedPickup?.time || "10 AM"}</p>
                     </div>
-                    <div className="flex flex-col">
-                      <p className="text-[12px] text-[#3A3A3A] text-right">
-                        {isSubscription ? "Planned until" : "Dropoff"}
-                      </p>
-                      <p className="font-bold text-[14px] text-[#222222]">
-                        {formattedDate(selectedDropoff?.date)}{" "}
-                        <span className="text-[#646464] text-[12px]">
-                          {!isSubscription && (selectedDropoff?.time || "10 AM")}
-                        </span>
-                      </p>
+                    <span className="rounded-full border border-[#dcd9e0] bg-white px-[10px] py-[3px] text-[12px] font-semibold text-[#3d3846]">{spanLabel}</span>
+                    <div className="min-w-0 text-right">
+                      <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6a6573]">{isSubscription ? "Until" : "Return"}</p>
+                      <p className="m-0 mt-[3px] whitespace-nowrap text-[15px] font-bold text-[#1c1a22]">{tripDate(selectedDropoff?.date)}</p>
+                      <p className="m-0 text-[13px] text-[#5a5562]">{isSubscription ? "Renews until you stop" : selectedDropoff?.time || "10 AM"}</p>
                     </div>
                   </div>
                   {(() => {
                     const hub = hubLocations.find((h) => h.id === selectedHubId);
                     return hub ? (
-                      <p className="mt-[12px] text-[14px] text-[#222222]">
-                        <span className="text-[#717171]">Pickup at </span>
-                        <span className="font-semibold">{hub.hubName || hub.name}</span>
-                        {hub.address ? <span className="block text-[13px] text-[#717171]">{hub.address}</span> : null}
+                      <p className="m-0 mt-[12px] flex items-start gap-[8px] text-[14px] text-[#3d3846]">
+                        <MapPin className="mt-[2px] size-[16px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
+                        <span>
+                          Pick up at <span className="font-semibold text-[#1c1a22]">{hub.hubName || hub.name}</span>
+                          {hub.address ? <span className="block text-[13px] text-[#6a6573]">{hub.address}</span> : null}
+                        </span>
                       </p>
                     ) : null;
                   })()}
                   {!isSubscription && (
                     <button
+                      type="button"
                       onClick={() => setShowDateChangeModal(true)}
-                      className="mt-[12px] cursor-pointer text-[14px] font-medium text-[#a8392b] transition-colors hover:text-[#7e2a20]"
+                      className="mt-[8px] inline-flex min-h-[40px] items-center gap-[6px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[#c44536]"
                     >
+                      <Pencil className="size-[14px]" aria-hidden="true" />
                       Change dates
                     </button>
                   )}
-                  {isSubscription && (
-                    <div className="mt-[14px] flex items-center gap-[8px] rounded-[10px] border border-[#dfe9e2] bg-[#f3faf5] px-[12px] py-[10px] text-[12px] text-[#326443]">
-                      <span className="font-bold">✓</span>
-                      Renews {renewalCadenceLabel(selectedProduct?.selectedPlanType || currentPlanType)} until you cancel
-                    </div>
-                  )}
-                  <div className="mt-[24px]">
-                    <p className="font-bold text-[14px] text-[#3A3A3A]">
-                      Vehicle Details
+                  <div className="mt-[18px] flex w-full flex-col border-t border-[#ecebef] pt-[16px]">
+                    <p className="m-0 text-[15px] font-bold text-[#1c1a22]">
+                      Price details
                     </p>
-                    <div className="mt-[8px] flex items-center gap-x-[12px] h-[100px] rounded-[8px] p-[12px] bg-[#EDEDED]">
-                      <img
-                        className="w-[80px] h-[80px] rounded-[8px] object-cover"
-                        src={selectedProduct?.imgUrl}
-                        alt="Scooter Book Image"
-                      />
-                      <div className="flex flex-col">
-                        <p className="font-bold text-[14px] text-[#3A3A3A]">
-                          {selectedProduct?.vehicleName}
-                        </p>
-                        <p className="text-[#3A3A3A] text-[12px]">
-                          Rental Plan :{" "}
-                          {selectedProduct?.selectedPlanType
-                            ? selectedProduct.selectedPlanType
-                                .charAt(0)
-                                .toUpperCase() +
-                              selectedProduct.selectedPlanType.slice(1)
-                            : selectedProduct?.planName || "Daily"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-[24px] flex flex-col w-full">
-                    <p className="font-bold text-[14px] text-[#3A3A3A]">
-                      Price Details
-                    </p>
-                    <div className="mt-[8px] flex flex-col gap-y-[4px]">
+                    <div className="mt-[10px] flex flex-col gap-y-[8px]">
                       {/* Dynamic calculation breakdown if available */}
                       {isSubscription && selectedProduct?.calculationData?.payment_breakdown ? (
                         <>
@@ -1522,12 +1472,8 @@ const Booking = () => {
                         <>
                           <div className="flex items-center justify-between">
                             <p className="text-[14px] text-[#3A3A3A]">
-                              Total Rental: 1 Vehicle x{" "}
-                              {
-                                selectedProduct.calculationData
-                                  .payment_breakdown.duration
-                              }{" "}
-                              days
+                              Rental, {selectedProduct.calculationData.payment_breakdown.duration}{" "}
+                              {Number(selectedProduct.calculationData.payment_breakdown.duration) === 1 ? "day" : "days"}
                             </p>
                             <p className="text-[#3A3A3A] text-[14px] font-medium">
                               ₹
@@ -1709,15 +1655,27 @@ const Booking = () => {
                         </>
                       )}
                     </div>
-                    <div className="mt-[10px] min-h-[1px] w-full rounded-[8px] flex-1 bg-[#EDEDED]" />
-                    <div className="flex mt-[12px] items-center justify-between">
-                      <p className="font-medium text-[22px] text-[#222222]">
-                        {isSubscription ? "Pay today" : "Total"}
+                    <div className="mt-[12px] flex items-baseline justify-between border-t border-[#ecebef] pt-[12px]">
+                      <p className="m-0 text-[17px] font-bold text-[#1c1a22]">
+                        {isSubscription ? "Pay today" : "Pay now"}
                       </p>
-                      <p className="font-bold text-[22px] text-[#222222]">
+                      <p className="m-0 text-[30px] font-extrabold tabular-nums text-[#1c1a22]">
                         ₹{formattedAmount(calculateTotal())}
                       </p>
                     </div>
+                    {pickedAddOns.length > 0 && (
+                      <div className="mt-[12px] rounded-[10px] bg-[#f4f3f6] px-[12px] py-[10px]">
+                        <p className="m-0 text-[13px] font-semibold text-[#1c1a22]">Add-ons, paid at the hub on pickup</p>
+                        <ul className="m-0 mt-[6px] flex list-none flex-col gap-[4px] p-0 text-[13px] text-[#3d3846]">
+                          {pickedAddOns.map((a) => (
+                            <li key={a.id} className="flex justify-between gap-[10px]">
+                              <span>{a.name}</span>
+                              <span className="tabular-nums">₹{formattedAmount(addOnCost(a))}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                   <label
                     htmlFor="tncCheckbox"
@@ -1746,7 +1704,7 @@ const Booking = () => {
                   </label>
                   <button
                     onClick={handlePayment}
-                    className={`mt-[12px] h-[48px] w-full rounded-[24px] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors ${
+                    className={`mt-[12px] min-h-[56px] w-full rounded-[12px] px-[24px] text-[16px] font-bold text-[#FDFDFD] transition-colors ${
                       canProceedToPayment()
                         ? "bg-[#c44536] cursor-pointer hover:bg-[#a8392b]"
                         : "bg-[#CBCBCB] cursor-not-allowed"
@@ -1759,7 +1717,7 @@ const Booking = () => {
                         ? Number(calculateTotal()) > 0
                           ? "Fund wallet & subscribe"
                           : "Confirm subscription"
-                        : "Proceed to Payment"}
+                        : `Pay ₹${formattedAmount(calculateTotal())}`}
                   </button>
                   {isSubscription && (
                     <>
@@ -1792,17 +1750,16 @@ const Booking = () => {
                       </div>
                     </>
                   )}
+                  </div>
                   </section>
 
-                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
-                    <h2 className="text-[20px] font-bold text-[#222222]">
-                      Payment & Offers
+                  <section className="rounded-[16px] border border-[#e3e0e8] bg-white p-[18px]">
+                    <h2 className="m-0 flex items-center gap-[8px] text-[16px] font-bold text-[#1c1a22]">
+                      <Tag className="size-[16px]" aria-hidden="true" />
+                      Have a coupon?
                     </h2>
-                    <p className="mt-[12px] border-b border-[#dedede] pb-[10px] text-[13px] text-[#3a3a3a]">
-                      Apply discount or coupons
-                    </p>
                     {appliedPromocode ? (
-                      <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[10px] border border-dashed border-[#cfc6ef] bg-[#f6f3ff] p-[14px]">
+                      <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[10px] border border-dashed border-[#f0c2b5] bg-[#fdf0ec] p-[14px]">
                         <div className="min-w-0">
                           <p className="truncate text-[14px] font-bold text-[#c44536]">
                             {appliedPromocode.promocode}
@@ -1821,7 +1778,7 @@ const Booking = () => {
                     ) : (
                       <button
                         onClick={() => setShowPromocodePage(true)}
-                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[#8f78c6] px-[16px] text-[13px] font-bold text-[#c44536] transition-colors hover:bg-[#f6f3ff]"
+                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[#e9a998] px-[16px] text-[14px] font-bold text-[#c44536] transition-colors hover:bg-[#fdf0ec]"
                       >
                         <span className="mr-[8px] text-[20px] font-normal">+</span>
                         Apply coupon
@@ -1834,14 +1791,20 @@ const Booking = () => {
                     )}
                   </section>
 
-                  <section className="rounded-[16px] bg-[#F7F7F7] p-[20px]">
-                    <h2 className="text-[20px] font-bold text-[#222222]">
-                      What&apos;s included
-                    </h2>
-                    <ul className="mt-[14px] space-y-[9px] text-[12px] text-[#4f4f4f]">
-                      <li className="flex gap-[8px]"><span className="text-[#1ca05a]">✓</span>{selectedProduct?.perDayKmLimit || selectedProduct?.range || 0} km per day included</li>
-                      <li className="flex gap-[8px]"><span className="text-[#1ca05a]">✓</span>24/7 breakdown assistance</li>
-                      <li className="flex gap-[8px]"><span className="text-[#1ca05a]">✓</span>Vehicle insurance</li>
+                  <section className="rounded-[16px] bg-[#f4f3f6] p-[18px]">
+                    <h2 className="m-0 text-[16px] font-bold text-[#1c1a22]">What's included</h2>
+                    <ul className="m-0 mt-[12px] flex list-none flex-col gap-[9px] p-0 text-[14px] text-[#3d3846]">
+                      {[
+                        `${selectedProduct?.perDayKmLimit || franchiseHome.kmPerDay} km a day`,
+                        "Maintenance and breakdown help",
+                        `24/7 support on ${franchiseHome.supportPhone}`,
+                        "Vehicle insurance",
+                      ].map((line) => (
+                        <li key={line} className="flex items-start gap-[10px]">
+                          <Check className="mt-[3px] size-[15px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
+                          {line}
+                        </li>
+                      ))}
                     </ul>
                   </section>
                 </div>
