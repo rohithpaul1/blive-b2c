@@ -543,6 +543,9 @@ const SearchPage = () => {
                     dropoff={selectedDropoff}
                     cutout={pickerModels.length === 1 ? franchiseHome.model.cutout : null}
                     features={pickerModels.length === 1 ? franchiseHome.model.features : []}
+                    addOns={franchiseHome.addOns || []}
+                    hubAddress={franchiseHome.hubAddress}
+                    supportPhone={franchiseHome.supportPhone}
                   />
                 ) : (
                   <div className="rounded-[20px] border border-[#e3e0e8] px-[24px] py-[48px] text-center">

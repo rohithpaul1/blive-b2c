@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { BatteryCharging, Bluetooth, Gauge, Headphones, Package, Route, SlidersHorizontal, Undo2, User, Weight, Wrench, Zap } from "lucide-react";
+import { BatteryCharging, Bluetooth, Check, Gauge, Package, Route, SlidersHorizontal, Undo2, User, Weight, Zap } from "lucide-react";
 import useRentNow from "../hooks/useRentNow";
 import { planUnit } from "../utils/subscription";
 
@@ -163,10 +163,70 @@ function ModelCard({ model, planType, selected, onSelect, pricingFor, best }) {
   );
 }
 
-export default function ModelPicker({ models, selectedPlanType, onPlanChange, pickup, dropoff, cutout = null, features = [] }) {
+const readAddOns = () => {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem("selectedAddOns") || "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+};
+
+// Sixt-style toggle row: name, price, Details disclosure, switch.
+function AddOnRow({ addOn, on, open, onToggle, onDetails }) {
+  return (
+    <li className={`rounded-[12px] border bg-white px-[16px] py-[14px] transition-colors ${on ? "border-[#1c1a22]" : "border-[#e3e0e8]"}`}>
+      <div className="flex items-center gap-[12px]">
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] font-bold text-[#1c1a22]">{addOn.name}</span>
+          <span className="mt-[3px] block text-[14px] text-[#3d3846]">
+            <span className="font-bold tabular-nums">₹{inr(addOn.price)}</span> / {addOn.per === "day" ? "day" : "one-time"}
+          </span>
+        </span>
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={onDetails}
+          className="min-h-[44px] px-[4px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[#c44536]"
+        >
+          Details
+        </button>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={on}
+          aria-label={`Add ${addOn.name}`}
+          onClick={onToggle}
+          className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors ${on ? "bg-[#c44536]" : "bg-[#dcdadf] hover:bg-[#cfccd3]"}`}
+        >
+          <span
+            aria-hidden="true"
+            className={`absolute left-[3px] top-[3px] size-[24px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.25)] transition-transform ${on ? "translate-x-[22px]" : ""}`}
+          />
+        </button>
+      </div>
+      {open && <p className="m-0 mt-[10px] text-[14px] leading-[1.5] text-[#5a5562]">{addOn.details}</p>}
+    </li>
+  );
+}
+
+export default function ModelPicker({
+  models,
+  selectedPlanType,
+  onPlanChange,
+  pickup,
+  dropoff,
+  cutout = null,
+  features = [],
+  addOns = [],
+  hubAddress = "",
+  supportPhone = "",
+}) {
   const { rentNow, pricingFor, isSubscription, rentalDays } = useRentNow();
   const [modelId, setModelId] = useState(() => (models.find((m) => m.isAvailable) || models[0])?.id);
   const [busy, setBusy] = useState(false);
+  const [addOnIds, setAddOnIds] = useState(readAddOns);
+  const [detailsId, setDetailsId] = useState(null);
 
   useEffect(() => {
     if (!models.some((m) => m.id === modelId)) setModelId((models.find((m) => m.isAvailable) || models[0])?.id);
@@ -229,6 +289,53 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
           dropoff?.date ? `${format(new Date(dropoff.date), "d MMM")}, ${clock(dropoff.time)}` : "Add return"
         }`);
 
+  // Rentals: the dates pick the plan. Offer a longer plan only when a few more days unlock a lower daily rate.
+  const extend = (() => {
+    if (isSubscription || !model.isAvailable || !pricing.days) return null;
+    const days = pricing.days;
+    const target = days >= 4 && days < 7 ? "weekly" : days >= 20 && days < 30 ? "monthly" : null;
+    if (!target || !planTypes.includes(target) || !(perDay[target] < perDay[planType])) return null;
+    const targetDays = UNIT_DAYS[target];
+    const extra = targetDays - days;
+    const diff = Math.round(perDay[target] * targetDays - pricing.total);
+    return {
+      plan: target,
+      days: targetDays,
+      title: `Add ${extra} more ${extra === 1 ? "day" : "days"} and pay ₹${inr(perDay[target])} a day`,
+      body:
+        diff > 0
+          ? `${targetDays} days cost just ₹${inr(diff)} more than ${days}.`
+          : diff === 0
+          ? `${targetDays} days for the price of ${days}.`
+          : `${targetDays} days cost ₹${inr(-diff)} less than ${days}.`,
+    };
+  })();
+
+  const addOnDays = isSubscription ? (pricing.units || 1) * (UNIT_DAYS[planType] || 1) : pricing.days || 1;
+  const chosenAddOns = addOns.filter((a) => addOnIds.includes(a.id));
+  const addOnCost = (a) => (a.per === "day" ? a.price * addOnDays : a.price);
+  const addOnTotal = chosenAddOns.reduce((sum, a) => sum + addOnCost(a), 0);
+  const kmBonus = chosenAddOns.reduce((sum, a) => sum + (Number(a.kmBonus) || 0), 0);
+
+  const toggleAddOn = (id) =>
+    setAddOnIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        sessionStorage.setItem("selectedAddOns", JSON.stringify(next));
+      } catch {
+        /* storage unavailable: the choice still holds on this page */
+      }
+      return next;
+    });
+
+  const overview = [
+    model.perDayKmLimit > 0 &&
+      `${model.perDayKmLimit + kmBonus} km a day included${model.perKmCharge ? `, then ₹${inr(model.perKmCharge)} per extra km` : ""}`,
+    "Maintenance and breakdown help",
+    supportPhone ? `24/7 support on ${supportPhone}` : "24/7 support",
+    hubAddress && `Pick up at ${hubAddress}`,
+  ].filter(Boolean);
+
   const handleContinue = async () => {
     setBusy(true);
     try {
@@ -243,7 +350,7 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
       <header className="flex flex-col gap-[8px] md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="font-display m-0 text-[clamp(36px,4.5vw,56px)] leading-[0.95] text-[#0f0d16]">
-            {single ? "Pick how you ride" : "Which scooter do you want to ride?"}
+            {single ? "Get ready to ride" : "Which scooter do you want to ride?"}
           </h1>
           <p className="m-0 mt-[8px] text-[16px] text-[#5a5562]">
             {single
@@ -270,8 +377,10 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
         </div>
       )}
 
-      <div className="grid overflow-hidden rounded-[24px] border border-[#e3e0e8] bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-        <div className="sixt-stage flex min-h-[480px] flex-col px-[20px] pb-[26px] pt-[30px] text-white md:px-[32px] md:pt-[40px]">
+      <div className="grid overflow-clip rounded-[24px] border border-[#e3e0e8] bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+        {/* The scooter stays in view while the add-ons column scrolls past it. */}
+        <div className="sixt-stage text-white">
+          <div className="flex min-h-[480px] flex-col px-[20px] pb-[26px] pt-[30px] md:px-[32px] md:pt-[40px] lg:sticky lg:top-[88px] lg:h-[min(760px,calc(100vh-108px))]">
           <h2 className="font-display m-0 text-center text-[clamp(34px,4vw,48px)] leading-none">{model.vehicleName}</h2>
           <p className="m-0 mt-[10px] text-center text-[17px] text-white/90">{byline(model)} · Maintenance included</p>
           <div className="flex flex-1 items-center py-[12px]">
@@ -287,88 +396,136 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
           ) : (
             <FeatureRow features={specChips(model).map((c) => ({ icon: c.icon === Route ? "range" : c.icon === Gauge ? "speed" : "battery", label: c.label }))} />
           )}
+          </div>
         </div>
 
-        <div className="flex flex-col gap-[14px] px-[20px] py-[24px] md:px-[36px] md:py-[32px]">
-          <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">{isSubscription ? "Billing" : "Rental plan"}</h3>
-          <div role="radiogroup" aria-label="Rental plan" className="flex flex-col gap-[10px]">
-            {orderedPlans.map((pt) => {
-              const on = pt === planType;
-              const unit = isSubscription ? planUnit(pt) : "day";
-              const rate = isSubscription ? Number(model.plans[pt].price) || 0 : perDay[pt];
-              const delta = isSubscription ? 0 : Math.round(perDay[pt] - perDay[planType]);
-              const longer = UNIT_DAYS[pt] > UNIT_DAYS[planType];
-              // Nudge copy: longer plans sell the lower daily rate, shorter ones stay neutral.
-              const nudge = on
-                ? isSubscription
-                  ? planNote(pt)
-                  : `Fits your ${pricing.days}-day trip`
-                : !isSubscription && longer && delta < 0
-                ? `Ride ${UNIT_DAYS[pt]} days and pay ₹${inr(rate)} a day`
-                : planNote(pt);
-              return (
-                <button
-                  key={pt}
-                  type="button"
-                  role="radio"
-                  aria-checked={on}
-                  onClick={() => !on && onPlanChange(pt)}
-                  className={`flex min-h-[72px] w-full items-center gap-[14px] rounded-[12px] px-[16px] py-[12px] text-left transition-colors ${
-                    on ? "border-2 border-[#1c1a22] bg-white" : "my-px border border-[#d9d9d9] bg-white hover:border-[#9a96a0]"
-                  }`}
-                >
-                  <span className={`size-[20px] shrink-0 rounded-full ${on ? "border-[6px] border-[#1c1a22]" : "border-2 border-[#b9b5c2]"}`} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[16px] font-bold text-[#1c1a22]">
-                      {planName(pt)}
-                      {on && <span className="ml-[8px] text-[13px] font-semibold text-[#5a5562]">₹{inr(rate)} / {unit}</span>}
+        <div className="flex flex-col gap-[22px] px-[20px] py-[24px] md:px-[36px] md:py-[32px]">
+          {isSubscription ? (
+            <div className="flex flex-col gap-[12px]">
+              <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">Billing</h3>
+            <div role="radiogroup" aria-label="Rental plan" className="flex flex-col gap-[10px]">
+              {orderedPlans.map((pt) => {
+                const on = pt === planType;
+                const unit = isSubscription ? planUnit(pt) : "day";
+                const rate = isSubscription ? Number(model.plans[pt].price) || 0 : perDay[pt];
+                const delta = isSubscription ? 0 : Math.round(perDay[pt] - perDay[planType]);
+                const longer = UNIT_DAYS[pt] > UNIT_DAYS[planType];
+                // Nudge copy: longer plans sell the lower daily rate, shorter ones stay neutral.
+                const nudge = on
+                  ? isSubscription
+                    ? planNote(pt)
+                    : `Fits your ${pricing.days}-day trip`
+                  : !isSubscription && longer && delta < 0
+                  ? `Ride ${UNIT_DAYS[pt]} days and pay ₹${inr(rate)} a day`
+                  : planNote(pt);
+                return (
+                  <button
+                    key={pt}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => !on && onPlanChange(pt)}
+                    className={`flex min-h-[72px] w-full items-center gap-[14px] rounded-[12px] px-[16px] py-[12px] text-left transition-colors ${
+                      on ? "border-2 border-[#1c1a22] bg-white" : "my-px border border-[#d9d9d9] bg-white hover:border-[#9a96a0]"
+                    }`}
+                  >
+                    <span className={`size-[20px] shrink-0 rounded-full ${on ? "border-[6px] border-[#1c1a22]" : "border-2 border-[#b9b5c2]"}`} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[16px] font-bold text-[#1c1a22]">
+                        {planName(pt)}
+                        {on && <span className="ml-[8px] text-[13px] font-semibold text-[#5a5562]">₹{inr(rate)} / {unit}</span>}
+                      </span>
+                      <span className="mt-[2px] block text-[14px] text-[#5a5562]">{nudge}</span>
                     </span>
-                    <span className="mt-[2px] block text-[14px] text-[#5a5562]">{nudge}</span>
-                  </span>
-                  {!on && pt === bestPlan && (
-                    <span className="hidden rounded-full bg-[#c44536] px-[10px] py-[4px] text-[12px] font-bold text-white sm:inline">
-                      {longer ? "Save more" : "Best value"}
+                    {!on && pt === bestPlan && (
+                      <span className="hidden rounded-full bg-[#c44536] px-[10px] py-[4px] text-[12px] font-bold text-white sm:inline">
+                        {longer ? "Save more" : "Best value"}
+                      </span>
+                    )}
+                    <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">
+                      {on
+                        ? "Included"
+                        : isSubscription
+                        ? `₹${inr(rate)} / ${unit}`
+                        : delta === 0
+                        ? "Same price"
+                        : `${delta > 0 ? "+" : "−"} ₹${inr(Math.abs(delta))} / day`}
                     </span>
-                  )}
-                  <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">
-                    {on
-                      ? "Included"
-                      : isSubscription
-                      ? `₹${inr(rate)} / ${unit}`
-                      : delta === 0
-                      ? "Same price"
-                      : `${delta > 0 ? "+" : "−"} ₹${inr(Math.abs(delta))} / day`}
+                  </button>
+                );
+              })}
+            </div>
+            </div>
+          ) : (
+            model.isAvailable && (
+              <div className="flex flex-col gap-[10px]">
+                <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">Your rental</h3>
+                <div className="flex items-baseline justify-between gap-[12px] rounded-[12px] border border-[#e3e0e8] px-[16px] py-[14px]">
+                  <span className="text-[15px] text-[#3d3846]">
+                    {pricing.days} {pricing.days === 1 ? "day" : "days"} · {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[planType]} rate
                   </span>
-                </button>
-              );
-            })}
-          </div>
-          {!isSubscription && (
-            <p className="m-0 text-[13px] text-[#6a6573]">Your plan follows your dates. Switching plans moves your return date to match.</p>
+                  <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">₹{inr(pricing.perUnit)} a day</span>
+                </div>
+                {extend && (
+                  <div className="flex flex-wrap items-center gap-[12px] rounded-[12px] bg-[#fdf0ec] px-[16px] py-[14px]">
+                    <span className="min-w-[200px] flex-1">
+                      <span className="block text-[15px] font-bold text-[#1c1a22]">{extend.title}</span>
+                      <span className="mt-[2px] block text-[14px] text-[#5a5562]">{extend.body}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onPlanChange(extend.plan)}
+                      className="min-h-[44px] rounded-[10px] border-2 border-[#c44536] px-[16px] text-[15px] font-bold text-[#c44536] transition-colors hover:bg-[#c44536] hover:text-white"
+                    >
+                      Extend to {extend.days} days
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
           )}
 
-          <h3 className="m-0 mt-[6px] text-[17px] font-bold text-[#1c1a22]">Included</h3>
-          <ul className="m-0 grid list-none grid-cols-1 gap-[10px] rounded-[12px] border border-[#e3e0e8] p-[16px] text-[15px] text-[#3d3846] sm:grid-cols-2">
-            {model.perDayKmLimit > 0 && (
-              <li className="flex items-center gap-[8px]">
-                <Route className="size-[17px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
-                {model.perDayKmLimit} km a day{model.perKmCharge ? `, ₹${inr(model.perKmCharge)} per extra km` : ""}
-              </li>
-            )}
-            <li className="flex items-center gap-[8px]">
-              <Wrench className="size-[17px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
-              Maintenance
-            </li>
-            <li className="flex items-center gap-[8px]">
-              <Headphones className="size-[17px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
-              24/7 support
-            </li>
-          </ul>
-          {Number(model.b2cDeposit) > 0 && (
-            <p className="m-0 text-[14px] text-[#5a5562]">
-              Refundable security deposit of ₹{inr(model.b2cDeposit)}, paid at checkout.
-            </p>
+          {addOns.length > 0 && model.isAvailable && (
+            <div className="flex flex-col gap-[10px]">
+              <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">Add-ons for your shift</h3>
+              <ul className="m-0 flex list-none flex-col gap-[10px] p-0">
+                {addOns.map((a) => (
+                  <AddOnRow
+                    key={a.id}
+                    addOn={a}
+                    on={addOnIds.includes(a.id)}
+                    open={detailsId === a.id}
+                    onToggle={() => toggleAddOn(a.id)}
+                    onDetails={() => setDetailsId((id) => (id === a.id ? null : a.id))}
+                  />
+                ))}
+              </ul>
+            </div>
           )}
+
+          <div className="rounded-[14px] bg-[#f4f3f6] p-[18px]">
+            <h3 className="m-0 text-[17px] font-bold text-[#1c1a22]">Your booking overview</h3>
+            <ul className="m-0 mt-[12px] flex list-none flex-col gap-[10px] p-0 text-[15px] leading-[1.45] text-[#3d3846]">
+              {overview.map((line) => (
+                <li key={line} className="flex items-start gap-[10px]">
+                  <Check className="mt-[3px] size-[16px] shrink-0 text-[#1c1a22]" aria-hidden="true" />
+                  {line}
+                </li>
+              ))}
+              {chosenAddOns.map((a) => (
+                <li key={a.id} className="flex items-start gap-[10px]">
+                  <Check className="mt-[3px] size-[16px] shrink-0 text-[#c44536]" aria-hidden="true" />
+                  <span className="flex-1">{a.name}</span>
+                  <span className="tabular-nums">₹{inr(addOnCost(a))}</span>
+                </li>
+              ))}
+            </ul>
+            {Number(model.b2cDeposit) > 0 && (
+              <p className="m-0 mt-[14px] border-t border-[#e1dfe5] pt-[12px] text-[14px] text-[#5a5562]">
+                Refundable security deposit of ₹{inr(model.b2cDeposit)}, paid at checkout.
+              </p>
+            )}
+          </div>
 
           <div className="mt-auto flex flex-wrap items-center justify-between gap-[16px] border-t border-[#ecebef] pt-[18px]">
             {model.isAvailable ? (
@@ -380,7 +537,11 @@ export default function ModelPicker({ models, selectedPlanType, onPlanChange, pi
                     ? `for ${pricing.units} ${planUnit(planType)}${pricing.units === 1 ? "" : "s"} planned`
                     : `for ${pricing.days} ${pricing.days === 1 ? "day" : "days"}`}
                 </span>
-                <span className="block text-[13px] text-[#6a6573]">Deposit and taxes are added at checkout.</span>
+                <span className="block text-[13px] text-[#6a6573]">
+                  {addOnTotal > 0
+                    ? `+ ₹${inr(addOnTotal)} for add-ons, paid at the hub on pickup. Deposit and taxes are added at checkout.`
+                    : "Deposit and taxes are added at checkout."}
+                </span>
               </p>
             ) : (
               <p className="m-0 text-[15px] font-semibold text-[#1c1a22]">Not available for your dates. Try different dates.</p>

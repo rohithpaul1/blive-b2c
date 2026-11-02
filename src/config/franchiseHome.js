@@ -19,6 +19,46 @@ export const franchiseHome = {
   kmPerDay: 60,
   deposit: "₹2,000",
   monthlySaving: "₹2,500",
+  // Add-ons on the search page, picked for delivery riders on long shifts.
+  // MOCK prices. Shown on screen and paid at the hub until they exist in the admin.
+  addOns: [
+    {
+      id: "phone-kit",
+      name: "Phone holder + USB charger",
+      price: 99,
+      per: "one-time",
+      details: "A handlebar mount that keeps your delivery app in view, and a charger so your phone lasts the whole shift.",
+    },
+    {
+      id: "top-box",
+      name: "Delivery top box",
+      price: 20,
+      per: "day",
+      details: "A 45 L lockable box on the rear carrier. Fits most food and parcel orders.",
+    },
+    {
+      id: "extra-km",
+      name: "Extra 40 km a day",
+      price: 30,
+      per: "day",
+      kmBonus: 40,
+      details: "100 km a day instead of 60, for long or double shifts. Cheaper than paying for extra km.",
+    },
+    {
+      id: "rain-kit",
+      name: "Rain kit",
+      price: 149,
+      per: "one-time",
+      details: "A raincoat and a waterproof seat cover for monsoon shifts.",
+    },
+    {
+      id: "damage-cover",
+      name: "Damage cover",
+      price: 29,
+      per: "day",
+      details: "Pay nothing for minor scratches and dents during your rental.",
+    },
+  ],
   model: {
     name: "Lectrix NDuro 2.0",
     // The search page lists only models from this brand (matched on brand or model name).
