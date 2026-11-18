@@ -1,7 +1,7 @@
 import SearchBar from "../../components/SearchBar";
 import { franchiseHome as c } from "../../config/franchiseHome";
 
-// Jaipur photo hero with the live search. The search card sits inside the hero
+// City photo hero with the live search. The search card sits inside the hero
 // (half over its bottom padding) so it never covers the band below.
 const HomeHero = () => (
   <section

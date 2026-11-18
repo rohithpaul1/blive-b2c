@@ -10,10 +10,15 @@ import { ProductProvider } from './contexts/ProductContext.jsx';
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { CONVEX_URL } from './config/env.js';
 import { convexClient } from './caller/convexReactClient.js';
+import { franchiseHome } from './config/franchiseHome.js';
+import { applyTheme } from './config/theme.js';
+import { savedAccent } from './components/AccentSwatches.jsx';
 
 // Self-host the dotLottie WebAssembly runtime so no CDN (unpkg/jsdelivr) is
 // contacted at runtime. The .wasm is served from /public.
 setWasmUrl('/dotlottie-player.wasm');
+
+applyTheme(franchiseHome, savedAccent());
 
 if (!CONVEX_URL) {
   throw new Error('VITE_CONVEX_URL is required to start the BLive storefront');

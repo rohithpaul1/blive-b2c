@@ -185,7 +185,7 @@ const BookingCard = ({ item, tab, onClick }) => {
     const chip = { Upcoming: "Upcoming", Ongoing: "On the road", Past: "Completed", Cancelled: "Cancelled" }[tab] || tab;
     const chipTone =
         tab === "Ongoing" ? "bg-[#1f8a4c] text-white"
-        : tab === "Upcoming" ? "bg-[#c44536] text-white"
+        : tab === "Upcoming" ? "bg-[var(--accent)] text-white"
         : "bg-white/[0.18] text-white";
 
     // The franchise's own model gets its cut-out on the stage; anything else shows its photo.
@@ -298,7 +298,7 @@ const BookingCard = ({ item, tab, onClick }) => {
                             <a
                                 href="/search"
                                 onClick={(e) => e.stopPropagation()}
-                                className="inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] bg-[#c44536] px-[16px] text-[14px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                                className="inline-flex min-h-[44px] items-center gap-[8px] rounded-[10px] bg-[var(--accent)] px-[16px] text-[14px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)]"
                             >
                                 <RotateCcw className="size-[16px]" aria-hidden="true" />
                                 Ride again

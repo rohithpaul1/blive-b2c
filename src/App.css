@@ -3,8 +3,22 @@
   background: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --blive-purple: #c44536;
-  --blive-purple-hover: #a8392b;
+  /* Franchise accent. Jaipur's values are the defaults; src/config/theme.js
+     overwrites them at boot for other franchises. */
+  --accent: #c44536;
+  --accent-hover: #a8392b;
+  --accent-tint-5: #fdf6f4;
+  --accent-tint-9: #fdf0ec;
+  --accent-tint-10: #fbeee9;
+  --accent-tint-13: #fde8e1;
+  --accent-tint-16: #fbe4dc;
+  --accent-tint-35: #f0c2b5;
+  --accent-tint-40: #f4b9a8;
+  --accent-tint-48: #e9a998;
+  --hero-image: url("/images/home/jaipur.webp");
+  --tile-image: url("/images/home/nduro-floor.webp");
+  --blive-purple: var(--accent);
+  --blive-purple-hover: var(--accent-hover);
   --blive-text: #262626;
   --blive-muted: #686868;
   --blive-surface: #f7f7f7;
@@ -280,7 +294,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
-/* ---- Homepage, Direction A (Jaipur terracotta) ---- */
+/* ---- Homepage, Direction A (franchise accent) ---- */
 .font-display {
   font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
   font-weight: 800;
@@ -291,7 +305,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 .home-a p { text-wrap: pretty; }
 .home-hero-bg {
   background-image: linear-gradient(90deg, rgba(15, 13, 22, 0.88) 0%, rgba(15, 13, 22, 0.55) 55%, rgba(15, 13, 22, 0.25) 100%),
-    url("/images/home/jaipur.webp");
+    var(--hero-image);
   background-size: cover;
   background-position: center 40%;
 }
@@ -304,10 +318,16 @@ input[type="range"]::-webkit-slider-runnable-track {
   background-position: center;
 }
 .home-tile-city {
-  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), url("/images/home/jaipur.webp");
+  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), var(--hero-image);
 }
 .home-tile-bike {
-  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), url("/images/home/nduro-floor.webp");
+  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), var(--tile-image);
+}
+/* Testimonial band: the tile photo by default; a franchise can give it its own (see theme.js). */
+.home-quote-bg {
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(180deg, rgba(15, 13, 22, 0.1) 30%, rgba(15, 13, 22, 0.9) 100%), var(--quote-image, var(--tile-image));
 }
 .home-a a { text-decoration: none; }
 .home-faq summary::-webkit-details-marker { display: none; }
@@ -331,7 +351,7 @@ input[type="range"]::-webkit-slider-runnable-track {
    and a faint sunset at the top, so the brand colour carries the panel. */
 .login-stage {
   background:
-    radial-gradient(62% 34% at 50% 50%, rgba(214, 92, 62, 0.42) 0%, rgba(214, 92, 62, 0) 100%),
+    radial-gradient(62% 34% at 50% 50%, color-mix(in srgb, var(--accent) 55%, transparent) 0%, transparent 100%),
     radial-gradient(90% 28% at 80% 0%, rgba(244, 150, 102, 0.28) 0%, rgba(244, 150, 102, 0) 100%),
     linear-gradient(180deg, #1d1311 0%, #2a1915 42%, #3a221b 62%, #1e1412 84%, #140d0c 100%);
 }

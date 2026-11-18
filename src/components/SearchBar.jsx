@@ -582,7 +582,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
                 setHubSheetOpen(false);
                 handleRentNow();
               }}
-              className="mt-[12px] flex min-h-[54px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[#c44536] text-[17px] font-bold text-white active:bg-[#a8392b]"
+              className="mt-[12px] flex min-h-[54px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[var(--accent)] text-[17px] font-bold text-white active:bg-[var(--accent-hover)]"
             >
               <Search className="size-[19px]" aria-hidden="true" />
               Show price
@@ -610,7 +610,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
         className={`flex min-h-[62px] w-full items-center gap-[12px] rounded-full border bg-white p-[8px] pl-[16px] text-left md:hidden ${onSearchPage ? "border-[#dddddd] shadow-[0_2px_8px_rgba(0,0,0,0.07)]" : "border-[#e7e5e8] shadow-[0_8px_24px_rgba(16,24,40,0.12)]"}`}
         aria-label="Open vehicle search"
       >
-        <Search className="size-[20px] shrink-0 text-[#c44536]" aria-hidden="true" />
+        <Search className="size-[20px] shrink-0 text-[var(--accent)]" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           {onSearchPage ? (
             <>
@@ -627,7 +627,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             </span>
           )}
         </span>
-        <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#ecdcd7] bg-[#fbf6f4] text-[#c44536]">
+        <span className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#ecdcd7] bg-[#fbf6f4] text-[var(--accent)]">
           <SlidersHorizontal className="size-[18px]" aria-hidden="true" />
         </span>
       </button>
@@ -672,7 +672,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
                 setHubSheetOpen(false);
                 handleRentNow();
               }}
-              className="mt-[12px] flex min-h-[54px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[#c44536] text-[17px] font-bold text-white active:bg-[#a8392b]"
+              className="mt-[12px] flex min-h-[54px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[var(--accent)] text-[17px] font-bold text-white active:bg-[var(--accent-hover)]"
             >
               <Search className="size-[19px]" aria-hidden="true" />
               Show price
@@ -699,7 +699,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             onClick={() => openDesktopSearch("location")}
             className="flex min-w-0 flex-1 items-center gap-[8px] rounded-full px-[10px] py-[8px] text-left hover:bg-[#f7f6f8]"
           >
-            <MapPin className="size-[17px] shrink-0 text-[#c44536]" aria-hidden="true" />
+            <MapPin className="size-[17px] shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <span className="truncate text-[13px] font-bold text-[#29262b]">
               {selectedLocation.split(",")[0]}
             </span>
@@ -736,7 +736,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             type="button"
             onClick={handleRentNow}
             className={`flex size-[44px] shrink-0 items-center justify-center rounded-full text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-              singleHub ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]" : "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
+              singleHub ? "bg-[var(--accent)] hover:bg-[var(--accent-hover)] focus-visible:outline-[var(--accent)]" : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] focus-visible:outline-[var(--accent)]"
             }`}
             aria-label="Search vehicles"
           >
@@ -775,7 +775,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               <button
                 type="button"
                 onClick={() => navigate("/my-bookings")}
-                className="text-[13px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[#a8392b]"
+                className="text-[13px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[var(--accent-hover)]"
               >
                 View or change my booking
               </button>
@@ -814,7 +814,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             }}
             className={desktopFieldClass}
           >
-            <MapPin className="size-[20px] shrink-0 text-[#c44536]" aria-hidden="true" />
+            <MapPin className="size-[20px] shrink-0 text-[var(--accent)]" aria-hidden="true" />
             <span className="min-w-0 flex-1">
               <span className="block text-[12px] font-bold text-[#4c4750]">Pickup location</span>
               <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
@@ -849,7 +849,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             onClick={() => openDesktopDatepicker("pickup")}
             className={desktopFieldClass}
           >
-            <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#c44536]"}`} aria-hidden="true" />
+            <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[var(--accent)]" : "text-[var(--accent)]"}`} aria-hidden="true" />
             <span className="min-w-0">
               <span className="block text-[12px] font-bold text-[#4c4750]">
                 {isSubscription ? "Start date" : "Pickup date"}
@@ -863,7 +863,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
 
           {isSubscription ? (
             <label className={`${desktopFieldClass} cursor-pointer`}>
-              <Clock3 className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#c44536]"}`} aria-hidden="true" />
+              <Clock3 className={`size-[20px] shrink-0 ${singleHub ? "text-[var(--accent)]" : "text-[var(--accent)]"}`} aria-hidden="true" />
               <span className="min-w-0 flex-1">
                 <span className="block text-[12px] font-bold text-[#4c4750]">How long?</span>
                 <select
@@ -888,7 +888,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               onClick={() => openDesktopDatepicker("dropoff")}
               className={desktopFieldClass}
             >
-              <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[#c44536]" : "text-[#c44536]"}`} aria-hidden="true" />
+              <CalendarDays className={`size-[20px] shrink-0 ${singleHub ? "text-[var(--accent)]" : "text-[var(--accent)]"}`} aria-hidden="true" />
               <span className="min-w-0">
                 <span className="block text-[12px] font-bold text-[#4c4750]">Return date</span>
                 <span className="mt-[2px] block truncate text-[14px] font-medium text-[#262626]">
@@ -907,8 +907,8 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
             onClick={handleRentNow}
             className={`flex ${singleHub ? "min-h-[58px] rounded-[12px]" : "min-h-[66px] rounded-[14px]"} min-w-[156px] items-center justify-center gap-[9px] px-[24px] text-[14px] font-bold text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
               singleHub
-                ? "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
-                : "bg-[#c44536] hover:bg-[#a8392b] focus-visible:outline-[#c44536]"
+                ? "bg-[var(--accent)] hover:bg-[var(--accent-hover)] focus-visible:outline-[var(--accent)]"
+                : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] focus-visible:outline-[var(--accent)]"
             }`}
           >
             <Search className="size-[19px]" aria-hidden="true" />
@@ -1277,7 +1277,7 @@ const SearchBar = ({ onSearchPage, onSearchTrigger, singleHub = false }) => {
               <button
                 type="button"
                 onClick={mobileFooterAction}
-                className={`flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] px-[22px] text-[16px] font-bold text-white ${singleHub ? "bg-[#c44536]" : "bg-[#c44536]"}`}
+                className={`flex min-h-[52px] min-w-[150px] items-center justify-center gap-[9px] rounded-[12px] px-[22px] text-[16px] font-bold text-white ${singleHub ? "bg-[var(--accent)]" : "bg-[var(--accent)]"}`}
               >
                 {mobileFooterLabel !== "Next" && <Search className="size-[18px]" aria-hidden="true" />}
                 {mobileFooterLabel}

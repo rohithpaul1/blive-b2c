@@ -400,7 +400,7 @@ const Cards = ({
                   type="button"
                   onClick={() => handleRentNow(card)}
                   aria-label={`${actionLabel} ${card.vehicleName}, ₹${formatCurrency(rate)} per ${pricing.unit}`}
-                  className="block w-full cursor-pointer rounded-[16px] text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#c44536]"
+                  className="block w-full cursor-pointer rounded-[16px] text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
                 >
                   {body}
                 </button>
@@ -421,11 +421,11 @@ const Cards = ({
                   )}
                   {selectedQuantity > 0 ? (
                     <div className="mt-[12px] flex h-[44px] items-center gap-[10px]">
-                      <div className="flex h-full flex-1 items-center justify-between rounded-[12px] border border-[#c44536] px-[6px] text-[#c44536]">
+                      <div className="flex h-full flex-1 items-center justify-between rounded-[12px] border border-[var(--accent)] px-[6px] text-[var(--accent)]">
                         <button
                           type="button"
                           onClick={() => onDecrease?.(card)}
-                          className="flex size-[36px] items-center justify-center rounded-full text-[22px] leading-none hover:bg-[#fbeee9]"
+                          className="flex size-[36px] items-center justify-center rounded-full text-[22px] leading-none hover:bg-[var(--accent-tint-10)]"
                           aria-label={`Decrease ${card.vehicleName} quantity`}
                         >
                           −
@@ -434,7 +434,7 @@ const Cards = ({
                         <button
                           type="button"
                           onClick={() => onIncrease?.(card)}
-                          className="flex size-[36px] items-center justify-center rounded-full text-[20px] leading-none hover:bg-[#fbeee9]"
+                          className="flex size-[36px] items-center justify-center rounded-full text-[20px] leading-none hover:bg-[var(--accent-tint-10)]"
                           aria-label={`Increase ${card.vehicleName} quantity`}
                         >
                           +
@@ -452,7 +452,7 @@ const Cards = ({
                     <button
                       type="button"
                       onClick={() => onSelect?.(card)}
-                      className="mt-[12px] flex h-[44px] w-full items-center justify-center rounded-[12px] bg-[#c44536] px-[24px] text-[15px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                      className="mt-[12px] flex h-[44px] w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-[24px] text-[15px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)]"
                     >
                       Add to fleet
                     </button>

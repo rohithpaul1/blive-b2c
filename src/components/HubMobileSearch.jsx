@@ -123,7 +123,7 @@ function CalendarSheet({ single, pickupDate, returnDate, onClose, onDone }) {
                       onClick={() => pick(day)}
                       className={`flex h-[46px] items-center justify-center text-[16px] font-bold tabular-nums ${
                         isStart || isEnd
-                          ? "rounded-[6px] bg-[#c44536] text-white"
+                          ? "rounded-[6px] bg-[var(--accent)] text-white"
                           : between
                           ? "bg-[#f2f2f2] text-[#191919]"
                           : past
@@ -146,7 +146,7 @@ function CalendarSheet({ single, pickupDate, returnDate, onClose, onDone }) {
             type="button"
             disabled={!ready}
             onClick={() => onDone(start, end)}
-            className="mt-[12px] flex min-h-[54px] w-full items-center justify-center rounded-[10px] bg-[#c44536] text-[17px] font-bold text-white disabled:bg-[#e3d3cf]"
+            className="mt-[12px] flex min-h-[54px] w-full items-center justify-center rounded-[10px] bg-[var(--accent)] text-[17px] font-bold text-white disabled:bg-[#e3d3cf]"
           >
             {single ? "Select date" : "Select dates"}
           </button>

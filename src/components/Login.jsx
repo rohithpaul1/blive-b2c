@@ -95,28 +95,28 @@ const Login = () => {
         />
       ) : (
         <div className="flex self-end md:self-center w-full md:w-[1000px] md:max-w-none max-h-[92%] rounded-t-[24px] md:rounded-[16px] overflow-hidden login-shadow bg-white">
-          {/* Franchise panel: city lockup, headline, the NDuro on the stage, three promises. */}
+          {/* Franchise panel: city lockup, headline, the scooter on the stage, three promises. */}
           <div className="login-stage hidden w-[440px] shrink-0 flex-col px-[40px] pb-[36px] pt-[40px] text-white md:flex">
             <div className="flex items-center gap-[12px]">
-              <span className="font-display text-[26px] leading-[0.85] tracking-[0.06em] text-[#f4b9a8]">{c.city}</span>
+              <span className="font-display text-[26px] leading-[0.85] tracking-[0.06em] text-[var(--accent-tint-40)]">{c.city}</span>
               <span aria-hidden="true" className="h-[22px] w-px bg-white/30" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75">{c.franchiseName}</span>
             </div>
             <p className="font-display m-0 mt-[22px] text-[40px] leading-[0.95]">Your ride is one step away.</p>
             <div className="relative mt-[18px] flex h-[220px] items-end justify-center">
               <span aria-hidden="true" className="absolute bottom-[6%] left-1/2 h-[10%] w-[70%] -translate-x-1/2 rounded-[50%] bg-black/55 blur-[14px]" />
-              <img className="relative h-full w-full object-contain object-bottom" src={c.model.cutout || "/images/home/nduro-side.png"} alt={c.model.name} />
+              <img className="relative h-full w-full object-contain object-bottom" src={c.model.cutout} alt={c.model.name} />
             </div>
             <ul className="m-0 mt-auto flex list-none flex-col gap-[14px] p-0 pt-[22px]">
               {[
-                { Icon: Zap, title: "From ₹150 a day", body: "Subscribe monthly and save 50% on the daily rate." },
+                { Icon: Zap, title: `From ${c.subscribePerDay} a day`, body: "Subscribe monthly and save 50% on the daily rate." },
                 { Icon: Wrench, title: "Maintenance included", body: "We look after the scooter. You just ride." },
                 { Icon: Headphones, title: "Help, day or night", body: `24/7 support on ${c.supportPhone}.` },
               ].map((item) => {
                 const Glyph = item.Icon;
                 return (
                   <li key={item.title} className="flex items-start gap-[12px]">
-                    <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#c44536]/30 ring-1 ring-[#f4b9a8]/25">
+                    <span className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/30 ring-1 ring-[var(--accent-tint-40)]/25">
                       <Glyph className="size-[17px]" aria-hidden="true" />
                     </span>
                     <span>
@@ -197,7 +197,7 @@ const Login = () => {
                     setPhoneNumber(onlyNums);
                   }}
                   placeholder="Enter your 10-digit mobile number"
-                  className="rounded-[8px] w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[16px] text-[#222222] placeholder:text-[#9a949d] focus:border-[#c44536] focus:bg-white"
+                  className="rounded-[8px] w-full border border-[#EDEDED] outline-none p-[16px] bg-[#F7F7F7] text-[16px] text-[#222222] placeholder:text-[#9a949d] focus:border-[var(--accent)] focus:bg-white"
                   type="text"
                   inputMode="numeric"
                 />
@@ -206,7 +206,7 @@ const Login = () => {
             <button
               disabled={sender || phoneNumber.length !== 10}
               onClick={handleSendOTP}
-              className="mt-[24px] mx-[32px] rounded-[24px] bg-[#c44536] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:bg-[#CBCBCB]"
+              className="mt-[24px] mx-[32px] rounded-[24px] bg-[var(--accent)] px-[24px] py-[13px] font-bold text-[#FDFDFD] transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:bg-[#CBCBCB]"
             >
               {sender ? "Sending code…" : "Get code"}
             </button>

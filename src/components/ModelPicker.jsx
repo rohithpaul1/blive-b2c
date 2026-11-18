@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { BatteryCharging, Bluetooth, Check, Gauge, Package, Route, SlidersHorizontal, Undo2, User, Weight, Zap } from "lucide-react";
 import useRentNow from "../hooks/useRentNow";
 import { addPlanDuration, planUnit } from "../utils/subscription";
+import { franchiseHome } from "../config/franchiseHome";
 
 // Search results built for a franchise that rents one model, after Sixt's
 // "Booking option" panel: the model on the left, plans and price on the right.
@@ -22,7 +23,7 @@ const clock = (label) => {
 
 const fallbackImage = (e) => {
   e.currentTarget.onerror = null;
-  e.currentTarget.src = "/images/home/nduro-side.png";
+  e.currentTarget.src = franchiseHome.model.cutout;
 };
 
 const Spec = (props) => {
@@ -113,14 +114,14 @@ function ModelCard({ model, planType, selected, onSelect, pricingFor, best }) {
         onClick={onSelect}
         aria-pressed={selected}
         className={`sixt-stage ${best ? "sixt-stage-warm" : ""} relative flex min-h-[540px] w-full flex-col overflow-hidden rounded-[16px] text-left text-white outline-offset-[4px] transition-[outline-color] ${
-          selected ? "outline outline-[3px] outline-[#c44536]" : "outline outline-[3px] outline-transparent hover:outline-white/30"
+          selected ? "outline outline-[3px] outline-[var(--accent)]" : "outline outline-[3px] outline-transparent hover:outline-white/30"
         } ${model.isAvailable ? "" : "opacity-60"}`}
       >
         <span className="px-[22px] pt-[22px]">
           <span className="font-display block text-[34px] leading-none">{model.vehicleName}</span>
           <span className="mt-[8px] block text-[16px] text-white/90">{byline(model)}</span>
           <span className="mt-[14px] flex flex-wrap gap-[6px]">
-            {best && <span className="rounded-full bg-[#c44536] px-[12px] py-[6px] text-[13px] font-semibold">Best value</span>}
+            {best && <span className="rounded-full bg-[var(--accent)] px-[12px] py-[6px] text-[13px] font-semibold">Best value</span>}
             {specChips(model).map((c) => (
               <Spec key={c.label} icon={c.icon}>{c.label}</Spec>
             ))}
@@ -156,7 +157,7 @@ function ModelCard({ model, planType, selected, onSelect, pricingFor, best }) {
       {selected && (
         <span
           aria-hidden="true"
-          className="absolute -bottom-[14px] left-[48px] h-0 w-0 border-x-[10px] border-t-[10px] border-x-transparent border-t-[#c44536]"
+          className="absolute -bottom-[14px] left-[48px] h-0 w-0 border-x-[10px] border-t-[10px] border-x-transparent border-t-[var(--accent)]"
         />
       )}
     </div>
@@ -187,7 +188,7 @@ function AddOnRow({ addOn, on, open, onToggle, onDetails }) {
           type="button"
           aria-expanded={open}
           onClick={onDetails}
-          className="min-h-[44px] px-[4px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[#c44536]"
+          className="min-h-[44px] px-[4px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[var(--accent)]"
         >
           Details
         </button>
@@ -197,7 +198,7 @@ function AddOnRow({ addOn, on, open, onToggle, onDetails }) {
           aria-checked={on}
           aria-label={`Add ${addOn.name}`}
           onClick={onToggle}
-          className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors ${on ? "bg-[#c44536]" : "bg-[#dcdadf] hover:bg-[#cfccd3]"}`}
+          className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors ${on ? "bg-[var(--accent)]" : "bg-[#dcdadf] hover:bg-[#cfccd3]"}`}
         >
           <span
             aria-hidden="true"
@@ -428,7 +429,7 @@ export default function ModelPicker({
             <VehicleArt src={art} alt={model.vehicleName} size="stage" />
           </div>
           {model.isAvailable && model.availableCount <= 2 && (
-            <span className="mb-[14px] self-center rounded-full bg-[#c44536] px-[12px] py-[6px] text-[13px] font-semibold">
+            <span className="mb-[14px] self-center rounded-full bg-[var(--accent)] px-[12px] py-[6px] text-[13px] font-semibold">
               Only {model.availableCount} left
             </span>
           )}
@@ -464,7 +465,7 @@ export default function ModelPicker({
                   <p className="m-0 text-[14px] font-bold text-[#1c1a22]">When you'll pay</p>
                   <ol className="m-0 mt-[12px] flex list-none flex-col gap-[12px] p-0 text-[14px] text-[#3d3846]">
                     <li className="flex items-start gap-[10px]">
-                      <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full bg-[#c44536]" />
+                      <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full bg-[var(--accent)]" />
                       <span className="flex-1">
                         <span className="block font-semibold text-[#1c1a22]">First bill, at checkout</span>
                         Covers {fmt(new Date(pickup.date))} to {fmt(schedule.next || schedule.end)}
@@ -473,7 +474,7 @@ export default function ModelPicker({
                     </li>
                     {schedule.next && (
                       <li className="flex items-start gap-[10px]">
-                        <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full border-2 border-[#c44536]" />
+                        <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full border-2 border-[var(--accent)]" />
                         <span className="flex-1">
                           <span className="block font-semibold text-[#1c1a22]">Then every {UNIT_WORD[planType]}</span>
                           {fmt(schedule.next)}
@@ -510,7 +511,7 @@ export default function ModelPicker({
                               on
                                 ? "bg-white text-[#1c1a22] shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
                                 : pendingCycle === pt
-                                ? "text-[#c44536]"
+                                ? "text-[var(--accent)]"
                                 : "text-[#5a5562] hover:text-[#1c1a22]"
                             }`}
                           >
@@ -522,14 +523,14 @@ export default function ModelPicker({
                   </div>
                 )}
                 {pendingCycle && pendingCycle !== planType && (
-                  <div role="alertdialog" aria-label="Change billing cycle" className="rounded-[12px] bg-[#fdf0ec] px-[16px] py-[14px]">
+                  <div role="alertdialog" aria-label="Change billing cycle" className="rounded-[12px] bg-[var(--accent-tint-9)] px-[16px] py-[14px]">
                     <p className="m-0 text-[15px] font-bold text-[#1c1a22]">Switch to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[pendingCycle]} billing?</p>
                     <p className="m-0 mt-[4px] text-[14px] leading-[1.5] text-[#5a5562]">{switchNote(pendingCycle)}</p>
                     <div className="mt-[12px] flex flex-wrap gap-[10px]">
                       <button
                         type="button"
                         onClick={() => confirmCycle(pendingCycle)}
-                        className="min-h-[44px] rounded-[10px] bg-[#c44536] px-[16px] text-[15px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                        className="min-h-[44px] rounded-[10px] bg-[var(--accent)] px-[16px] text-[15px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)]"
                       >
                         Switch to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[pendingCycle]}
                       </button>
@@ -556,7 +557,7 @@ export default function ModelPicker({
                   <span className="whitespace-nowrap text-[16px] font-bold tabular-nums text-[#1c1a22]">₹{inr(pricing.perUnit)} a day</span>
                 </div>
                 {extend && (
-                  <div className="flex flex-wrap items-center gap-[12px] rounded-[12px] bg-[#fdf0ec] px-[16px] py-[14px]">
+                  <div className="flex flex-wrap items-center gap-[12px] rounded-[12px] bg-[var(--accent-tint-9)] px-[16px] py-[14px]">
                     <span className="min-w-[200px] flex-1">
                       <span className="block text-[15px] font-bold text-[#1c1a22]">{extend.title}</span>
                       <span className="mt-[2px] block text-[14px] text-[#5a5562]">{extend.body}</span>
@@ -564,7 +565,7 @@ export default function ModelPicker({
                     <button
                       type="button"
                       onClick={() => onPlanChange(extend.plan)}
-                      className="min-h-[44px] rounded-[10px] border-2 border-[#c44536] px-[16px] text-[15px] font-bold text-[#c44536] transition-colors hover:bg-[#c44536] hover:text-white"
+                      className="min-h-[44px] rounded-[10px] border-2 border-[var(--accent)] px-[16px] text-[15px] font-bold text-[var(--accent)] transition-colors hover:bg-[var(--accent)] hover:text-white"
                     >
                       Extend to {extend.days} days
                     </button>
@@ -603,7 +604,7 @@ export default function ModelPicker({
               ))}
               {chosenAddOns.map((a) => (
                 <li key={a.id} className="flex items-start gap-[10px]">
-                  <Check className="mt-[3px] size-[16px] shrink-0 text-[#c44536]" aria-hidden="true" />
+                  <Check className="mt-[3px] size-[16px] shrink-0 text-[var(--accent)]" aria-hidden="true" />
                   <span className="flex-1">{a.name}</span>
                   <span className="tabular-nums">₹{inr(addOnCost(a))}</span>
                 </li>
@@ -641,7 +642,7 @@ export default function ModelPicker({
               type="button"
               disabled={!model.isAvailable || busy}
               onClick={handleContinue}
-              className="flex min-h-[56px] min-w-[220px] flex-1 items-center justify-center rounded-[12px] bg-[#c44536] px-[24px] text-[16px] font-bold text-white transition-colors hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:bg-[#d9d4d2] sm:flex-none"
+              className="flex min-h-[56px] min-w-[220px] flex-1 items-center justify-center rounded-[12px] bg-[var(--accent)] px-[24px] text-[16px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:bg-[#d9d4d2] sm:flex-none"
             >
               {busy ? "Getting your price…" : "Continue"}
             </button>

@@ -17,6 +17,7 @@
  * ---------------------------------------------------------------------------
  */
 import { convexClient as client } from "./convexReactClient";
+import { franchiseSlug } from "../config/franchiseHome";
 
 /** True when a Convex deployment URL is configured. */
 export const USE_CONVEX = !!client;
@@ -37,14 +38,14 @@ export async function resolveConvex(method, path, data) {
 
   // ---- mapped B2C endpoints (grow this list per migration slice) ----
   if (method === "GET" && p === "/vehicle-plan/all-hubs") {
-    const hubs = await client.query("b2c/hubs:list", {});
+    const hubs = await client.query("b2c/hubs:list", { franchise: franchiseSlug });
     return { handled: true, result: ok(hubs) };
   }
   if (method === "GET" && p.startsWith("/vehicle-plan/vehicle-model-with-plan")) {
     // With the searched dates, counts are scooters checkout can actually reserve at the hub.
     const pickupDate = queryParams.get("pickupDate");
     const dropoffDate = queryParams.get("dropoffDate");
-    const data = await client.query("b2c/catalog:list", pickupDate && dropoffDate ? { pickupDate, dropoffDate } : {});
+    const data = await client.query("b2c/catalog:list", pickupDate && dropoffDate ? { pickupDate, dropoffDate, franchise: franchiseSlug } : { franchise: franchiseSlug });
     return { handled: true, result: ok(data) };
   }
   if (method === "GET" && p === "/vehicle-plan/check-new-user") {

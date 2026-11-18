@@ -1095,7 +1095,7 @@ const Booking = () => {
   const sectionTitle = "m-0 text-[20px] font-bold text-[#1c1a22]";
   const fieldLabel = "m-0 text-[13px] font-semibold text-[#5a5562]";
   const fieldInput =
-    "mt-[6px] h-[50px] w-full rounded-[10px] border border-[#dcd9e0] bg-white px-[14px] text-[15px] text-[#1c1a22] outline-none placeholder:text-[#9a949d] focus:border-[#c44536]";
+    "mt-[6px] h-[50px] w-full rounded-[10px] border border-[#dcd9e0] bg-white px-[14px] text-[15px] text-[#1c1a22] outline-none placeholder:text-[#9a949d] focus:border-[var(--accent)]";
 
   return (
     <>
@@ -1420,7 +1420,7 @@ const Booking = () => {
                     <button
                       type="button"
                       onClick={() => setShowDateChangeModal(true)}
-                      className="mt-[8px] inline-flex min-h-[40px] items-center gap-[6px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[#c44536]"
+                      className="mt-[8px] inline-flex min-h-[40px] items-center gap-[6px] text-[14px] font-bold text-[#1c1a22] underline underline-offset-4 hover:text-[var(--accent)]"
                     >
                       <Pencil className="size-[14px]" aria-hidden="true" />
                       Change dates
@@ -1684,7 +1684,7 @@ const Booking = () => {
                     <input
                       type="checkbox"
                       id="tncCheckbox"
-                      className="mt-[2px] size-[18px] shrink-0 accent-[#c44536]"
+                      className="mt-[2px] size-[18px] shrink-0 accent-[var(--accent)]"
                       checked={acceptedTnC}
                       onChange={() => setAcceptedTnC(!acceptedTnC)}
                     />
@@ -1696,7 +1696,7 @@ const Booking = () => {
                           e.preventDefault();
                           setShowTermsModal(true);
                         }}
-                        className="font-semibold text-[#a8392b] underline underline-offset-4 hover:text-[#7e2a20]"
+                        className="font-semibold text-[var(--accent-hover)] underline underline-offset-4 hover:text-[#7e2a20]"
                       >
                         Terms & Conditions, Privacy Policy and Cookie Policy
                       </button>
@@ -1706,7 +1706,7 @@ const Booking = () => {
                     onClick={handlePayment}
                     className={`mt-[12px] min-h-[56px] w-full rounded-[12px] px-[24px] text-[16px] font-bold text-[#FDFDFD] transition-colors ${
                       canProceedToPayment()
-                        ? "bg-[#c44536] cursor-pointer hover:bg-[#a8392b]"
+                        ? "bg-[var(--accent)] cursor-pointer hover:bg-[var(--accent-hover)]"
                         : "bg-[#CBCBCB] cursor-not-allowed"
                     }`}
                     disabled={!canProceedToPayment() || isLoading}
@@ -1759,9 +1759,9 @@ const Booking = () => {
                       Have a coupon?
                     </h2>
                     {appliedPromocode ? (
-                      <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[10px] border border-dashed border-[#f0c2b5] bg-[#fdf0ec] p-[14px]">
+                      <div className="mt-[14px] flex items-center justify-between gap-[12px] rounded-[10px] border border-dashed border-[var(--accent-tint-35)] bg-[var(--accent-tint-9)] p-[14px]">
                         <div className="min-w-0">
-                          <p className="truncate text-[14px] font-bold text-[#c44536]">
+                          <p className="truncate text-[14px] font-bold text-[var(--accent)]">
                             {appliedPromocode.promocode}
                           </p>
                           <p className="mt-[2px] text-[12px] text-[#656565]">
@@ -1770,7 +1770,7 @@ const Booking = () => {
                         </div>
                         <button
                           onClick={() => setAppliedPromocode(null)}
-                          className="text-[12px] font-bold text-[#c44536]"
+                          className="text-[12px] font-bold text-[var(--accent)]"
                         >
                           Remove
                         </button>
@@ -1778,7 +1778,7 @@ const Booking = () => {
                     ) : (
                       <button
                         onClick={() => setShowPromocodePage(true)}
-                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[#e9a998] px-[16px] text-[14px] font-bold text-[#c44536] transition-colors hover:bg-[#fdf0ec]"
+                        className="mt-[14px] flex h-[52px] w-full items-center rounded-[10px] border border-dashed border-[var(--accent-tint-48)] px-[16px] text-[14px] font-bold text-[var(--accent)] transition-colors hover:bg-[var(--accent-tint-9)]"
                       >
                         <span className="mr-[8px] text-[20px] font-normal">+</span>
                         Apply coupon

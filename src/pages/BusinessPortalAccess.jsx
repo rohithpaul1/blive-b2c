@@ -3,6 +3,7 @@ import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Building2, Check, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { franchiseHome } from "../config/franchiseHome";
 
 const fieldClass =
   "mt-2 h-12 w-full rounded-[12px] border border-[#ddd9e1] bg-white px-4 text-[15px] text-[#2d2930] outline-none transition placeholder:text-[#716c75] focus:border-[#6a5294] focus:ring-2 focus:ring-[#6a5294]/10";
@@ -123,7 +124,7 @@ function BusinessPortalAccess() {
           Back to BLive NXT for Business
         </button>
         <div className="relative my-auto max-w-[560px]">
-          <span className="flex size-12 items-center justify-center rounded-[15px] bg-white text-[#c44536]">
+          <span className="flex size-12 items-center justify-center rounded-[15px] bg-white text-[var(--accent)]">
             <Building2 className="size-6" />
           </span>
           <h1 className="mt-8 text-[52px] font-black leading-[1.03] tracking-[-0.05em]">
@@ -223,7 +224,7 @@ function BusinessPortalAccess() {
               <button
                 type="submit"
                 disabled={working || isLoading}
-                className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#c44536] px-5 text-[14px] font-bold text-white transition hover:bg-[#a8392b] disabled:cursor-wait disabled:bg-[#aaa4b2]"
+                className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[var(--accent)] px-5 text-[14px] font-bold text-white transition hover:bg-[var(--accent-hover)] disabled:cursor-wait disabled:bg-[#aaa4b2]"
               >
                 {working
                   ? mode === "create"
@@ -251,7 +252,7 @@ function BusinessPortalAccess() {
             </div>
           </div>
           <p className="mt-5 text-center text-[12px] leading-5 text-[#716c75]">
-            Need access help? Contact BLive NXT at 080-4719-0022.
+            Need access help? Contact BLive NXT at {franchiseHome.supportPhone}.
           </p>
         </div>
       </section>

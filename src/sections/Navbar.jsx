@@ -6,7 +6,7 @@ import { LoginPageContext } from "../contexts/LoginPageContext";
 import Login from "../components/Login";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "convex/react";
-import { ChevronLeft, WalletCards } from "lucide-react";
+import { ChevronLeft, Phone, WalletCards } from "lucide-react";
 import { franchiseHome } from "../config/franchiseHome";
 
 const compactRupees = (value) =>
@@ -16,6 +16,29 @@ const compactRupees = (value) =>
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(Number(value || 0));
+
+
+// Support number, upfront in the header (business team ask); it replaces the old
+// "Business enquiries" link, which stays in the footer and the "More" cards. Full number from sm up;
+// a round tap-to-call button on small phones so it doesn't crowd the login button.
+// A franchise can hide it with `showPhoneInNav: false` in its config.
+const NavPhone = () => {
+  if (franchiseHome.showPhoneInNav === false) return null;
+  // The franchise's own number; falls back to the shared BLive NXT support line.
+  const phone = franchiseHome.navPhone || franchiseHome.supportPhone;
+  if (!phone) return null;
+  const href = `tel:${phone.replace(/[^\d+]/g, "")}`;
+  return (
+    <a
+      href={href}
+      aria-label={`Call ${phone}`}
+      className="flex size-10 shrink-0 items-center justify-center gap-2 rounded-full border border-[#dfdfe3] bg-white text-[#1c1a22] transition-colors hover:border-[var(--accent-tint-48)] hover:bg-[var(--accent-tint-5)] sm:size-auto sm:h-10 sm:px-4"
+    >
+      <Phone size={16} aria-hidden="true" className="text-[var(--accent)]" />
+      <span className="hidden text-[13px] font-bold tabular-nums sm:inline">{phone}</span>
+    </a>
+  );
+};
 
 const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, singleHub = false }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -65,7 +88,7 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
               <>
                 <span aria-hidden="true" className="h-[30px] w-px bg-[#e2d3ce] md:h-[38px]" />
                 <span className="flex flex-col items-start leading-none">
-                  <span className="font-display text-[24px] leading-[0.85] tracking-[0.06em] text-[#c44536] md:text-[30px]">
+                  <span className="font-display text-[24px] leading-[0.85] tracking-[0.06em] text-[var(--accent)] md:text-[30px]">
                     {franchiseHome.city}
                   </span>
                   <span className="mt-[5px] hidden text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#7a727d] sm:block">
@@ -104,19 +127,14 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
               <button
                 type="button"
                 onClick={() => navigate("/business/access")}
-                className="flex h-10 items-center justify-center rounded-full bg-[#c44536] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[#a8392b] sm:px-5 sm:text-[13px]"
+                className="flex h-10 items-center justify-center rounded-full bg-[var(--accent)] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)] sm:px-5 sm:text-[13px]"
               >
                 Business login
               </button>
             </div>
           ) : token ? (
             <div className={`flex items-center gap-x-1.5 md:gap-x-3 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
-              <a
-                href={franchiseHome.businessEmailHref}
-                className="hidden min-h-10 items-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:flex sm:px-4 sm:text-[13px]"
-              >
-                Business enquiries
-              </a>
+              <NavPhone />
               {wallet?.showInHeader && (
                 <button
                   type="button"
@@ -124,8 +142,8 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
                   aria-label={`Wallet balance ${compactRupees(wallet.availableBalance)}`}
                   className={`flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-bold transition-colors ${
                     location.pathname === "/wallet"
-                      ? "border-[#f0c2b5] bg-[#fdf0ec] text-[#a8392b]"
-                      : "border-[#dfdfe3] bg-white text-[#303035] hover:border-[#e9a998] hover:bg-[#fdf6f4]"
+                      ? "border-[var(--accent-tint-35)] bg-[var(--accent-tint-9)] text-[var(--accent-hover)]"
+                      : "border-[#dfdfe3] bg-white text-[#303035] hover:border-[var(--accent-tint-48)] hover:bg-[var(--accent-tint-5)]"
                   }`}
                 >
                   <WalletCards size={18} aria-hidden="true" />
@@ -256,15 +274,10 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
             </div>
           ) : (
             <div className={`flex items-center gap-2 ${onSearchPage ? "col-start-3 row-start-1 justify-self-end max-md:hidden" : ""}`}>
-              <a
-                href={franchiseHome.businessEmailHref}
-                className="hidden h-10 items-center justify-center rounded-full px-3 text-[12px] font-bold text-[#3f3a42] transition-colors hover:bg-[#f7f7f7] sm:flex sm:px-4 sm:text-[13px]"
-              >
-                Business enquiries
-              </a>
+              <NavPhone />
               <button
                 onClick={() => setShowLoginPage(true)}
-                className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[#c44536] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                className="flex h-[40px] cursor-pointer items-center justify-center rounded-full bg-[var(--accent)] px-[24px] py-[8px] text-[13px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)]"
               >
                 Login or Signup
               </button>

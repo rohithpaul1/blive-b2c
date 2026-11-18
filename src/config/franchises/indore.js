@@ -1,0 +1,206 @@
+// Indore franchise site: e-Sprinto Sprinto HS, one hub.
+// Specs and photos: esprinto.in product page (Nov 2026). Photos are fetched into
+// public/images/franchises/indore/ by scripts/fetch-indore-images.sh.
+// MOCK DATA: franchise name, hub, prices, stats and the testimonial are placeholders.
+import { paletteFor } from "../theme";
+
+// Accent candidates from the demo. Deep teal (the first) was chosen on 18 Nov 2026.
+export const indoreAccents = [
+  { name: "Deep teal", hex: "#0f6e6e" },
+  { name: "Saffron", hex: "#b8640f" },
+  { name: "Indigo", hex: "#3b4cca" },
+];
+
+const ACCENT = indoreAccents[0].hex;
+const IMG = "/images/franchises/indore";
+// Side-on transparent product shot for the search page stage (like Jaipur's NDuro cutout).
+const CUTOUT = `${IMG}/hs-white.webp`;
+
+export const indore = {
+  slug: "indore",
+  domains: ["indore"],
+  accent: ACCENT,
+  palette: paletteFor(ACCENT),
+  // MOCK: indoreHD aerial (watermarked, 640px). Replace with a licensed, full-size photo before launch.
+  heroImage: `${IMG}/indore-hero.webp`,
+  // Photo tile on the homepage.
+  tileImage: `${IMG}/hs-scooter.webp`,
+  // The road photo is too small to run full width, so the testimonial band uses an accent glow.
+  quoteImage: null,
+  seo: { title: "BLive NXT Indore | Electric scooter rentals" },
+  brand: "BLive NXT",
+  franchiseName: "Malwa EV Rentals",
+  city: "Indore",
+  hubAddress: "Shop 4, AB Road, near C21 Mall, Vijay Nagar, Indore 452010",
+  supportPhone: "080-4719-0022",
+  supportPhoneHref: "tel:08047190022",
+  // Franchise's own number for the top bar. Empty: the shared support line above is shown.
+  // MOCK: dummy number until the franchise sends its own.
+  navPhone: "+91 90000 00002",
+  businessEmail: "contact@blive.co.in",
+  businessEmailHref: "mailto:contact@blive.co.in?subject=Business%20enquiry%20(Indore)",
+  headline: "India's cleanest city. Ride it electric.",
+  stats: [
+    { value: "New", label: "in Indore" },
+    { value: "24/7", label: "support" },
+    { value: "₹0", label: "fuel cost" },
+  ],
+  kmPerDay: 60,
+  deposit: "₹2,000",
+  monthlySaving: "₹2,500",
+  addOns: [
+    {
+      id: "phone-kit",
+      name: "Phone holder + USB charger",
+      price: 99,
+      per: "one-time",
+      details: "A handlebar mount that keeps your delivery app in view, and a charger so your phone lasts the whole shift.",
+    },
+    {
+      id: "top-box",
+      name: "Delivery top box",
+      price: 20,
+      per: "day",
+      details: "A 45 L lockable box on the rear carrier. Fits most food and parcel orders.",
+    },
+    {
+      id: "extra-km",
+      name: "Extra 40 km a day",
+      price: 30,
+      per: "day",
+      kmBonus: 40,
+      details: "100 km a day instead of 60, for long or double shifts. Cheaper than paying for extra km.",
+    },
+    {
+      id: "rain-kit",
+      name: "Rain kit",
+      price: 149,
+      per: "one-time",
+      details: "A raincoat and a waterproof seat cover for monsoon shifts.",
+    },
+    {
+      id: "damage-cover",
+      name: "Damage cover",
+      price: 29,
+      per: "day",
+      details: "Pay nothing for minor scratches and dents during your rental.",
+    },
+  ],
+  model: {
+    name: "Sprinto HS",
+    // The search page lists only models from this brand (matched on brand or model name).
+    brand: "Esprinto",
+    cutout: CUTOUT,
+    // Large shot in the homepage model section.
+    heroShot: `${IMG}/hs-spec.webp`,
+    features: [
+      { icon: "range", label: "120 km range" },
+      { icon: "speed", label: "50 km/h" },
+      { icon: "battery", label: "60V 42Ah lithium" },
+      { icon: "charge", label: "3-4 h full charge" },
+    ],
+    specs: [
+      { value: "120 km", label: "max range" },
+      { value: "50 km/h", label: "top speed" },
+      { value: "3-4 h", label: "full charge" },
+      { value: "150 kg", label: "carrying capacity" },
+    ],
+    // Close-ups are cropped out of esprinto.in's round frames; the white scooter is a cutout on a light tile.
+    gallery: [
+      { src: `${IMG}/hs-dashboard.webp`, alt: "Sprinto HS digital dashboard", caption: "Digital dashboard" },
+      { src: `${IMG}/hs-features.webp`, alt: "Sprinto HS remote key", caption: "Remote lock and find my vehicle" },
+      { src: `${IMG}/hs-high-speed.webp`, alt: "Sprinto HS headlamp", caption: "LED headlamp" },
+      { src: `${IMG}/hs-battery.webp`, alt: "Sprinto HS ignition and battery lock", caption: "60V 42Ah lithium battery" },
+      { src: `${IMG}/hs-scooter.webp`, alt: "Sprinto HS in Denim Blue on the road", caption: "Up to 120 km on a charge" },
+    ],
+    // Full spec sheet from esprinto.in, for the model page and the admin.
+    specSheet: {
+      battery: "Lithium-ion NMC, 60V 30Ah / 42Ah",
+      motor: "800W BLDC hub motor",
+      topSpeed: "50 km/h",
+      maxRange: "120 km",
+      chargingTime: "3-4 h",
+      kerbWeight: "78 kg",
+      carryingCapacity: "150 kg",
+      brakes: "Front and rear disc",
+      tyres: '10"',
+      wheelbase: "1325 mm",
+      dimensions: "1820 x 700 x 1100 mm",
+      gradeability: "10 degrees",
+      colours: ["Ruby Red", "Denim Blue", "Pearl White"],
+      features: ["Remote central lock", "Find my vehicle", "Part failure alerts", "Reverse mode"],
+    },
+  },
+  plans: [
+    {
+      id: "daily",
+      name: "Daily",
+      sub: "up to 7 days",
+      tags: [{ label: "Maintenance" }, { label: "24/7 support" }],
+      image: `${IMG}/hs-red.webp`,
+      imageAlt: "Sprinto HS in Ruby Red",
+      perDay: "₹280",
+      total: "₹560",
+      totalNote: "for 2 days",
+      pickerNote: "2 days",
+      cta: "Book daily",
+    },
+    {
+      id: "weekly",
+      name: "Weekly",
+      sub: "7 days",
+      tags: [{ label: "Save 10%", accent: true }, { label: "24/7 support" }],
+      image: `${IMG}/hs-blue.webp`,
+      imageAlt: "Sprinto HS in Denim Blue",
+      perDay: "₹250",
+      total: "₹1,750",
+      totalNote: "for 7 days",
+      pickerNote: "7 days · save 10%",
+      cta: "Book weekly",
+    },
+    {
+      id: "monthly",
+      name: "Subscription",
+      sub: "monthly",
+      tags: [{ label: "Save 50%", accent: true }, { label: "24/7 support" }],
+      image: `${IMG}/hs-white.webp`,
+      imageAlt: "Sprinto HS in Pearl White",
+      perDay: "₹140",
+      total: "₹4,200",
+      totalNote: "a month",
+      pickerNote: "30 days, renews monthly · save 50%",
+      cta: "Subscribe",
+      best: true,
+    },
+  ],
+  steps: [
+    { title: "Pick your dates", body: "Choose pickup and return times that suit your day, down to the half hour." },
+    { title: "Choose your plan", body: "Ride by the day, save 10% by the week, or subscribe and save 50%." },
+    { title: "Pay in a minute", body: "One secure online payment and your scooter is held for you." },
+    { title: "Get verified online", body: "Upload your licence and Aadhaar from your phone. No paperwork at the hub." },
+    { title: "Grab the keys and go", body: "Pick up a ready-to-ride Sprinto HS at the Vijay Nagar hub and head out." },
+  ],
+  moreImages: {
+    subscribe: { src: `${IMG}/hs-red.webp`, alt: "Sprinto HS in Ruby Red" },
+    team: { src: `${IMG}/hs-blue.webp`, alt: "Sprinto HS in Denim Blue" },
+    help: { src: `${IMG}/hs-spec.webp`, alt: "Sprinto HS in Pearl White" },
+  },
+  subscribePerDay: "₹140",
+  quote: {
+    text: "Booked on my phone, picked it up the same evening. My daily delivery shifts cost far less than on petrol.",
+    name: "Rahul M.",
+    meta: "Delivery rider, Vijay Nagar",
+  },
+  faqs: [
+    {
+      q: "What's the difference between fixed rental and subscription?",
+      a: "Fixed rental is for a set number of days or weeks. A subscription runs month to month at the lowest daily price.",
+    },
+    { q: "What documents do I need?", a: "A valid driving licence and Aadhaar, uploaded online." },
+    {
+      q: "Is there a security deposit?",
+      a: "Yes, ₹2,000. It's fully refundable and comes back to you within 5 working days of returning the scooter.",
+    },
+    { q: "Where do I pick up the scooter?", a: "At our Vijay Nagar hub on AB Road, near C21 Mall." },
+  ],
+};

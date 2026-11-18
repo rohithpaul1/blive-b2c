@@ -164,7 +164,7 @@ export default function DateTimePicker({
                 onClick={() => handleDateClick(day)}
                 disabled={isPast}
                 className={`relative min-h-[40px] cursor-pointer rounded-[8px] p-2 text-sm transition-colors aspect-square
-                  ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[#c4453629]" : isPast ? "cursor-not-allowed bg-transparent text-[#c7c4c9]" : "bg-[#F1F2F447] hover:bg-gray-200"}
+                  ${isSelected || isEnd ? "bg-[#484848] text-white" : inRange ? "bg-[color-mix(in_srgb,var(--accent)_16%,transparent)]" : isPast ? "cursor-not-allowed bg-transparent text-[#c7c4c9]" : "bg-[#F1F2F447] hover:bg-gray-200"}
                 `}
               >
                 {day.getDate()}

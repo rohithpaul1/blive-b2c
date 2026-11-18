@@ -167,7 +167,7 @@ const durationLabel = (months) => `About ${months} ${Number(months) === 1 ? "mon
 
 const segment = (active) =>
   `flex min-h-[56px] items-center gap-[10px] px-[14px] text-left text-[16px] font-medium text-[#191919] transition-colors hover:bg-[#fafafa] ${
-    active ? "relative z-[1] rounded-[8px] outline outline-2 -outline-offset-2 outline-[#c44536]" : ""
+    active ? "relative z-[1] rounded-[8px] outline outline-2 -outline-offset-2 outline-[var(--accent)]" : ""
   }`;
 
 export default function HubDateTimeFields({

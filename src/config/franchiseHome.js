@@ -1,156 +1,45 @@
-// Homepage content for a single-franchise site (one model, one hub).
-// MOCK DATA: every value below is a placeholder until the franchise sends real numbers.
-export const franchiseHome = {
-  brand: "BLive NXT",
-  franchiseName: "Pink City EV Rentals",
-  city: "Jaipur",
-  hubAddress: "Shop 12, MI Road, near Panch Batti, Jaipur 302001",
-  supportPhone: "080-4719-0022",
-  supportPhoneHref: "tel:08047190022",
-  // Business rentals are handled by contact for now (no self-serve business flow).
-  businessEmail: "contact@blive.co.in",
-  businessEmailHref: "mailto:contact@blive.co.in?subject=Business%20enquiry",
-  headline: "Skip the petrol pump. Ride electric in Jaipur.",
-  stats: [
-    { value: "12,000+", label: "rides" },
-    { value: "3,500+", label: "riders" },
-    { value: "4.7", label: "rating" },
-  ],
-  kmPerDay: 60,
-  deposit: "₹2,000",
-  monthlySaving: "₹2,500",
-  // Add-ons on the search page, picked for delivery riders on long shifts.
-  // MOCK prices. Shown on screen and paid at the hub until they exist in the admin.
-  addOns: [
-    {
-      id: "phone-kit",
-      name: "Phone holder + USB charger",
-      price: 99,
-      per: "one-time",
-      details: "A handlebar mount that keeps your delivery app in view, and a charger so your phone lasts the whole shift.",
-    },
-    {
-      id: "top-box",
-      name: "Delivery top box",
-      price: 20,
-      per: "day",
-      details: "A 45 L lockable box on the rear carrier. Fits most food and parcel orders.",
-    },
-    {
-      id: "extra-km",
-      name: "Extra 40 km a day",
-      price: 30,
-      per: "day",
-      kmBonus: 40,
-      details: "100 km a day instead of 60, for long or double shifts. Cheaper than paying for extra km.",
-    },
-    {
-      id: "rain-kit",
-      name: "Rain kit",
-      price: 149,
-      per: "one-time",
-      details: "A raincoat and a waterproof seat cover for monsoon shifts.",
-    },
-    {
-      id: "damage-cover",
-      name: "Damage cover",
-      price: 29,
-      per: "day",
-      details: "Pay nothing for minor scratches and dents during your rental.",
-    },
-  ],
-  model: {
-    name: "Lectrix NDuro 2.0",
-    // The search page lists only models from this brand (matched on brand or model name).
-    brand: "Lectrix",
-    // Side-on transparent PNG of the model, shown on the search page stage.
-    cutout: "/images/home/nduro-side.png",
-    // Spec row on the search page stage: keep it to the four that matter most.
-    features: [
-      { icon: "range", label: "90 km range" },
-      { icon: "speed", label: "65 km/h" },
-      { icon: "battery", label: "Swappable battery" },
-      { icon: "storage", label: "42 L storage" },
-    ],
-    specs: [
-      { value: "90 km", label: "range per battery" },
-      { value: "65 km/h", label: "top speed" },
-      { value: "42 L", label: "under-seat storage" },
-      { value: "3 modes", label: "Eco, Normal, Sport" },
-    ],
-    gallery: [
-      { src: "/images/home/nduro-storage.webp", alt: "Under-seat storage", caption: "42 L under-seat storage" },
-      { src: "/images/home/nduro-right-switch.webp", alt: "Right handlebar switches", caption: "Ride modes and reverse" },
-      { src: "/images/home/nduro-left-switch.webp", alt: "Left handlebar switches", caption: "LED projector headlamp" },
-      { src: "/images/home/nduro-ignition.webp", alt: "Ignition knob", caption: "Anti-theft system" },
-      { src: "/images/home/nduro-floor.webp", alt: "Flat floorboard", caption: "Flat floorboard" },
-      { src: "/images/home/nduro-mirror.webp", alt: "Handlebar and mirror", caption: "Bluetooth and navigation" },
-    ],
-  },
-  plans: [
-    {
-      id: "daily",
-      name: "Daily",
-      sub: "up to 7 days",
-      tags: [{ label: "Maintenance" }, { label: "24/7 support" }],
-      image: "/images/home/nduro-mirror.webp",
-      imageAlt: "Lectrix NDuro handlebar and mirror",
-      perDay: "₹300",
-      total: "₹600",
-      totalNote: "for 2 days",
-      pickerNote: "2 days",
-      cta: "Book daily",
-    },
-    {
-      id: "weekly",
-      name: "Weekly",
-      sub: "7 days",
-      tags: [{ label: "Save 10%", accent: true }, { label: "24/7 support" }],
-      image: "/images/home/nduro-right-switch.webp",
-      imageAlt: "Lectrix NDuro ride mode switches",
-      perDay: "₹270",
-      total: "₹1,890",
-      totalNote: "for 7 days",
-      pickerNote: "7 days · save 10%",
-      cta: "Book weekly",
-    },
-    {
-      id: "monthly",
-      name: "Subscription",
-      sub: "monthly",
-      tags: [{ label: "Save 50%", accent: true }, { label: "24/7 support" }],
-      image: "/images/home/nduro-storage.webp",
-      imageAlt: "Lectrix NDuro under-seat storage",
-      perDay: "₹150",
-      total: "₹4,500",
-      totalNote: "a month",
-      pickerNote: "30 days, renews monthly · save 50%",
-      cta: "Subscribe",
-      best: true,
-    },
-  ],
-  steps: [
-    { title: "Pick your dates", body: "Choose pickup and return times that suit your day, down to the half hour." },
-    { title: "Choose your plan", body: "Ride by the day, save 10% by the week, or subscribe and save 50%." },
-    { title: "Pay in a minute", body: "One secure online payment and your scooter is held for you." },
-    { title: "Get verified online", body: "Upload your licence and Aadhaar from your phone. No paperwork at the hub." },
-    { title: "Grab the keys and go", body: "Pick up a ready-to-ride NDuro at the hub and head out." },
-  ],
-  quote: {
-    text: "First time with an electric vehicle. Customer service called to check everything was okay after the first week. Saves money on petrol.",
-    name: "Priya S.",
-    meta: "4.8 ★ · First-time EV rider",
-  },
-  faqs: [
-    {
-      q: "What's the difference between fixed rental and subscription?",
-      a: "Fixed rental is for a set number of days or weeks. A subscription runs month to month at the lowest daily price.",
-    },
-    { q: "What documents do I need?", a: "A valid driving licence and Aadhaar, uploaded online." },
-    {
-      q: "Is there a security deposit?",
-      a: "Yes, ₹2,000. It's fully refundable and comes back to you within 5 working days of returning the scooter.",
-    },
-    { q: "Can I extend my rental?", a: "Yes, from My Bookings, before your return time." },
-  ],
+// Which franchise this storefront is serving. One build serves every franchise:
+//   1. ?franchise=<slug> in the URL (kept for the browser session) - for demos
+//   2. VITE_FRANCHISE at build time - one Vercel project per franchise
+//   3. the hostname (e.g. any host containing "indore")
+//   4. Jaipur, the default
+// Per-franchise content lives in ./franchises/<slug>.js.
+import { jaipur } from "./franchises/jaipur";
+import { indore } from "./franchises/indore";
+
+export const franchises = { jaipur, indore };
+export const DEFAULT_FRANCHISE = "jaipur";
+
+const readSession = (key) => {
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
 };
+const writeSession = (key, value) => {
+  try {
+    window.sessionStorage.setItem(key, value);
+  } catch {
+    /* storage can be blocked; the URL param still works for this page */
+  }
+};
+
+const resolveSlug = () => {
+  if (typeof window === "undefined") return import.meta.env.VITE_FRANCHISE || DEFAULT_FRANCHISE;
+  const fromUrl = new URLSearchParams(window.location.search).get("franchise");
+  if (fromUrl && franchises[fromUrl]) {
+    writeSession("franchise", fromUrl);
+    return fromUrl;
+  }
+  const fromSession = readSession("franchise");
+  if (fromSession && franchises[fromSession]) return fromSession;
+  const fromEnv = import.meta.env.VITE_FRANCHISE;
+  if (fromEnv && franchises[fromEnv]) return fromEnv;
+  const host = window.location.hostname.toLowerCase();
+  const byHost = Object.values(franchises).find((f) => f.domains.some((d) => host.includes(d)));
+  return byHost?.slug ?? DEFAULT_FRANCHISE;
+};
+
+export const franchiseSlug = resolveSlug();
+export const franchiseHome = franchises[franchiseSlug];

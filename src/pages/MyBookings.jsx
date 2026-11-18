@@ -225,9 +225,9 @@ const MyBookings = () => {
             </div>
             <div className="flex flex-col pt-[20px]">
                 {wallet?.showInHeader && wallet.activeSubscription && (
-                    <div className="mx-auto mb-5 grid w-[calc(100%_-_2rem)] max-w-[1040px] gap-4 rounded-[20px] border border-[#f0d9d2] bg-[#fdf6f4] p-5 sm:w-[calc(100%_-_3rem)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+                    <div className="mx-auto mb-5 grid w-[calc(100%_-_2rem)] max-w-[1040px] gap-4 rounded-[20px] border border-[#f0d9d2] bg-[var(--accent-tint-5)] p-5 sm:w-[calc(100%_-_3rem)] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
                         <div className="flex min-w-0 items-start gap-4">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fbe4dc] text-[#a8392b]">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent-tint-16)] text-[var(--accent-hover)]">
                                 <WalletCards size={22} aria-hidden="true" />
                             </div>
                             <div className="min-w-0">
@@ -244,7 +244,7 @@ const MyBookings = () => {
                         <button
                             type="button"
                             onClick={() => navigate("/wallet")}
-                            className="min-h-11 rounded-full bg-[#c44536] px-6 text-sm font-bold text-white transition-colors hover:bg-[#a8392b]"
+                            className="min-h-11 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white transition-colors hover:bg-[var(--accent-hover)]"
                         >
                             Add money
                         </button>
@@ -252,10 +252,10 @@ const MyBookings = () => {
                 )}
                 <div className="header-shadow overflow-x-auto px-4 sm:px-6">
                     <div className="mx-auto flex min-w-max max-w-[1040px] items-center gap-x-[28px] sm:gap-x-[35px]">
-                    <button onClick={() => setTab("Ongoing")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Ongoing" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Ongoing</button>
-                    <button onClick={() => setTab("Upcoming")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Upcoming" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Upcoming</button>
-                    <button onClick={() => setTab("Past")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Past" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Past</button>
-                    <button onClick={() => setTab("Cancelled")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Cancelled" ? "border-[#c44536] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Cancelled</button>
+                    <button onClick={() => setTab("Ongoing")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Ongoing" ? "border-[var(--accent)] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Ongoing</button>
+                    <button onClick={() => setTab("Upcoming")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Upcoming" ? "border-[var(--accent)] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Upcoming</button>
+                    <button onClick={() => setTab("Past")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Past" ? "border-[var(--accent)] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Past</button>
+                    <button onClick={() => setTab("Cancelled")} className={`min-h-11 cursor-pointer border-b-[2px] py-[8px] text-[16px] font-medium transition-all duration-300 sm:text-[18px] ${tab === "Cancelled" ? "border-[var(--accent)] text-[#1c1a22] font-bold" : "text-[#717171] border-transparent"}`}>Cancelled</button>
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-y-[24px] px-4 py-[36px] sm:px-6 sm:py-[50px]">
@@ -267,7 +267,7 @@ const MyBookings = () => {
                             <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">{error}</p>
                             <button 
                                 onClick={fetchBookingHistory}
-                                className="mt-4 min-h-11 rounded-full bg-[#c44536] px-6 py-2 font-semibold text-white hover:bg-[#a8392b]"
+                                className="mt-4 min-h-11 rounded-full bg-[var(--accent)] px-6 py-2 font-semibold text-white hover:bg-[var(--accent-hover)]"
                             >
                                 Retry
                             </button>

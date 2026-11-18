@@ -7,6 +7,7 @@ import { FaFacebook } from "react-icons/fa";
 import { FaPhone } from "react-icons/fa";
 import TermsAndConditionsModal from "../components/TermsAndConditionsModal";
 import PrivacyPolicyModal from "../components/PrivacyPolicyModal";
+import { franchiseHome } from "../config/franchiseHome";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -16,8 +17,8 @@ const Footer = () => {
   return (
     <footer className="flex min-h-[96px] flex-col items-center justify-between gap-[22px] bg-[#0F0F0F] px-[clamp(20px,8vw,120px)] py-[26px] md:flex-row">
       <div className="flex items-center gap-x-[10px] text-[15px] font-medium text-white md:text-[13px]">
-        <a className="text-white" href="tel:08047190022">
-          080-4719-0022
+        <a className="text-white" href={franchiseHome.supportPhoneHref}>
+          {franchiseHome.supportPhone}
         </a>{" "}
         <FaPhone className="w-[16px]" />
       </div>

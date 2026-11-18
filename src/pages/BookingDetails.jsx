@@ -501,7 +501,7 @@ const BookingDetails = () => {
                     <p className="mt-[8px] font-medium text-[14px] text-[#6a6a6a]">{error}</p>
                     <button 
                         onClick={fetchBookingDetails}
-                        className="mt-4 min-h-[44px] rounded-[10px] bg-[#c44536] px-5 font-bold text-white hover:bg-[#a8392b]"
+                        className="mt-4 min-h-[44px] rounded-[10px] bg-[var(--accent)] px-5 font-bold text-white hover:bg-[var(--accent-hover)]"
                     >
                         Retry
                     </button>
@@ -534,7 +534,7 @@ const BookingDetails = () => {
             {(() => {
                 const isSub = data.rentalMode === 'subscription';
                 const tone = {
-                    Upcoming: "bg-[#c44536] text-white",
+                    Upcoming: "bg-[var(--accent)] text-white",
                     Ongoing: "bg-[#1f8a4c] text-white",
                     Past: "bg-white/[0.18] text-white",
                     Cancelled: "bg-white/[0.18] text-white",
@@ -636,7 +636,7 @@ const BookingDetails = () => {
                                     <h2 className={sectionTitle}>{data.delivery ? 'Delivery' : 'Pickup hub'}</h2>
                                     <div className="flex flex-col gap-[14px] rounded-[14px] border border-[#e3e0e8] p-[18px] sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex min-w-0 items-start gap-[12px]">
-                                            <span className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-[#fdf0ec] text-[#c44536]">
+                                            <span className="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-[var(--accent-tint-9)] text-[var(--accent)]">
                                                 <MapPin className="size-[19px]" aria-hidden="true" />
                                             </span>
                                             <p className="m-0 min-w-0 text-[14px] leading-[1.5] text-[#5a5562]">
@@ -653,13 +653,13 @@ const BookingDetails = () => {
                                     </div>
                                     <div className="flex flex-wrap gap-x-[22px] gap-y-[8px] text-[14px]">
                                         {data.hubPhone && (
-                                            <a href={`tel:${String(data.hubPhone).replace(/[^\d+]/g, "")}`} className="inline-flex min-h-[40px] items-center gap-[8px] font-semibold text-[#1c1a22] hover:text-[#c44536]">
+                                            <a href={`tel:${String(data.hubPhone).replace(/[^\d+]/g, "")}`} className="inline-flex min-h-[40px] items-center gap-[8px] font-semibold text-[#1c1a22] hover:text-[var(--accent)]">
                                                 <Phone className="size-[16px]" aria-hidden="true" />
                                                 {data.hubPhone}
                                             </a>
                                         )}
                                         {data.hubEmail && (
-                                            <a href={`mailto:${data.hubEmail}`} className="inline-flex min-h-[40px] items-center gap-[8px] font-semibold text-[#1c1a22] hover:text-[#c44536]">
+                                            <a href={`mailto:${data.hubEmail}`} className="inline-flex min-h-[40px] items-center gap-[8px] font-semibold text-[#1c1a22] hover:text-[var(--accent)]">
                                                 <Mail className="size-[16px]" aria-hidden="true" />
                                                 {data.hubEmail}
                                             </a>
@@ -701,7 +701,7 @@ const BookingDetails = () => {
                                                 type="button"
                                                 onClick={uploadDocuments}
                                                 disabled={isUploadingDocuments}
-                                                className="min-h-[48px] justify-self-start rounded-[10px] bg-[#c44536] px-[24px] text-[15px] font-bold text-white transition-colors hover:bg-[#a8392b] disabled:cursor-not-allowed disabled:bg-[#d9d4d2]"
+                                                className="min-h-[48px] justify-self-start rounded-[10px] bg-[var(--accent)] px-[24px] text-[15px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:bg-[#d9d4d2]"
                                             >
                                                 {isUploadingDocuments ? "Saving…" : "Save documents"}
                                             </button>
@@ -742,7 +742,7 @@ const BookingDetails = () => {
                                             {isSub ? 'Wallet funded' : 'Paid'}
                                         </span>
                                     ) : (
-                                        <span className="mt-[8px] inline-flex items-center gap-[6px] rounded-full bg-[#fdf0ec] px-[10px] py-[4px] text-[13px] font-semibold text-[#a8392b]">
+                                        <span className="mt-[8px] inline-flex items-center gap-[6px] rounded-full bg-[var(--accent-tint-9)] px-[10px] py-[4px] text-[13px] font-semibold text-[var(--accent-hover)]">
                                             <Clock className="size-[14px]" aria-hidden="true" />
                                             Payment pending
                                         </span>
@@ -830,7 +830,7 @@ const BookingDetails = () => {
                         {/* Close Button */}
                         <button
                             onClick={() => setShowSuccessModal(false)}
-                            className="min-h-[44px] rounded-[10px] bg-[#c44536] px-[32px] text-[14px] font-bold text-white transition-colors hover:bg-[#a8392b]"
+                            className="min-h-[44px] rounded-[10px] bg-[var(--accent)] px-[32px] text-[14px] font-bold text-white transition-colors hover:bg-[var(--accent-hover)]"
                         >
                             Continue
                         </button>

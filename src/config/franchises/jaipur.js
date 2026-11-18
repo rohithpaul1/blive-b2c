@@ -1,0 +1,186 @@
+// Jaipur franchise site: Lectrix NDuro 2.0, one hub.
+// MOCK DATA: every value below is a placeholder until the franchise sends real numbers.
+export const jaipur = {
+  slug: "jaipur",
+  // Hostnames that open this franchise's site (substring match).
+  domains: ["jaipur"],
+  // Brand accent. Jaipur keeps the exact terracotta palette it shipped with.
+  accent: "#c44536",
+  palette: {
+    "--accent": "#c44536",
+    "--accent-hover": "#a8392b",
+    "--accent-tint-5": "#fdf6f4",
+    "--accent-tint-9": "#fdf0ec",
+    "--accent-tint-10": "#fbeee9",
+    "--accent-tint-13": "#fde8e1",
+    "--accent-tint-16": "#fbe4dc",
+    "--accent-tint-35": "#f0c2b5",
+    "--accent-tint-40": "#f4b9a8",
+    "--accent-tint-48": "#e9a998",
+  },
+  heroImage: "/images/home/jaipur.webp",
+  tileImage: "/images/home/nduro-floor.webp",
+  seo: { title: "BLive NXT Jaipur | Electric scooter rentals" },
+  brand: "BLive NXT",
+  franchiseName: "Pink City EV Rentals",
+  city: "Jaipur",
+  hubAddress: "Shop 12, MI Road, near Panch Batti, Jaipur 302001",
+  supportPhone: "080-4719-0022",
+  supportPhoneHref: "tel:08047190022",
+  // Franchise's own number for the top bar. Empty: the shared support line above is shown.
+  // MOCK: dummy number until the franchise sends its own.
+  navPhone: "+91 90000 00001",
+  // Business rentals are handled by contact for now (no self-serve business flow).
+  businessEmail: "contact@blive.co.in",
+  businessEmailHref: "mailto:contact@blive.co.in?subject=Business%20enquiry",
+  headline: "Skip the petrol pump. Ride electric in Jaipur.",
+  stats: [
+    { value: "12,000+", label: "rides" },
+    { value: "3,500+", label: "riders" },
+    { value: "4.7", label: "rating" },
+  ],
+  kmPerDay: 60,
+  deposit: "₹2,000",
+  monthlySaving: "₹2,500",
+  // Add-ons on the search page, picked for delivery riders on long shifts.
+  // MOCK prices. Shown on screen and paid at the hub until they exist in the admin.
+  addOns: [
+    {
+      id: "phone-kit",
+      name: "Phone holder + USB charger",
+      price: 99,
+      per: "one-time",
+      details: "A handlebar mount that keeps your delivery app in view, and a charger so your phone lasts the whole shift.",
+    },
+    {
+      id: "top-box",
+      name: "Delivery top box",
+      price: 20,
+      per: "day",
+      details: "A 45 L lockable box on the rear carrier. Fits most food and parcel orders.",
+    },
+    {
+      id: "extra-km",
+      name: "Extra 40 km a day",
+      price: 30,
+      per: "day",
+      kmBonus: 40,
+      details: "100 km a day instead of 60, for long or double shifts. Cheaper than paying for extra km.",
+    },
+    {
+      id: "rain-kit",
+      name: "Rain kit",
+      price: 149,
+      per: "one-time",
+      details: "A raincoat and a waterproof seat cover for monsoon shifts.",
+    },
+    {
+      id: "damage-cover",
+      name: "Damage cover",
+      price: 29,
+      per: "day",
+      details: "Pay nothing for minor scratches and dents during your rental.",
+    },
+  ],
+  model: {
+    name: "Lectrix NDuro 2.0",
+    // The search page lists only models from this brand (matched on brand or model name).
+    brand: "Lectrix",
+    // Side-on transparent PNG of the model, shown on the search page stage.
+    cutout: "/images/home/nduro-side.png",
+    // Spec row on the search page stage: keep it to the four that matter most.
+    features: [
+      { icon: "range", label: "90 km range" },
+      { icon: "speed", label: "65 km/h" },
+      { icon: "battery", label: "Swappable battery" },
+      { icon: "storage", label: "42 L storage" },
+    ],
+    specs: [
+      { value: "90 km", label: "range per battery" },
+      { value: "65 km/h", label: "top speed" },
+      { value: "42 L", label: "under-seat storage" },
+      { value: "3 modes", label: "Eco, Normal, Sport" },
+    ],
+    gallery: [
+      { src: "/images/home/nduro-storage.webp", alt: "Under-seat storage", caption: "42 L under-seat storage" },
+      { src: "/images/home/nduro-right-switch.webp", alt: "Right handlebar switches", caption: "Ride modes and reverse" },
+      { src: "/images/home/nduro-left-switch.webp", alt: "Left handlebar switches", caption: "LED projector headlamp" },
+      { src: "/images/home/nduro-ignition.webp", alt: "Ignition knob", caption: "Anti-theft system" },
+      { src: "/images/home/nduro-floor.webp", alt: "Flat floorboard", caption: "Flat floorboard" },
+      { src: "/images/home/nduro-mirror.webp", alt: "Handlebar and mirror", caption: "Bluetooth and navigation" },
+    ],
+  },
+  plans: [
+    {
+      id: "daily",
+      name: "Daily",
+      sub: "up to 7 days",
+      tags: [{ label: "Maintenance" }, { label: "24/7 support" }],
+      image: "/images/home/nduro-mirror.webp",
+      imageAlt: "Lectrix NDuro handlebar and mirror",
+      perDay: "₹300",
+      total: "₹600",
+      totalNote: "for 2 days",
+      pickerNote: "2 days",
+      cta: "Book daily",
+    },
+    {
+      id: "weekly",
+      name: "Weekly",
+      sub: "7 days",
+      tags: [{ label: "Save 10%", accent: true }, { label: "24/7 support" }],
+      image: "/images/home/nduro-right-switch.webp",
+      imageAlt: "Lectrix NDuro ride mode switches",
+      perDay: "₹270",
+      total: "₹1,890",
+      totalNote: "for 7 days",
+      pickerNote: "7 days · save 10%",
+      cta: "Book weekly",
+    },
+    {
+      id: "monthly",
+      name: "Subscription",
+      sub: "monthly",
+      tags: [{ label: "Save 50%", accent: true }, { label: "24/7 support" }],
+      image: "/images/home/nduro-storage.webp",
+      imageAlt: "Lectrix NDuro under-seat storage",
+      perDay: "₹150",
+      total: "₹4,500",
+      totalNote: "a month",
+      pickerNote: "30 days, renews monthly · save 50%",
+      cta: "Subscribe",
+      best: true,
+    },
+  ],
+  steps: [
+    { title: "Pick your dates", body: "Choose pickup and return times that suit your day, down to the half hour." },
+    { title: "Choose your plan", body: "Ride by the day, save 10% by the week, or subscribe and save 50%." },
+    { title: "Pay in a minute", body: "One secure online payment and your scooter is held for you." },
+    { title: "Get verified online", body: "Upload your licence and Aadhaar from your phone. No paperwork at the hub." },
+    { title: "Grab the keys and go", body: "Pick up a ready-to-ride NDuro at the hub and head out." },
+  ],
+  // Cards in the "More BLive NXT" band near the bottom of the homepage.
+  moreImages: {
+    subscribe: { src: "/images/home/nduro-storage.webp", alt: "Lectrix NDuro under-seat storage" },
+    team: { src: "/images/home/nduro-floor.webp", alt: "Lectrix NDuro floorboard" },
+    help: { src: "/images/home/nduro-mirror.webp", alt: "Lectrix NDuro handlebar" },
+  },
+  subscribePerDay: "₹150",
+  quote: {
+    text: "First time with an electric vehicle. Customer service called to check everything was okay after the first week. Saves money on petrol.",
+    name: "Priya S.",
+    meta: "4.8 ★ · First-time EV rider",
+  },
+  faqs: [
+    {
+      q: "What's the difference between fixed rental and subscription?",
+      a: "Fixed rental is for a set number of days or weeks. A subscription runs month to month at the lowest daily price.",
+    },
+    { q: "What documents do I need?", a: "A valid driving licence and Aadhaar, uploaded online." },
+    {
+      q: "Is there a security deposit?",
+      a: "Yes, ₹2,000. It's fully refundable and comes back to you within 5 working days of returning the scooter.",
+    },
+    { q: "Can I extend my rental?", a: "Yes, from My Bookings, before your return time." },
+  ],
+};

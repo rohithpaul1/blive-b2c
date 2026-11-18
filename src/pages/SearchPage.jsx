@@ -15,6 +15,7 @@ import { RENTAL_MODES, rentalPlanFor } from "../utils/subscription";
 import { formatDateTimeForAPI } from "../hooks/useRentNow";
 
 const VEHICLE_IMAGES = {
+  [franchiseHome.model.brand]: franchiseHome.model.cutout,
   Lectrix: "/images/home/nduro-side.png",
   Ather: "/images/Scooter (1).png",
   Ola: "/images/Scooter (3).png",

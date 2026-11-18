@@ -5,7 +5,7 @@ import TermsAndConditionsModal from "../../components/TermsAndConditionsModal";
 import PrivacyPolicyModal from "../../components/PrivacyPolicyModal";
 
 export const RiderQuote = () => (
-  <section className="home-tile-bike px-[clamp(16px,5vw,80px)] py-[88px] text-white md:py-[120px]">
+  <section className="home-quote-bg px-[clamp(16px,5vw,80px)] py-[88px] text-white md:py-[120px]">
     <div className="mx-auto max-w-[1000px] text-center">
       <blockquote className="m-0 text-[clamp(22px,3vw,40px)] font-medium leading-[1.3]">"{c.quote.text}"</blockquote>
       <p className="m-0 mt-6 text-[16px] font-bold">
@@ -45,27 +45,27 @@ export const MoreBlive = () => {
         <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <MoreCard
             title="Subscribe. Ride all month."
-            body="Your NDuro for ₹150 a day, billed monthly."
+            body={`Your ${c.model.name} for ${c.subscribePerDay} a day, billed monthly.`}
             cta="Learn more"
             href="#plans"
-            image="/images/home/nduro-storage.webp"
-            alt="Lectrix NDuro under-seat storage"
+            image={c.moreImages.subscribe.src}
+            alt={c.moreImages.subscribe.alt}
           />
           <MoreCard
             title="Scooters for your team"
             body="Delivery and field teams can rent in bulk. Write to us for fleet pricing."
             cta="Email us"
             href={c.businessEmailHref}
-            image="/images/home/nduro-floor.webp"
-            alt="Lectrix NDuro floorboard"
+            image={c.moreImages.team.src}
+            alt={c.moreImages.team.alt}
           />
           <MoreCard
             title="Help, day or night"
             body="24/7 support on every ride, wherever you are."
             cta={`Call ${c.supportPhone}`}
             href={c.supportPhoneHref}
-            image="/images/home/nduro-mirror.webp"
-            alt="Lectrix NDuro handlebar"
+            image={c.moreImages.help.src}
+            alt={c.moreImages.help.alt}
           />
         </div>
       </div>

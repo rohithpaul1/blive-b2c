@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { faqData } from "./faqData";
 import AccordionItem from "../components/AccordionItem";
 import Navbar from "../sections/Navbar";
+import { franchiseHome } from "../config/franchiseHome";
 
 const HelpCenter = () => {
   // pick first category & its first tab
@@ -43,7 +44,7 @@ const HelpCenter = () => {
                     aria-current={active ? "true" : undefined}
                     className={`min-h-[44px] whitespace-nowrap rounded-full border px-[16px] text-[15px] font-semibold md:w-full md:whitespace-normal md:rounded-none md:rounded-r-md md:border-0 md:border-l-4 md:py-4 md:pl-4 md:text-left md:text-[17px] ${
                       active
-                        ? "border-[#222222] bg-[#222222] text-white md:border-[#c44536] md:bg-[#fdf0ec] md:text-[#c44536]"
+                        ? "border-[#222222] bg-[#222222] text-white md:border-[var(--accent)] md:bg-[var(--accent-tint-9)] md:text-[var(--accent)]"
                         : "border-[#dddddd] text-[#3A3A3A] md:border-transparent"
                     }`}
                   >
@@ -68,7 +69,7 @@ const HelpCenter = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`flex h-[40px] shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-[16px] text-[14px] font-medium md:h-[44px] ${
                   activeTab === tab
-                    ? "border-[#c44536] bg-[#c44536] text-white"
+                    ? "border-[var(--accent)] bg-[var(--accent)] text-white"
                     : "border-[#C0C0C0] bg-transparent text-[#3A3A3A]"
                 }`}
               >
@@ -106,10 +107,10 @@ const HelpCenter = () => {
           </div>
         </div>
         <a
-          href="tel:08047190022"
+          href={franchiseHome.supportPhoneHref}
           className="flex h-[48px] shrink-0 items-center justify-center rounded-[24px] border border-[#222222] px-[24px] text-[15px] font-bold text-[#222222]"
         >
-          Call 080-4719-0022
+          Call {franchiseHome.supportPhone}
         </a>
       </div>
     </div>

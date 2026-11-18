@@ -20,6 +20,7 @@ import BusinessPortalAccess from './pages/BusinessPortalAccess';
 import BusinessPortal from './pages/BusinessPortal';
 import PayLink from './pages/PayLink';
 import MobileTabBar from './components/MobileTabBar';
+import AccentSwatches from './components/AccentSwatches';
 
 // Every route change starts at the top of the page, unless it targets an #anchor.
 const ScrollToTop = () => {
@@ -50,6 +51,7 @@ const App = () => {
           containerStyle={isPhone ? { top: 84 } : undefined}
           reverseOrder={false}
         />
+        <AccentSwatches />
         <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/search" element={<SearchPage />} />

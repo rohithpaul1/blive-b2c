@@ -2,12 +2,12 @@ import { franchiseHome as c } from "../../config/franchiseHome";
 import { scrollToSearch } from "./scrollToSearch";
 
 export const SubscribeBand = () => (
-  <section className="flex flex-col items-center justify-center bg-[#c44536] px-[clamp(16px,5vw,80px)] py-[64px] text-center text-white md:py-[80px]">
+  <section className="flex flex-col items-center justify-center bg-[var(--accent)] px-[clamp(16px,5vw,80px)] py-[64px] text-center text-white md:py-[80px]">
     <h2 className="font-display m-0 max-w-[1000px] text-[clamp(40px,6vw,84px)] leading-[0.95]">
       Subscribe and save 50%
     </h2>
-    <p className="m-0 mt-[14px] max-w-[720px] text-[17px] font-semibold text-[#fde8e1]">
-      Your daily scooter for ₹150 a day, billed monthly. Maintenance included.
+    <p className="m-0 mt-[14px] max-w-[720px] text-[17px] font-semibold text-[var(--accent-tint-13)]">
+      Your daily scooter for {c.subscribePerDay} a day, billed monthly. Maintenance included.
     </p>
   </section>
 );
@@ -15,7 +15,7 @@ export const SubscribeBand = () => (
 const PlanCard = ({ plan }) => (
   <article
     className={`home-spot relative flex flex-col overflow-hidden rounded-[20px] text-white ${
-      plan.best ? "shadow-[0_0_0_3px_#c44536]" : ""
+      plan.best ? "shadow-[0_0_0_3px_var(--accent)]" : ""
     }`}
   >
     {plan.best && (
@@ -34,7 +34,7 @@ const PlanCard = ({ plan }) => (
         {plan.tags.map((t) => (
           <span
             key={t.label}
-            className={`rounded-full px-2.5 py-1 text-[12px] font-bold ${t.accent ? "bg-[#c44536]" : "bg-white/[0.12]"}`}
+            className={`rounded-full px-2.5 py-1 text-[12px] font-bold ${t.accent ? "bg-[var(--accent)]" : "bg-white/[0.12]"}`}
           >
             {t.label}
           </span>
@@ -57,7 +57,7 @@ const PlanCard = ({ plan }) => (
       href="#hero-search"
       onClick={scrollToSearch}
       className={`mt-auto flex justify-center p-[14px] text-[14px] font-bold text-white hover:text-white ${
-        plan.best ? "bg-[#c44536] hover:bg-[#a8392b]" : "bg-[#2a2538] hover:bg-[#373047]"
+        plan.best ? "bg-[var(--accent)] hover:bg-[var(--accent-hover)]" : "bg-[#2a2538] hover:bg-[#373047]"
       }`}
     >
       {plan.cta}
