@@ -115,6 +115,12 @@ export const HomeFooter = () => {
           <p className="m-0 mt-3.5 text-[14px] leading-normal">
             {c.brand} {c.franchiseName}. {c.hubAddress}.
           </p>
+          {c.franchiseLogoOnDark && (
+            <p className="m-0 mt-[22px] flex items-center gap-3 text-[12px] text-[#9a95a6]">
+              Operated by
+              <img src={c.franchiseLogoOnDark} alt={c.legalEntity ?? c.franchiseName} className="h-[22px] w-auto" />
+            </p>
+          )}
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-12">
           <div className="flex flex-col gap-2.5">

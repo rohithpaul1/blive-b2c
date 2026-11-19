@@ -91,9 +91,17 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
                   <span className="font-display text-[24px] leading-[0.85] tracking-[0.06em] text-[var(--accent)] md:text-[30px]">
                     {franchiseHome.city}
                   </span>
-                  <span className="mt-[5px] hidden text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#7a727d] sm:block">
-                    {franchiseHome.franchiseName}
-                  </span>
+                  {franchiseHome.franchiseLogo ? (
+                    // Endorsed lockup: "by <franchise logo>" under the city, on every screen size.
+                    <span className="mt-[5px] flex items-center gap-[5px] text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#7a727d]">
+                      by
+                      <img src={franchiseHome.franchiseLogo} alt={franchiseHome.franchiseName} className="h-[11px] w-auto md:h-[13px]" />
+                    </span>
+                  ) : (
+                    <span className="mt-[5px] hidden text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#7a727d] sm:block">
+                      {franchiseHome.franchiseName}
+                    </span>
+                  )}
                 </span>
               </>
             )}

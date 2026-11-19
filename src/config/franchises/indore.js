@@ -36,7 +36,11 @@ export const indore = {
   quoteImage: null,
   seo: { title: "BLive NXT Indore | Electric scooter rentals" },
   brand: "BLive NXT",
-  franchiseName: "Malwa EV Rentals",
+  franchiseName: "Evision Mobility",
+  legalEntity: "Evision Mobility LLP",
+  // Franchise logo (traced from a 430px image; swap for the vector when Evision sends it).
+  franchiseLogo: `${IMG}/evision-logo.webp`,
+  franchiseLogoOnDark: `${IMG}/evision-logo-white.webp`,
   city: "Indore",
   hubAddress: "Shop 4, AB Road, near C21 Mall, Vijay Nagar, Indore 452010",
   supportPhone: "080-4719-0022",
@@ -46,7 +50,7 @@ export const indore = {
   navPhone: "+91 90000 00002",
   businessEmail: "contact@blive.co.in",
   businessEmailHref: "mailto:contact@blive.co.in?subject=Business%20enquiry%20(Indore)",
-  headline: "India's cleanest city. Ride it electric.",
+  headline: "India's cleanest city goes electric.",
   stats: [
     { value: "New", label: "in Indore" },
     { value: "24/7", label: "support" },
