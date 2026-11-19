@@ -105,12 +105,12 @@ export const indore = {
       { value: "3-4 h", label: "full charge" },
       { value: "150 kg", label: "carrying capacity" },
     ],
-    // Close-ups are cropped out of esprinto.in's round frames; the white scooter is a cutout on a light tile.
+    // Close-ups are esprinto.in's round shots (red ring removed), shown whole on a dark tile.
     gallery: [
-      { src: `${IMG}/hs-dashboard.webp`, alt: "Sprinto HS digital dashboard", caption: "Digital dashboard" },
-      { src: `${IMG}/hs-features.webp`, alt: "Sprinto HS remote key", caption: "Remote lock and find my vehicle" },
-      { src: `${IMG}/hs-high-speed.webp`, alt: "Sprinto HS headlamp", caption: "LED headlamp" },
-      { src: `${IMG}/hs-battery.webp`, alt: "Sprinto HS ignition and battery lock", caption: "60V 42Ah lithium battery" },
+      { src: `${IMG}/hs-dashboard.webp`, alt: "Sprinto HS digital dashboard", caption: "Digital dashboard", fit: "circle" },
+      { src: `${IMG}/hs-features.webp`, alt: "Sprinto HS remote key", caption: "Remote lock and find my vehicle", fit: "circle" },
+      { src: `${IMG}/hs-high-speed.webp`, alt: "Sprinto HS headlamp", caption: "LED headlamp", fit: "circle" },
+      { src: `${IMG}/hs-battery.webp`, alt: "Sprinto HS charging socket and key", caption: "Charges fully in 3-4 h", fit: "circle" },
       { src: `${IMG}/hs-scooter.webp`, alt: "Sprinto HS in Denim Blue on the road", caption: "Up to 120 km on a charge" },
     ],
     // Full spec sheet from esprinto.in, for the model page and the admin.
@@ -138,6 +138,8 @@ export const indore = {
       sub: "up to 7 days",
       tags: [{ label: "Maintenance" }, { label: "24/7 support" }],
       image: `${IMG}/hs-red.webp`,
+      // Cutout: shown whole on the card instead of cropped like a photo.
+      imageFit: "contain",
       imageAlt: "Sprinto HS in Ruby Red",
       perDay: "₹280",
       total: "₹560",
@@ -151,6 +153,8 @@ export const indore = {
       sub: "7 days",
       tags: [{ label: "Save 10%", accent: true }, { label: "24/7 support" }],
       image: `${IMG}/hs-blue.webp`,
+      // Cutout: shown whole on the card instead of cropped like a photo.
+      imageFit: "contain",
       imageAlt: "Sprinto HS in Denim Blue",
       perDay: "₹250",
       total: "₹1,750",
@@ -164,6 +168,8 @@ export const indore = {
       sub: "monthly",
       tags: [{ label: "Save 50%", accent: true }, { label: "24/7 support" }],
       image: `${IMG}/hs-white.webp`,
+      // Cutout: shown whole on the card instead of cropped like a photo.
+      imageFit: "contain",
       imageAlt: "Sprinto HS in Pearl White",
       perDay: "₹140",
       total: "₹4,200",

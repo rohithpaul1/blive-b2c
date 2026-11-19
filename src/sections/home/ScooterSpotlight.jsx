@@ -38,7 +38,13 @@ export const ScooterSpotlight = () => {
                   src={g.src}
                   alt={g.alt}
                   loading="lazy"
-                  className={`block aspect-square w-full ${g.fit === "contain" ? "bg-[#f4f3f6] object-contain p-3 pb-9" : "object-cover"}`}
+                  className={`block aspect-square w-full ${
+                    g.fit === "circle"
+                      ? "bg-[#1c1a26] object-contain p-[12%] pb-[22%]"
+                      : g.fit === "contain"
+                        ? "bg-[#f4f3f6] object-contain p-3 pb-9"
+                        : "object-cover"
+                  }`}
                 />
                 <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-2.5 pt-8 text-[13px] font-bold leading-snug">
                   {g.caption}
