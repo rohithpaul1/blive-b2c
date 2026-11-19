@@ -45,7 +45,7 @@ const PlanCard = ({ plan }) => (
       src={plan.image}
       alt={plan.imageAlt}
       loading="lazy"
-      className={`my-[18px] w-full ${plan.imageFit === "contain" ? "h-[250px] object-contain" : "h-[220px] object-cover"}`}
+      className={`my-[18px] w-full ${plan.imageFit === "contain" ? "h-[280px] object-contain" : "h-[220px] object-cover"}`}
     />
     <div className="px-6 pb-5">
       <p className="m-0 text-[13px] text-[#d6d2df]">✓ {c.kmPerDay} km a day included</p>
