@@ -20,6 +20,8 @@ export const jaipur = {
   },
   heroImage: "/images/home/jaipur.webp",
   tileImage: "/images/home/nduro-floor.webp",
+  // The floorboard close-up is too soft to run full width behind the quote: use the accent glow.
+  quoteImage: null,
   seo: { title: "BLive NXT Jaipur | Electric scooter rentals" },
   brand: "BLive NXT",
   franchiseName: "Pink City EV Rentals",
@@ -162,7 +164,7 @@ export const jaipur = {
   // Cards in the "More BLive NXT" band near the bottom of the homepage.
   moreImages: {
     subscribe: { src: "/images/home/nduro-storage.webp", alt: "Lectrix NDuro under-seat storage" },
-    team: { src: "/images/home/nduro-floor.webp", alt: "Lectrix NDuro floorboard" },
+    team: { src: "/images/home/nduro-ignition.webp", alt: "Lectrix NDuro ignition" },
     help: { src: "/images/home/nduro-mirror.webp", alt: "Lectrix NDuro handlebar" },
   },
   subscribePerDay: "₹150",

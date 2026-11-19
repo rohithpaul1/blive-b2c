@@ -3,6 +3,7 @@
 // public/images/franchises/indore/ by scripts/fetch-indore-images.sh.
 // MOCK DATA: franchise name, hub, prices, stats and the testimonial are placeholders.
 import { paletteFor } from "../theme";
+import { nxtBenefits } from "../benefits";
 
 // Accent candidates from the demo. Deep teal (the first) was chosen on 18 Nov 2026.
 export const indoreAccents = [
@@ -23,7 +24,13 @@ export const indore = {
   palette: paletteFor(ACCENT),
   // MOCK: indoreHD aerial (watermarked, 640px). Replace with a licensed, full-size photo before launch.
   heroImage: `${IMG}/indore-hero.webp`,
-  // Photo tile on the homepage.
+  // City tile shows the stadium and streets, not the sky.
+  cityTilePosition: "center 85%",
+  // Benefit tiles: the EV tile shows the three-colour line-up, the maintenance tile the white scooter.
+  benefits: nxtBenefits.map((b) =>
+    b.icon === "ev" ? { ...b, photo: "model", image: `${IMG}/hs-fleet.webp` } : b.icon === "maintenance" ? { ...b, image: `${IMG}/hs-white.webp` } : b
+  ),
+  // Road photo, kept for the testimonial fallback only.
   tileImage: `${IMG}/hs-scooter.webp`,
   // The road photo is too small to run full width, so the testimonial band uses an accent glow.
   quoteImage: null,
@@ -108,10 +115,9 @@ export const indore = {
     // Close-ups are esprinto.in's round shots (red ring removed), shown whole on a dark tile.
     gallery: [
       { src: `${IMG}/hs-dashboard.webp`, alt: "Sprinto HS digital dashboard", caption: "Digital dashboard", fit: "circle" },
-      { src: `${IMG}/hs-features.webp`, alt: "Sprinto HS remote key", caption: "Remote lock and find my vehicle", fit: "circle" },
+      { src: `${IMG}/hs-features.webp`, alt: "Sprinto HS remote key", caption: "Remote key with central lock", fit: "circle" },
       { src: `${IMG}/hs-high-speed.webp`, alt: "Sprinto HS headlamp", caption: "LED headlamp", fit: "circle" },
-      { src: `${IMG}/hs-battery.webp`, alt: "Sprinto HS charging socket and key", caption: "Charges fully in 3-4 h", fit: "circle" },
-      { src: `${IMG}/hs-scooter.webp`, alt: "Sprinto HS in Denim Blue on the road", caption: "Up to 120 km on a charge" },
+      { src: `${IMG}/hs-battery.webp`, alt: "Sprinto HS key ignition", caption: "Keyed ignition", fit: "circle" },
     ],
     // Full spec sheet from esprinto.in, for the model page and the admin.
     specSheet: {
@@ -187,9 +193,11 @@ export const indore = {
     { title: "Grab the keys and go", body: "Pick up a ready-to-ride Sprinto HS at the Vijay Nagar hub and head out." },
   ],
   moreImages: {
-    subscribe: { src: `${IMG}/hs-red.webp`, alt: "Sprinto HS in Ruby Red" },
-    team: { src: `${IMG}/hs-blue.webp`, alt: "Sprinto HS in Denim Blue" },
-    help: { src: `${IMG}/hs-spec.webp`, alt: "Sprinto HS in Pearl White" },
+    // Cutouts: shown whole, standing at the foot of each card.
+    // Reuse kept far from where each image first appears; the line-up is used once, above.
+    subscribe: { src: `${IMG}/hs-spec.webp`, alt: "Sprinto HS in Pearl White", fit: "contain" },
+    team: { src: `${IMG}/hs-blue.webp`, alt: "Sprinto HS in Denim Blue", fit: "contain" },
+    help: { src: `${IMG}/hs-red.webp`, alt: "Sprinto HS in Ruby Red", fit: "contain" },
   },
   subscribePerDay: "₹140",
   quote: {

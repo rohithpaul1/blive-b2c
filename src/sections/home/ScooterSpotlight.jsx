@@ -22,7 +22,7 @@ export const ScooterSpotlight = () => {
             </div>
           </div>
           {shot && (
-            <div className="home-spot flex aspect-[4/3] items-end justify-center overflow-hidden rounded-[24px] px-6 pb-4">
+            <div className="flex aspect-[4/3] items-end justify-center px-6 pb-4 [background:radial-gradient(closest-side,#3a3550_0%,#0f0d16_100%)]">
               <img src={shot} alt={c.model.name} className="max-h-full w-full object-contain" />
             </div>
           )}
@@ -32,25 +32,26 @@ export const ScooterSpotlight = () => {
             className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-[repeat(var(--n),minmax(0,1fr))]"
             style={{ "--n": features.length }}
           >
-            {features.map((g) => (
-              <figure key={g.src} className="relative m-0 overflow-hidden rounded-[16px]">
-                <img
-                  src={g.src}
-                  alt={g.alt}
-                  loading="lazy"
-                  className={`block aspect-square w-full ${
-                    g.fit === "circle"
-                      ? "bg-[#1c1a26] object-contain p-[12%] pb-[22%]"
-                      : g.fit === "contain"
-                        ? "bg-[#f4f3f6] object-contain p-3 pb-9"
-                        : "object-cover"
-                  }`}
-                />
-                <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-2.5 pt-8 text-[13px] font-bold leading-snug">
-                  {g.caption}
-                </figcaption>
-              </figure>
-            ))}
+            {features.map((g) =>
+              g.fit === "circle" ? (
+                <figure key={g.src} className="m-0 flex flex-col items-center overflow-hidden rounded-[16px] bg-[#1c1a26] px-4 pb-4 pt-5">
+                  <img src={g.src} alt={g.alt} loading="lazy" className="block aspect-square w-[78%] rounded-full object-contain ring-1 ring-white/15" />
+                  <figcaption className="mt-3 text-center text-[13px] font-bold leading-snug text-white">{g.caption}</figcaption>
+                </figure>
+              ) : (
+                <figure key={g.src} className="relative m-0 overflow-hidden rounded-[16px]">
+                  <img
+                    src={g.src}
+                    alt={g.alt}
+                    loading="lazy"
+                    className={`block aspect-square w-full ${g.fit === "contain" ? "bg-[#f4f3f6] object-contain p-3 pb-9" : "object-cover"}`}
+                  />
+                  <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-2.5 pt-8 text-[13px] font-bold leading-snug">
+                    {g.caption}
+                  </figcaption>
+                </figure>
+              )
+            )}
           </div>
         )}
       </div>
@@ -58,33 +59,45 @@ export const ScooterSpotlight = () => {
   );
 };
 
-// Two photo tiles; their text comes from the shared NXT benefits (config/benefits.js).
+// Photo tiles, evenly in one row; their text comes from the shared NXT benefits (config/benefits.js).
+const TILE = "flex min-h-[360px] flex-col justify-end gap-3 rounded-[20px] p-8 text-white md:min-h-[420px]";
+const modelTileStyle = (image) => ({
+  background: `linear-gradient(180deg, rgba(15, 13, 22, 0) 40%, rgba(15, 13, 22, 0.92) 80%), url("${image ?? c.model.cutout}") center 8% / auto 44% no-repeat, radial-gradient(70% 55% at 50% 30%, var(--accent) 0%, #0f0d16 85%)`,
+});
+
 export const BenefitTiles = () => {
-  const benefits = c.benefits ?? nxtBenefits;
-  const city = benefits.find((b) => b.photo === "city");
-  const bike = benefits.find((b) => b.photo === "bike");
+  const tiles = (c.benefits ?? nxtBenefits).filter((b) => b.photo);
   return (
     <section className="px-[clamp(16px,5vw,80px)] py-[64px] md:py-[88px]">
-      <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-5 md:grid-cols-2">
-        <article className="home-tile-city flex min-h-[360px] flex-col justify-end gap-3 rounded-[20px] p-8 text-white md:min-h-[420px]">
-          <span className="font-display self-start -skew-x-[8deg] border-2 border-white px-3 py-1.5 text-center text-[22px] leading-[0.95]">
-            Save
-            <br />
-            {c.monthlySaving}/month
-          </span>
-          <h3 className="font-display m-0 text-[40px] leading-none">{city.title}</h3>
-          <p className="m-0 text-[16px] text-[#e1dde8]">{city.body}</p>
-        </article>
-        <article className="home-tile-bike flex min-h-[360px] flex-col justify-end gap-3 rounded-[20px] p-8 text-white md:min-h-[420px]">
-          <h3 className="font-display m-0 text-[40px] leading-none">{bike.title}</h3>
-          <p className="m-0 text-[16px] text-[#e1dde8]">{bike.body}</p>
-          <a
-            href="#plans"
-            className="inline-flex min-h-10 items-center self-start rounded-full border border-white px-[18px] text-[13px] font-bold text-white hover:bg-white hover:text-[#0f0d16]"
+      <div
+        className="mx-auto grid max-w-[1180px] grid-cols-1 gap-5 md:grid-cols-[repeat(var(--n),minmax(0,1fr))]"
+        style={{ "--n": tiles.length }}
+      >
+        {tiles.map((b) => (
+          <article
+            key={b.title}
+            className={`${TILE} ${b.photo === "city" ? "home-tile-city" : b.photo === "bike" ? "home-tile-bike" : ""}`}
+            style={b.photo === "model" ? modelTileStyle(b.image) : b.photo === "city" && c.cityTilePosition ? { backgroundPosition: c.cityTilePosition } : undefined}
           >
-            See plans
-          </a>
-        </article>
+            {b.photo === "city" && (
+              <span className="font-display self-start -skew-x-[8deg] border-2 border-white px-3 py-1.5 text-center text-[22px] leading-[0.95]">
+                Save
+                <br />
+                {c.monthlySaving}/month
+              </span>
+            )}
+            <h3 className="font-display m-0 text-[40px] leading-none">{b.title}</h3>
+            <p className="m-0 text-[16px] text-[#e1dde8]">{b.body}</p>
+            {b.icon === "ev" && (
+              <a
+                href="#plans"
+                className="inline-flex min-h-10 items-center self-start rounded-full border border-white px-[18px] text-[13px] font-bold text-white hover:bg-white hover:text-[#0f0d16]"
+              >
+                See plans
+              </a>
+            )}
+          </article>
+        ))}
       </div>
     </section>
   );

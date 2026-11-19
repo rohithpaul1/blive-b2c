@@ -15,7 +15,7 @@ export const RiderQuote = () => (
   </section>
 );
 
-const MoreCard = ({ title, body, cta, onClick, href, image, alt }) => (
+const MoreCard = ({ title, body, cta, onClick, href, image, alt, fit }) => (
   <article className="flex min-h-[520px] flex-col items-center overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#0f0d16_0%,#1d1a26_45%,#6c6878_100%)] px-7 pt-14 text-center text-white md:min-h-[600px]">
     <h3 className="font-display m-0 text-[40px] leading-none">{title}</h3>
     <p className="m-0 mt-4 text-[17px] leading-normal text-[#e1dde8]">{body}</p>
@@ -30,7 +30,11 @@ const MoreCard = ({ title, body, cta, onClick, href, image, alt }) => (
       src={image}
       alt={alt}
       loading="lazy"
-      className="-mx-7 mt-auto block h-[260px] w-[calc(100%+56px)] max-w-none object-cover [mask-image:linear-gradient(180deg,transparent_0%,#000_35%)] md:h-[300px]"
+      className={
+        fit === "contain"
+          ? "mt-auto block h-[240px] w-full object-contain object-bottom pb-6 md:h-[270px]"
+          : "-mx-7 mt-auto block h-[260px] w-[calc(100%+56px)] max-w-none object-cover [mask-image:linear-gradient(180deg,transparent_0%,#000_35%)] md:h-[300px]"
+      }
     />
   </article>
 );
@@ -50,6 +54,7 @@ export const MoreBlive = () => {
             href="#plans"
             image={c.moreImages.subscribe.src}
             alt={c.moreImages.subscribe.alt}
+            fit={c.moreImages.subscribe.fit}
           />
           <MoreCard
             title="Scooters for your team"
@@ -58,6 +63,7 @@ export const MoreBlive = () => {
             href={c.businessEmailHref}
             image={c.moreImages.team.src}
             alt={c.moreImages.team.alt}
+            fit={c.moreImages.team.fit}
           />
           <MoreCard
             title="Help, day or night"
@@ -66,6 +72,7 @@ export const MoreBlive = () => {
             href={c.supportPhoneHref}
             image={c.moreImages.help.src}
             alt={c.moreImages.help.alt}
+            fit={c.moreImages.help.fit}
           />
         </div>
       </div>
