@@ -1,4 +1,4 @@
-// Indore franchise site: e-Sprinto Sprinto HS, one hub.
+// Indore franchise site: e-Sprinto Esprinto HS, one hub.
 // Specs and photos: esprinto.in product page (Nov 2026). Photos are fetched into
 // public/images/franchises/indore/ by scripts/fetch-indore-images.sh.
 // MOCK DATA: franchise name, hub, prices, stats and the testimonial are placeholders.
@@ -104,7 +104,7 @@ export const indore = {
     },
   ],
   model: {
-    name: "Sprinto HS",
+    name: "Esprinto HS",
     // The search page lists only models from this brand (matched on brand or model name).
     brand: "Esprinto",
     cutout: CUTOUT,
@@ -124,10 +124,10 @@ export const indore = {
     ],
     // Close-ups are esprinto.in's round shots (red ring removed), shown whole on a dark tile.
     gallery: [
-      { src: `${IMG}/hs-dashboard.webp`, alt: "Sprinto HS digital dashboard", caption: "Digital dashboard", fit: "circle" },
-      { src: `${IMG}/hs-features.webp`, alt: "Sprinto HS remote key", caption: "Remote key with central lock", fit: "circle" },
-      { src: `${IMG}/hs-high-speed.webp`, alt: "Sprinto HS headlamp", caption: "LED headlamp", fit: "circle" },
-      { src: `${IMG}/hs-battery.webp`, alt: "Sprinto HS key ignition", caption: "Keyed ignition", fit: "circle" },
+      { src: `${IMG}/hs-dashboard.webp`, alt: "Esprinto HS digital dashboard", caption: "Digital dashboard", fit: "circle" },
+      { src: `${IMG}/hs-features.webp`, alt: "Esprinto HS remote key", caption: "Remote key with central lock", fit: "circle" },
+      { src: `${IMG}/hs-high-speed.webp`, alt: "Esprinto HS headlamp", caption: "LED headlamp", fit: "circle" },
+      { src: `${IMG}/hs-battery.webp`, alt: "Esprinto HS key ignition", caption: "Keyed ignition", fit: "circle" },
     ],
     // Full spec sheet from esprinto.in, for the model page and the admin.
     specSheet: {
@@ -156,7 +156,7 @@ export const indore = {
       image: `${IMG}/hs-red.webp`,
       // Cutout: shown whole on the card instead of cropped like a photo.
       imageFit: "contain",
-      imageAlt: "Sprinto HS in Ruby Red",
+      imageAlt: "Esprinto HS in Ruby Red",
       perDay: "₹280",
       total: "₹560",
       totalNote: "for 2 days",
@@ -171,7 +171,7 @@ export const indore = {
       image: `${IMG}/hs-blue.webp`,
       // Cutout: shown whole on the card instead of cropped like a photo.
       imageFit: "contain",
-      imageAlt: "Sprinto HS in Denim Blue",
+      imageAlt: "Esprinto HS in Denim Blue",
       perDay: "₹250",
       total: "₹1,750",
       totalNote: "for 7 days",
@@ -186,7 +186,7 @@ export const indore = {
       image: `${IMG}/hs-white.webp`,
       // Cutout: shown whole on the card instead of cropped like a photo.
       imageFit: "contain",
-      imageAlt: "Sprinto HS in Pearl White",
+      imageAlt: "Esprinto HS in Pearl White",
       perDay: "₹140",
       total: "₹4,200",
       totalNote: "a month",
@@ -200,14 +200,14 @@ export const indore = {
     { title: "Choose your plan", body: "Ride by the day, save 10% by the week, or subscribe and save 50%." },
     { title: "Pay in a minute", body: "One secure online payment and your scooter is held for you." },
     { title: "Get verified online", body: "Upload your licence and Aadhaar from your phone. No paperwork at the hub." },
-    { title: "Grab the keys and go", body: "Pick up a ready-to-ride Sprinto HS at the Vijay Nagar hub and head out." },
+    { title: "Grab the keys and go", body: "Pick up a ready-to-ride Esprinto HS at the Vijay Nagar hub and head out." },
   ],
   moreImages: {
     // Cutouts: shown whole, standing at the foot of each card.
     // Reuse kept far from where each image first appears; the line-up is used once, above.
-    subscribe: { src: `${IMG}/hs-spec.webp`, alt: "Sprinto HS in Pearl White", fit: "contain" },
-    team: { src: `${IMG}/hs-blue.webp`, alt: "Sprinto HS in Denim Blue", fit: "contain" },
-    help: { src: `${IMG}/hs-red.webp`, alt: "Sprinto HS in Ruby Red", fit: "contain" },
+    subscribe: { src: `${IMG}/hs-spec.webp`, alt: "Esprinto HS in Pearl White", fit: "contain" },
+    team: { src: `${IMG}/hs-blue.webp`, alt: "Esprinto HS in Denim Blue", fit: "contain" },
+    help: { src: `${IMG}/hs-red.webp`, alt: "Esprinto HS in Ruby Red", fit: "contain" },
   },
   subscribePerDay: "₹140",
   quote: {
