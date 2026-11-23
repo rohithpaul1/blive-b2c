@@ -36,6 +36,30 @@ export const HomeFaq = () => (
   </section>
 );
 
+// Partner band above the footer, for co-branded franchise sites.
+export const PartnerBand = () => {
+  if (c.brandMode !== "cobrand" || !c.franchiseLogo) return null;
+  return (
+    <section className="border-t border-[#ecebf0] bg-white px-[clamp(16px,5vw,80px)] py-10">
+      <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-6">
+        <div className="flex flex-wrap items-center gap-[18px]">
+          <img src={c.franchiseLogo} alt={c.franchiseName} className="h-[30px] w-auto md:h-[34px]" />
+          <span aria-hidden="true" className="hidden h-[34px] w-px bg-[#dcdae2] sm:block" />
+          <p className="m-0 max-w-[560px] text-[15px] leading-normal text-[#3f3a42]">
+            {c.brand} {c.city} is run by <b>{c.legalEntity ?? c.franchiseName}</b>, your local rental partner.
+            {c.franchiseTagline ? ` ${c.franchiseTagline}` : ""}
+          </p>
+        </div>
+        {c.partnerUrl && (
+          <a href={c.partnerUrl} target="_blank" rel="noreferrer" className="text-[14px] font-bold text-[var(--accent)]">
+            About {c.franchiseName.split(" ")[0]}
+          </a>
+        )}
+      </div>
+    </section>
+  );
+};
+
 export const HomeFooter = () => {
   const navigate = useNavigate();
   const [showTerms, setShowTerms] = useState(false);
@@ -50,7 +74,7 @@ export const HomeFooter = () => {
           <p className="m-0 mt-3.5 text-[14px] leading-normal">
             {c.brand} {c.franchiseName}. {c.hubAddress}.
           </p>
-          {c.franchiseLogoOnDark && (
+          {c.franchiseLogoOnDark && c.brandMode !== "cobrand" && (
             <p className="m-0 mt-[22px] flex items-center gap-3 text-[12px] text-[#9a95a6]">
               Operated by
               <img src={c.franchiseLogoOnDark} alt={c.legalEntity ?? c.franchiseName} className="h-[22px] w-auto" />

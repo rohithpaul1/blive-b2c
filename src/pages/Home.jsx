@@ -2,7 +2,7 @@ import Navbar from "../sections/Navbar";
 import HomeHero from "../sections/home/HomeHero";
 import PlanCards, { SubscribeBand } from "../sections/home/PlanCards";
 import { ScooterSpotlight, BenefitTiles, HomeSteps } from "../sections/home/ScooterSpotlight";
-import { RiderQuote, HomeFaq, HomeFooter } from "../sections/home/HomeClosing";
+import { RiderQuote, HomeFaq, PartnerBand, HomeFooter } from "../sections/home/HomeClosing";
 import { useEffect, useContext } from "react";
 import { ProductContext } from "../contexts/ProductContext";
 import { UserContext } from "../contexts/UserContext";
@@ -35,6 +35,7 @@ const Home = () => {
             <HomeSteps />
             <RiderQuote />
             <HomeFaq />
+            <PartnerBand />
             <HomeFooter />
         </div>
     )

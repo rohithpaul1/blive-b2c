@@ -36,7 +36,13 @@ export const indore = {
   quoteImage: null,
   seo: { title: "BLive NXT Indore | Electric scooter rentals" },
   brand: "BLive NXT",
+  // Header shows BLive NXT × Evision; the city moves to the hero eyebrow; partner band above the footer.
+  brandMode: "cobrand",
   franchiseName: "Evision Mobility",
+  franchiseTagline: "Quiet rides, clean cities, electric fleets.",
+  // Evision's website, for the "About Evision" link in the partner band. Empty hides the link.
+  partnerUrl: "",
+  hubArea: "Vijay Nagar",
   legalEntity: "Evision Mobility LLP",
   // Franchise logo (traced from a 430px image; swap for the vector when Evision sends it).
   franchiseLogo: `${IMG}/evision-logo.webp`,

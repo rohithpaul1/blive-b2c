@@ -78,13 +78,19 @@ const Navbar = ({ onSearchPage, expanded, onSearchTrigger, contained = false, si
           <button
             type="button"
             onClick={() => navigate(isBusinessWebsite ? "/business" : "/home")}
-            aria-label={isBusinessWebsite ? "b:live NXT home" : `b:live NXT ${franchiseHome.city} home`}
+            aria-label={isBusinessWebsite ? "b:live NXT home" : franchiseHome.brandMode === "cobrand" ? `b:live NXT and ${franchiseHome.franchiseName} ${franchiseHome.city} home` : `b:live NXT ${franchiseHome.city} home`}
             className={`flex shrink-0 items-center gap-[10px] md:gap-[14px] ${
               onSearchPage ? "col-start-1 row-start-1 max-md:hidden" : ""
             }`}
           >
-            <img className="h-[40px] w-auto md:h-[50px]" src="/images/BliveNxtLogo.svg" alt="" />
-            {!isBusinessWebsite && (
+            <img className="h-[34px] w-auto sm:h-[40px] md:h-[50px]" src="/images/BliveNxtLogo.svg" alt="" />
+            {!isBusinessWebsite && franchiseHome.brandMode === "cobrand" && franchiseHome.franchiseLogo ? (
+              // Co-branded lockup: BLive NXT × franchise logo, equal billing. The city moves to the hero.
+              <>
+                <span aria-hidden="true" className="text-[16px] font-light text-[#b5b0bd] md:text-[20px]">×</span>
+                <img src={franchiseHome.franchiseLogo} alt={franchiseHome.franchiseName} className="h-[17px] w-auto sm:h-[22px] md:h-[30px]" />
+              </>
+            ) : !isBusinessWebsite && (
               <>
                 <span aria-hidden="true" className="h-[30px] w-px bg-[#e2d3ce] md:h-[38px]" />
                 <span className="flex flex-col items-start leading-none">
