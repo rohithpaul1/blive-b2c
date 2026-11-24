@@ -59,11 +59,47 @@ export const ScooterSpotlight = () => {
   );
 };
 
-// Photo tiles, evenly in one row; their text comes from the shared NXT benefits (config/benefits.js).
-const TILE = "flex min-h-[360px] flex-col justify-end gap-3 rounded-[20px] p-8 text-white md:min-h-[420px]";
-const modelTileStyle = (image) => ({
-  background: `linear-gradient(180deg, rgba(15, 13, 22, 0) 40%, rgba(15, 13, 22, 0.92) 80%), url("${image ?? c.model.cutout}") center 8% / auto 44% no-repeat, radial-gradient(70% 55% at 50% 30%, var(--accent) 0%, #0f0d16 85%)`,
-});
+// Benefit cards, evenly in one row, in the "More BLive NXT" card style: centred title, text
+// and button on a dark gradient, the picture standing at the foot of the card.
+// Text comes from the shared NXT benefits (config/benefits.js); pictures from the franchise.
+const benefitPicture = (b) => {
+  if (b.photo === "city") return { src: c.heroImage, alt: `${c.city} skyline`, fit: "cover" };
+  if (b.photo === "bike") return { src: b.image ?? c.tileImage, alt: c.model.name, fit: b.image ? "contain" : "cover" };
+  return { src: b.image ?? c.model.cutout, alt: c.model.name, fit: "contain" };
+};
+
+const BenefitCard = ({ b }) => {
+  const pic = benefitPicture(b);
+  return (
+    <article className="flex min-h-[520px] flex-col items-center overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#0f0d16_0%,#1d1a26_45%,#6c6878_100%)] px-7 pt-12 text-center text-white md:min-h-[560px]">
+      {b.photo === "city" && c.monthlySaving && (
+        <span className="mb-4 rounded-full bg-[var(--accent)] px-3 py-1 text-[13px] font-bold">Save {c.monthlySaving}/month</span>
+      )}
+      <h3 className="font-display m-0 text-[36px] leading-none md:text-[40px]">{b.title}</h3>
+      <p className="m-0 mt-4 max-w-[320px] text-[17px] leading-normal text-[#e1dde8]">{b.body}</p>
+      {b.icon === "ev" && (
+        <a
+          href="#plans"
+          className="mt-6 inline-flex min-h-12 items-center rounded-full border-2 border-white px-[26px] text-[15px] font-bold text-white hover:bg-white hover:text-[#0f0d16]"
+        >
+          See plans
+        </a>
+      )}
+      {pic.src && (
+        <img
+          src={pic.src}
+          alt={pic.alt}
+          loading="lazy"
+          className={
+            pic.fit === "contain"
+              ? "mt-auto block h-[240px] w-full object-contain object-bottom pb-6 md:h-[260px]"
+              : "-mx-7 mt-auto block h-[260px] w-[calc(100%+56px)] max-w-none object-cover [mask-image:linear-gradient(180deg,transparent_0%,#000_35%)] md:h-[290px]"
+          }
+        />
+      )}
+    </article>
+  );
+};
 
 export const BenefitTiles = () => {
   const tiles = (c.benefits ?? nxtBenefits).filter((b) => b.photo);
@@ -74,29 +110,7 @@ export const BenefitTiles = () => {
         style={{ "--n": tiles.length }}
       >
         {tiles.map((b) => (
-          <article
-            key={b.title}
-            className={`${TILE} ${b.photo === "city" ? "home-tile-city" : b.photo === "bike" ? "home-tile-bike" : ""}`}
-            style={b.photo === "model" ? modelTileStyle(b.image) : b.photo === "city" && c.cityTilePosition ? { backgroundPosition: c.cityTilePosition } : undefined}
-          >
-            {b.photo === "city" && (
-              <span className="font-display self-start -skew-x-[8deg] border-2 border-white px-3 py-1.5 text-center text-[22px] leading-[0.95]">
-                Save
-                <br />
-                {c.monthlySaving}/month
-              </span>
-            )}
-            <h3 className="font-display m-0 text-[40px] leading-none">{b.title}</h3>
-            <p className="m-0 text-[16px] text-[#e1dde8]">{b.body}</p>
-            {b.icon === "ev" && (
-              <a
-                href="#plans"
-                className="inline-flex min-h-10 items-center self-start rounded-full border border-white px-[18px] text-[13px] font-bold text-white hover:bg-white hover:text-[#0f0d16]"
-              >
-                See plans
-              </a>
-            )}
-          </article>
+          <BenefitCard key={b.title} b={b} />
         ))}
       </div>
     </section>
