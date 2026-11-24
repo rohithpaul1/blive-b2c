@@ -27,7 +27,7 @@ const PlanCard = ({ plan }) => (
     )}
     <div className="px-6 pt-6">
       <h3 className={`font-display m-0 text-[24px] leading-none tracking-[0.02em] ${plan.best ? "pr-[104px]" : ""}`}>{plan.name}</h3>
-      <p className="m-0 mt-0.5 text-[14px] text-[#d6d2df]">
+      <p className={`m-0 mt-0.5 text-[14px] text-[#d6d2df] ${plan.best ? "pr-[104px]" : ""}`}>
         {c.model.name} · {plan.sub}
       </p>
       <div className="mt-3 flex flex-wrap gap-1.5">

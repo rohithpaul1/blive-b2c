@@ -151,7 +151,7 @@ export const indore = {
     {
       id: "daily",
       name: "Daily",
-      sub: "up to 7 days",
+      sub: "1–6 days",
       tags: [{ label: "Maintenance" }, { label: "24/7 support" }],
       image: `${IMG}/hs-red.webp`,
       // Cutout: shown whole on the card instead of cropped like a photo.
@@ -166,7 +166,7 @@ export const indore = {
     {
       id: "weekly",
       name: "Weekly",
-      sub: "7 days",
+      sub: "7–29 days",
       tags: [{ label: "Save 10%", accent: true }, { label: "24/7 support" }],
       image: `${IMG}/hs-blue.webp`,
       // Cutout: shown whole on the card instead of cropped like a photo.
@@ -181,7 +181,7 @@ export const indore = {
     {
       id: "monthly",
       name: "Subscription",
-      sub: "monthly",
+      sub: "30+ days",
       tags: [{ label: "Save 50%", accent: true }, { label: "24/7 support" }],
       image: `${IMG}/hs-white.webp`,
       // Cutout: shown whole on the card instead of cropped like a photo.
