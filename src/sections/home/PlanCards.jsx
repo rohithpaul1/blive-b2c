@@ -26,7 +26,7 @@ const PlanCard = ({ plan }) => (
       </span>
     )}
     <div className="px-6 pt-6">
-      <h3 className={`font-display m-0 text-[36px] leading-none ${plan.best ? "pr-[104px]" : ""}`}>{plan.name}</h3>
+      <h3 className={`font-display m-0 text-[24px] leading-none tracking-[0.02em] ${plan.best ? "pr-[104px]" : ""}`}>{plan.name}</h3>
       <p className="m-0 mt-0.5 text-[14px] text-[#d6d2df]">
         {c.model.name} · {plan.sub}
       </p>
@@ -49,13 +49,13 @@ const PlanCard = ({ plan }) => (
     />
     <div className="px-6 pb-5">
       <p className="m-0 text-[13px] text-[#d6d2df]">✓ {c.kmPerDay} km a day included</p>
-      <p className="m-0 mt-1.5">
-        <span className="text-[30px] font-black tabular-nums">{plan.perDay}</span>
-        <span className="text-[14px] font-bold"> /day</span>
-        <span className="text-[13px] text-[#b8b3c4]">
-          {"  "}
-          {plan.total} {plan.totalNote}
-        </span>
+      {/* Price leads the card: biggest type on it, total underneath. */}
+      <p className="m-0 mt-2 flex items-baseline gap-1.5">
+        <span className="font-display text-[56px] normal-case leading-[0.9] tabular-nums">{plan.perDay}</span>
+        <span className="text-[16px] font-bold">/day</span>
+      </p>
+      <p className="m-0 mt-1 text-[14px] text-[#b8b3c4]">
+        {plan.total} {plan.totalNote}
       </p>
     </div>
     <a
