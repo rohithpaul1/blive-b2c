@@ -72,11 +72,12 @@ const BenefitCard = ({ b }) => {
   const pic = benefitPicture(b);
   return (
     <article className="flex min-h-[520px] flex-col items-center overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#0f0d16_0%,#1d1a26_45%,#6c6878_100%)] px-7 pt-12 text-center text-white md:min-h-[560px]">
-      {b.photo === "city" && c.monthlySaving && (
-        <span className="mb-4 rounded-full bg-[var(--accent)] px-3 py-1 text-[13px] font-bold">Save {c.monthlySaving}/month</span>
-      )}
       <h3 className="font-display m-0 text-[36px] leading-none md:text-[40px]">{b.title}</h3>
       <p className="m-0 mt-4 max-w-[320px] text-[17px] leading-normal text-[#e1dde8]">{b.body}</p>
+      {b.photo === "city" && c.monthlySaving && (
+        // Sits where the middle card's button does, so the titles line up across the row.
+        <span className="mt-6 rounded-full bg-[var(--accent)] px-4 py-2 text-[15px] font-bold">Save {c.monthlySaving}/month</span>
+      )}
       {b.icon === "ev" && (
         <a
           href="#plans"
