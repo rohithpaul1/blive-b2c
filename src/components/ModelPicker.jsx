@@ -457,42 +457,9 @@ export default function ModelPicker({
                 </div>
                 {cycleChanged && cycleChanged.to === planType && (
                   <p role="status" className="m-0 rounded-[10px] bg-[#eef7f1] px-[14px] py-[10px] text-[14px] text-[#1f5f3a]">
-                    Billing changed from {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[cycleChanged.from]} to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[cycleChanged.to]}. Your new bills are below.
+                    Billing changed from {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[cycleChanged.from]} to {{ daily: "daily", weekly: "weekly", monthly: "monthly" }[cycleChanged.to]}.
                   </p>
                 )}
-
-                <div className="rounded-[12px] border border-[#e3e0e8] px-[16px] py-[14px]">
-                  <p className="m-0 text-[14px] font-bold text-[#1c1a22]">When you'll pay</p>
-                  <ol className="m-0 mt-[12px] flex list-none flex-col gap-[12px] p-0 text-[14px] text-[#3d3846]">
-                    <li className="flex items-start gap-[10px]">
-                      <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full bg-[var(--accent)]" />
-                      <span className="flex-1">
-                        <span className="block font-semibold text-[#1c1a22]">First bill, at checkout</span>
-                        Covers {fmt(new Date(pickup.date))} to {fmt(schedule.next || schedule.end)}
-                      </span>
-                      <span className="font-bold tabular-nums text-[#1c1a22]">₹{inr(cyclePrice(planType))}</span>
-                    </li>
-                    {schedule.next && (
-                      <li className="flex items-start gap-[10px]">
-                        <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full border-2 border-[var(--accent)]" />
-                        <span className="flex-1">
-                          <span className="block font-semibold text-[#1c1a22]">Then every {UNIT_WORD[planType]}</span>
-                          {fmt(schedule.next)}
-                          {schedule.units > 2 ? ` to ${fmt(schedule.last)}` : ""} · {plural(schedule.units - 1, "more bill")}
-                        </span>
-                        <span className="font-bold tabular-nums text-[#1c1a22]">₹{inr(cyclePrice(planType))}</span>
-                      </li>
-                    )}
-                    <li className="flex items-start gap-[10px]">
-                      <span aria-hidden="true" className="mt-[5px] size-[9px] shrink-0 rounded-full bg-[#b9b5c2]" />
-                      <span className="flex-1">
-                        <span className="block font-semibold text-[#1c1a22]">Plan ends {fmt(schedule.end)}</span>
-                        {plural(schedule.units, "bill")} in total
-                      </span>
-                      <span className="font-bold tabular-nums text-[#1c1a22]">₹{inr(cycleTotal(planType))}</span>
-                    </li>
-                  </ol>
-                </div>
 
                 {cycles.length > 1 && (
                   <div className="flex flex-wrap items-center justify-between gap-[10px]">
